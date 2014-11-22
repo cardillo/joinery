@@ -45,7 +45,7 @@ import joinery.impl.BlockManager;
  */
 public class DataFrame<V>
 implements Iterable<List<V>> {
-    private final Map<String, Integer> rows;
+    private final Map<String, Integer> index;
     private final Map<String, Integer> columns;
     private final BlockManager<V> data;
 
@@ -73,11 +73,11 @@ implements Iterable<List<V>> {
         }
 
         final int len = length();
-        this.rows = new LinkedHashMap<String, Integer>();
+        this.index = new LinkedHashMap<String, Integer>();
         final Iterator<String> it = rows.iterator();
         for (int r = 0; r < len; r++) {
             final String row = it.hasNext() ? it.next() : String.valueOf(r);
-            if (this.rows.put(row, r) != null) {
+            if (this.index.put(row, r) != null) {
                 throw new IllegalArgumentException("duplicate row label " + row);
             }
         }
@@ -109,7 +109,7 @@ implements Iterable<List<V>> {
 
     public DataFrame<V> drop(final Integer ... cols) {
         final List<String> columns = new ArrayList<String>(this.columns.keySet());
-        final List<String> rows = new ArrayList<String>(this.rows.keySet());
+        final List<String> rows = new ArrayList<String>(this.index.keySet());
         final Set<Integer> removeCols = new HashSet<Integer>(Arrays.asList(cols));
         final List<List<V>> keep = new ArrayList<List<V>>(data.size() - cols.length);
         final List<String> keepCols = new ArrayList<String>(data.size() - cols.length);
@@ -149,7 +149,7 @@ implements Iterable<List<V>> {
     }
 
     public DataFrame<V> append(final String name, final List<V> row) {
-        if (rows.put(name, length()) != null) {
+        if (index.put(name, length()) != null) {
             throw new IllegalArgumentException("row " + name + " already exists.");
         }
 
@@ -170,7 +170,7 @@ implements Iterable<List<V>> {
     }
 
     public Set<String> rows() {
-        return rows.keySet();
+        return index.keySet();
     }
 
     public Set<String> columns() {
@@ -186,7 +186,7 @@ implements Iterable<List<V>> {
     }
 
     public List<V> row(final String row) {
-        return row(rows.get(row));
+        return row(index.get(row));
     }
 
     public List<V> row(final int r) {
@@ -378,7 +378,7 @@ implements Iterable<List<V>> {
     }
 
     public DataFrame<V> sortBy(final Integer ... cols) {
-        final DataFrame<V> sorted = new DataFrame<V>(rows.keySet(), columns.keySet());
+        final DataFrame<V> sorted = new DataFrame<V>(index.keySet(), columns.keySet());
         final Comparator<Integer> cmp = new Comparator<Integer>() {
             @Override
             @SuppressWarnings("unchecked")
@@ -404,7 +404,7 @@ implements Iterable<List<V>> {
         }
         Collections.sort(rows, cmp);
 
-        final List<String> labels = new ArrayList<>(this.rows.keySet());
+        final List<String> labels = new ArrayList<>(this.index.keySet());
         for (final Integer r : rows) {
             final String label = r < labels.size() ? labels.get(r) : String.valueOf(r);
             sorted.append(label, row(r));
@@ -447,7 +447,7 @@ implements Iterable<List<V>> {
         final Map<String, List<V>> m = new LinkedHashMap<String, List<V>>();
 
         final int len = length();
-        final Iterator<String> names = rows.keySet().iterator();
+        final Iterator<String> names = index.keySet().iterator();
         for (int r = 0; r < len; r++) {
             final String name = names.hasNext() ? names.next() : String.valueOf(r);
             m.put(name, row(r));
@@ -520,7 +520,7 @@ implements Iterable<List<V>> {
         }
         sb.append("\n");
 
-        final Iterator<String> names = rows.keySet().iterator();
+        final Iterator<String> names = index.keySet().iterator();
         for (int r = 0; r < len; r++) {
             sb.append(names.hasNext() ? names.next() : String.valueOf(r));
             for (int c = 0; c < size(); c++) {
