@@ -60,7 +60,7 @@ public class DataFrameBasicTest {
         assertArrayEquals(
                 "row names are correct",
                 new Object[] { "row1", "row2", "row3", "3", "4", "5" },
-                df.rows().toArray()
+                df.index().toArray()
             );
         assertArrayEquals(
                 "data is correct",
@@ -71,7 +71,7 @@ public class DataFrameBasicTest {
 
     @Test
     public final void testColByIndex() {
-        List<Object> col = df.col(2);
+        final List<Object> col = df.col(2);
         assertArrayEquals(
                 "data is correct",
                 new Object[] { 10, 20, 30, 40, 50, 60 },
@@ -81,7 +81,7 @@ public class DataFrameBasicTest {
 
     @Test
     public final void testColByName() {
-        List<Object> col = df.col("value");
+        final List<Object> col = df.col("value");
         assertArrayEquals(
                 "data is correct",
                 new Object[] { 10, 20, 30, 40, 50, 60 },
@@ -91,7 +91,7 @@ public class DataFrameBasicTest {
 
     @Test
     public final void testRowByIndex() {
-        List<Object> row = df.row(1);
+        final List<Object> row = df.row(1);
         assertArrayEquals(
                 "data is correct",
                 new Object[] { "test", "two", 20 },
@@ -101,7 +101,7 @@ public class DataFrameBasicTest {
 
     @Test
     public final void testRowByName() {
-        List<Object> row = df.row("row2");
+        final List<Object> row = df.row("row2");
         assertArrayEquals(
                 "data is correct",
                 new Object[] { "test", "two", 20 },
@@ -111,7 +111,7 @@ public class DataFrameBasicTest {
 
     @Test
     public final void testRowByGeneratedName() {
-        List<Object> row = df.row("5");
+        final List<Object> row = df.row("5");
         assertArrayEquals(
                 "data is correct",
                 new Object[] { "beta", "three", 60 },

@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 
 import joinery.impl.BlockManager;
+import joinery.impl.Index;
 
 /**
  * A minimal data frame implementation in the spirit
@@ -45,8 +46,8 @@ import joinery.impl.BlockManager;
  */
 public class DataFrame<V>
 implements Iterable<List<V>> {
-    private final Map<String, Integer> index;
-    private final Map<String, Integer> columns;
+    private final Index index;
+    private final Index columns;
     private final BlockManager<V> data;
 
     public DataFrame() {
@@ -64,22 +65,18 @@ implements Iterable<List<V>> {
     public DataFrame(final Collection<String> rows, final Collection<String> columns, final List<List<V>> data) {
         this.data = new BlockManager<>(data);
 
-        this.columns = new LinkedHashMap<String, Integer>();
+        this.columns = new Index();
         int c = 0;
         for (final String column : columns) {
-            if (this.columns.put(column, c++) != null) {
-                throw new IllegalArgumentException("duplicate column " + column);
-            }
+            this.columns.add(column, c++);
         }
 
         final int len = length();
-        this.index = new LinkedHashMap<String, Integer>();
+        this.index = new Index();
         final Iterator<String> it = rows.iterator();
         for (int r = 0; r < len; r++) {
             final String row = it.hasNext() ? it.next() : String.valueOf(r);
-            if (this.index.put(row, r) != null) {
-                throw new IllegalArgumentException("duplicate row label " + row);
-            }
+            this.index.add(row, r);
         }
     }
 
@@ -92,9 +89,7 @@ implements Iterable<List<V>> {
     }
 
     public DataFrame<V> add(final String column, final List<V> values) {
-        if (columns.put(column, data.size()) != null) {
-            throw new IllegalArgumentException("column " + column + " already exists");
-        }
+        columns.add(column, data.size());
         data.add(values);
         return this;
     }
@@ -108,8 +103,8 @@ implements Iterable<List<V>> {
     }
 
     public DataFrame<V> drop(final Integer ... cols) {
-        final List<String> columns = new ArrayList<String>(this.columns.keySet());
-        final List<String> rows = new ArrayList<String>(this.index.keySet());
+        final List<String> columns = new ArrayList<String>(this.columns.names());
+        final List<String> rows = new ArrayList<String>(this.index.names());
         final Set<Integer> removeCols = new HashSet<Integer>(Arrays.asList(cols));
         final List<List<V>> keep = new ArrayList<List<V>>(data.size() - cols.length);
         final List<String> keepCols = new ArrayList<String>(data.size() - cols.length);
@@ -149,11 +144,8 @@ implements Iterable<List<V>> {
     }
 
     public DataFrame<V> append(final String name, final List<V> row) {
-        if (index.put(name, length()) != null) {
-            throw new IllegalArgumentException("row " + name + " already exists.");
-        }
-
         final int len = length();
+        index.add(name, len);
         data.reshape(data.size(), len + 1);
         for (int c = 0; c < data.size(); c++) {
             data.set(c < row.size() ? row.get(c) : null, c, len);
@@ -169,12 +161,12 @@ implements Iterable<List<V>> {
         return data.length();
     }
 
-    public Set<String> rows() {
-        return index.keySet();
+    public Set<String> index() {
+        return index.names();
     }
 
     public Set<String> columns() {
-        return columns.keySet();
+        return columns.names();
     }
 
     public List<V> col(final String column) {
@@ -217,7 +209,7 @@ implements Iterable<List<V>> {
 
     public DataFrame<V> groupBy(final Set<Integer> cols, final Map<Integer, ? extends Aggregator<V>> aggregators) {
         final DataFrame<V> grouped = new DataFrame<V>();
-        final List<String>  columnNames = new ArrayList<>(columns.keySet());
+        final List<String>  columnNames = new ArrayList<>(columns.names());
         // add key columns to new data frame column list
         for (int c = 0; c < data.size(); c++) {
             if (cols.contains(c)) {
@@ -378,7 +370,7 @@ implements Iterable<List<V>> {
     }
 
     public DataFrame<V> sortBy(final Integer ... cols) {
-        final DataFrame<V> sorted = new DataFrame<V>(index.keySet(), columns.keySet());
+        final DataFrame<V> sorted = new DataFrame<V>(index.names(), columns.names());
         final Comparator<Integer> cmp = new Comparator<Integer>() {
             @Override
             @SuppressWarnings("unchecked")
@@ -404,7 +396,7 @@ implements Iterable<List<V>> {
         }
         Collections.sort(rows, cmp);
 
-        final List<String> labels = new ArrayList<>(this.index.keySet());
+        final List<String> labels = new ArrayList<>(this.index.names());
         for (final Integer r : rows) {
             final String label = r < labels.size() ? labels.get(r) : String.valueOf(r);
             sorted.append(label, row(r));
@@ -447,7 +439,7 @@ implements Iterable<List<V>> {
         final Map<String, List<V>> m = new LinkedHashMap<String, List<V>>();
 
         final int len = length();
-        final Iterator<String> names = index.keySet().iterator();
+        final Iterator<String> names = index.names().iterator();
         for (int r = 0; r < len; r++) {
             final String name = names.hasNext() ? names.next() : String.valueOf(r);
             m.put(name, row(r));
@@ -486,7 +478,7 @@ implements Iterable<List<V>> {
     }
 
     public DataFrame<V> unique(final int ... cols) {
-        final DataFrame<V> unique = new DataFrame<V>(columns.keySet());
+        final DataFrame<V> unique = new DataFrame<V>(columns.names());
         final Set<List<V>> seen = new HashSet<List<V>>();
 
         final List<V> key = new ArrayList<V>(cols.length);
@@ -514,13 +506,13 @@ implements Iterable<List<V>> {
         final int len = length();
 
         final StringBuilder sb = new StringBuilder();
-        for (final String column : columns.keySet()) {
+        for (final String column : columns.names()) {
             sb.append("\t");
             sb.append(column);
         }
         sb.append("\n");
 
-        final Iterator<String> names = index.keySet().iterator();
+        final Iterator<String> names = index.names().iterator();
         for (int r = 0; r < len; r++) {
             sb.append(names.hasNext() ? names.next() : String.valueOf(r));
             for (int c = 0; c < size(); c++) {

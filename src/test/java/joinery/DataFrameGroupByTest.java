@@ -39,7 +39,7 @@ public class DataFrameGroupByTest {
     public final void testGroupBy() {
         df.add("name", Arrays.<Object>asList("one", "two", "three", "four", "one", "two"));
         df.add("value", Arrays.<Object>asList(1, 2, 3, 4, 5, 6));
-        DataFrame<Object> grouped = df.groupBy(0);
+        final DataFrame<Object> grouped = df.groupBy(0);
         assertEquals(
                 "group by result has correct number of rows",
                 4,
@@ -48,7 +48,7 @@ public class DataFrameGroupByTest {
         assertArrayEquals(
                 "group by result has correct names",
                 new Object[] { "one", "two", "three", "four" },
-                grouped.rows().toArray()
+                grouped.index().toArray()
             );
         assertArrayEquals(
                 "group by result has correct values",
@@ -61,7 +61,7 @@ public class DataFrameGroupByTest {
     public final void testGroupBySum() {
         df.add("name", Arrays.<Object>asList("one", "two", "three", "four", "one", "two"));
         df.add("value", Arrays.<Object>asList(1, 2, 3, 4, 5, 6));
-        DataFrame<Object> grouped = df.groupBy(
+        final DataFrame<Object> grouped = df.groupBy(
                 Collections.singleton(0),
                 Collections.<Integer, DataFrame.Aggregator<Object>>singletonMap(1, new DataFrame.Sum<Object>())
             );
@@ -73,7 +73,7 @@ public class DataFrameGroupByTest {
         assertArrayEquals(
                 "group by result has correct names",
                 new Object[] { "one", "two", "three", "four" },
-                grouped.rows().toArray()
+                grouped.index().toArray()
             );
         assertArrayEquals(
                 "group by result has correct values",
@@ -95,7 +95,7 @@ public class DataFrameGroupByTest {
         df.add("name", Arrays.<Object>asList("one", "two", "three", "four", "one", "two"));
         df.add("category", Arrays.<Object>asList("alpha", "beta", "alpha", "beta", "alpha", "beta"));
         df.add("value", Arrays.<Object>asList(1, 2, 3, 4, 5, 6));
-        Object[][] expected = new Object[][] {
+        final Object[][] expected = new Object[][] {
                 new Object[] { "alpha", "one",   2 },
                 new Object[] { "beta",  "two",   2 },
                 new Object[] { "alpha", "three", 1 },
