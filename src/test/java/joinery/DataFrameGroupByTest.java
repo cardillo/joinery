@@ -22,7 +22,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +38,7 @@ public class DataFrameGroupByTest {
     public final void testGroupBy() {
         df.add("name", Arrays.<Object>asList("one", "two", "three", "four", "one", "two"));
         df.add("value", Arrays.<Object>asList(1, 2, 3, 4, 5, 6));
-        final DataFrame<Object> grouped = df.groupBy(0);
+        final DataFrame<Object> grouped = df.groupBy(0).count();
         assertEquals(
                 "group by result has correct number of rows",
                 4,
@@ -61,10 +60,7 @@ public class DataFrameGroupByTest {
     public final void testGroupBySum() {
         df.add("name", Arrays.<Object>asList("one", "two", "three", "four", "one", "two"));
         df.add("value", Arrays.<Object>asList(1, 2, 3, 4, 5, 6));
-        final DataFrame<Object> grouped = df.groupBy(
-                Collections.singleton(0),
-                Collections.<Integer, DataFrame.Aggregator<Object>>singletonMap(1, new DataFrame.Sum<Object>())
-            );
+        final DataFrame<Object> grouped = df.groupBy(0).sum();
         assertEquals(
                 "group by result has correct number of rows",
                 4,
@@ -78,7 +74,7 @@ public class DataFrameGroupByTest {
         assertArrayEquals(
                 "group by result has correct values",
                 new Object[] { 6.0, 8.0, 3.0, 4.0 },
-                grouped.col(1).toArray()
+                grouped.col(0).toArray()
             );
     }
 
@@ -87,7 +83,8 @@ public class DataFrameGroupByTest {
         new DataFrame<String>()
             .add("name", Arrays.<String>asList("one", "two", "three", "four", "one", "two"))
             .add("value", Arrays.<String>asList("1", "2", "3", "4", "1", "6"))
-            .groupBy(0);
+            .groupBy(0)
+            .sum();
     }
 
     @Test
@@ -96,16 +93,16 @@ public class DataFrameGroupByTest {
         df.add("category", Arrays.<Object>asList("alpha", "beta", "alpha", "beta", "alpha", "beta"));
         df.add("value", Arrays.<Object>asList(1, 2, 3, 4, 5, 6));
         final Object[][] expected = new Object[][] {
-                new Object[] { "alpha", "one",   2 },
-                new Object[] { "beta",  "two",   2 },
-                new Object[] { "alpha", "three", 1 },
-                new Object[] { "beta",  "four",  1 }
+                new Object[] { 2, 2, 2 },
+                new Object[] { 2, 2, 2 },
+                new Object[] { 1, 1, 1 },
+                new Object[] { 1, 1, 1 }
             };
         for (int i = 0; i < expected.length; i++) {
             assertArrayEquals(
                     "group by result has correct values",
                     expected[i],
-                    df.groupBy("category", "name").row(i).toArray()
+                    df.groupBy("category", "name").count().row(i).toArray()
                 );
         }
     }

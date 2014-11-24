@@ -23,17 +23,17 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import joinery.impl.Aggregation;
 import joinery.impl.BlockManager;
+import joinery.impl.Grouping;
 import joinery.impl.Index;
 
 /**
@@ -49,21 +49,23 @@ implements Iterable<List<V>> {
     private final Index index;
     private final Index columns;
     private final BlockManager<V> data;
+    private final Grouping groups;
 
     public DataFrame() {
         this(new ArrayList<String>());
     }
 
     public DataFrame(final Collection<String> columns) {
-        this(Collections.<String>emptyList(), columns, DataFrame.<V>alloc(0, columns.size()));
+        this(Collections.<String>emptyList(), columns, Collections.<List<V>>emptyList());
     }
 
     public DataFrame(final Collection<String> rows, final Collection<String> columns) {
-        this(rows, columns, DataFrame.<V>alloc(rows.size(), columns.size()));
+        this(rows, columns, Collections.<List<V>>emptyList());
     }
 
     public DataFrame(final Collection<String> rows, final Collection<String> columns, final List<List<V>> data) {
         this.data = new BlockManager<>(data);
+        this.data.reshape(columns.size(), rows.size());
 
         this.columns = new Index();
         int c = 0;
@@ -78,6 +80,15 @@ implements Iterable<List<V>> {
             final String row = it.hasNext() ? it.next() : String.valueOf(r);
             this.index.add(row, r);
         }
+
+        groups = new Grouping();
+    }
+
+    private DataFrame(final Index index, final Index columns, final BlockManager<V> data, final Grouping groups) {
+        this.index = index;
+        this.columns = columns;
+        this.data = data;
+        this.groups = groups;
     }
 
     public DataFrame<V> add(final String column) {
@@ -190,171 +201,41 @@ implements Iterable<List<V>> {
     }
 
     public DataFrame<V> groupBy(final String ... colnames) {
-        final Integer[] indices = new Integer[colnames.length];
+        final int[] indices = new int[colnames.length];
         for (int i = 0; i < colnames.length; i++) {
             indices[i] = columns.get(colnames[i]);
         }
         return groupBy(indices);
     }
 
-    public DataFrame<V> groupBy(final Integer ... cols) {
-        final Map<Integer, Aggregator<V>> aggregators = Collections.emptyMap();
-        return groupBy(new LinkedHashSet<Integer>(Arrays.asList(cols)), aggregators);
+    public DataFrame<V> groupBy(final int ... cols) {
+        return new DataFrame<>(
+                index,
+                columns,
+                data,
+                new Grouping(this, cols)
+            );
     }
 
-    public DataFrame<V> groupBy(final Set<Integer> cols) {
-        final Map<Integer, Aggregator<V>> aggregators = Collections.emptyMap();
-        return groupBy(cols, aggregators);
+    public DataFrame<V> groupBy(final KeyFunction<V> function) {
+        return new DataFrame<>(
+                index,
+                columns,
+                data,
+                new Grouping(this, function)
+            );
     }
 
-    public DataFrame<V> groupBy(final Set<Integer> cols, final Map<Integer, ? extends Aggregator<V>> aggregators) {
-        final DataFrame<V> grouped = new DataFrame<V>();
-        final List<String>  columnNames = new ArrayList<>(columns.names());
-        // add key columns to new data frame column list
-        for (int c = 0; c < data.size(); c++) {
-            if (cols.contains(c)) {
-                grouped.add(columnNames.get(c));
-            }
-        }
-
-        // add value columns to new data frame column list
-        final Set<Integer> valCols = new LinkedHashSet<>();
-        for (int c = 0; c < data.size(); c++) {
-            if (!cols.contains(c)) {
-                valCols.add(c);
-                grouped.add(columnNames.get(c));
-            }
-        }
-
-        // determine groupings
-        final Map<List<V>, List<Integer>> groups = new LinkedHashMap<List<V>, List<Integer>>();
-        final int len = length();
-        for (int r = 0; r < len; r++) {
-            List<V> key = new ArrayList<V>(cols.size());
-            for (final Integer c : cols) {
-                key.add(data.get(c, r));
-            }
-            key = Collections.unmodifiableList(key);
-
-            List<Integer> group = groups.get(key);
-            if (group == null) {
-                group = new ArrayList<Integer>();
-                groups.put(key, group);
-            }
-
-            group.add(r);
-        }
-
-        // for each group
-        for (final Map.Entry<List<V>, List<Integer>> entry : groups.entrySet()) {
-            final List<V> row = new ArrayList<V>(entry.getKey());
-
-            // for each value column
-            for (final Integer c : valCols) {
-                // collect all values
-                final List<V> values = new ArrayList<V>(entry.getValue().size());
-                for (final Integer r : entry.getValue()) {
-                    final V value = data.get(c, r);
-                    if (value != null) {
-                        values.add(value);
-                    }
-                }
-
-                // determine aggregator
-                Aggregator<V> aggregator = aggregators.get(c);
-                if (aggregator == null) {
-                    if (!values.isEmpty() && values.get(0) instanceof Integer) {
-                        aggregator = new Count<V>();
-                    } else if (!values.isEmpty() && values.get(0) instanceof Boolean) {
-                        aggregator = new CountTrue<V>();
-                    } else {
-                        aggregator = new Unique<V>();
-                    }
-                }
-
-                // add aggregate value to the row
-                row.add(aggregator.aggregate(values));
-            }
-
-            // add aggregate values row to the data frame
-            final String label = String.valueOf(entry.getKey().size() == 1 ?
-                                    entry.getKey().get(0) : entry.getKey());
-            grouped.append(label, row);
-        }
-
-        return grouped;
+    public DataFrame<V> count() {
+        return groups.apply(this, new Aggregation.Count<V>());
     }
 
-    public DataFrame<V> sum(final Integer ... cols) {
-        final Map<Integer, Sum<V>> functions = new HashMap<>();
-        for (final int c : cols) {
-            functions.put(c, new Sum<V>());
-        }
-
-        final LinkedHashSet<Integer> keyCols = new LinkedHashSet<>(data.size() - cols.length);
-        for (int c = 0; c < data.size(); c++) {
-            if (!functions.containsKey(c)) {
-                keyCols.add(c);
-            }
-        }
-
-        return groupBy(keyCols, functions);
+    public DataFrame<V> sum() {
+        return groups.apply(this, new Aggregation.Sum<V>());
     }
 
-    public DataFrame<V> sum(final String ... cols) {
-        final Integer[] indices = new Integer[cols.length];
-        for (int i = 0; i < cols.length; i++) {
-            indices[i] = columns.get(cols[i]);
-        }
-        return sum(indices);
-    }
-
-    public DataFrame<V> prod(final Integer ... cols) {
-        final Map<Integer, Product<V>> functions = new HashMap<>();
-        for (final int c : cols) {
-            functions.put(c, new Product<V>());
-        }
-
-        final LinkedHashSet<Integer> keyCols = new LinkedHashSet<>(data.size() - cols.length);
-        for (int c = 0; c < data.size(); c++) {
-            if (!functions.containsKey(c)) {
-                keyCols.add(c);
-            }
-        }
-
-        return groupBy(keyCols, functions);
-    }
-
-    public DataFrame<V> prod(final String ... cols) {
-        final Integer[] indices = new Integer[cols.length];
-        for (int i = 0; i < cols.length; i++) {
-            indices[i] = columns.get(cols[i]);
-        }
-        return prod(indices);
-    }
-
-    public DataFrame<V> count(final Integer ... cols) {
-        final Map<Integer, Count<V>> functions = new HashMap<>();
-        for (final int c : cols) {
-            functions.put(c, new Count<V>());
-        }
-
-        final LinkedHashSet<Integer> keyCols = new LinkedHashSet<>(data.size() - cols.length);
-        for (int c = 0; c < data.size(); c++) {
-            if (!functions.containsKey(c)) {
-                keyCols.add(c);
-            }
-        }
-
-        return groupBy(keyCols, functions);
-    }
-
-    public DataFrame<V> count(final String ... cols) {
-        final Integer[] indices = new Integer[cols.length];
-        for (int i = 0; i < cols.length; i++) {
-            indices[i] = columns.get(cols[i]);
-        }
-        return count(indices);
+    public DataFrame<V> prod() {
+        return groups.apply(this, new Aggregation.Product<V>());
     }
 
     public DataFrame<V> sortBy(final String ... cols) {
@@ -370,7 +251,7 @@ implements Iterable<List<V>> {
     }
 
     public DataFrame<V> sortBy(final Integer ... cols) {
-        final DataFrame<V> sorted = new DataFrame<V>(index.names(), columns.names());
+        final DataFrame<V> sorted = new DataFrame<V>(columns.names());
         final Comparator<Integer> cmp = new Comparator<Integer>() {
             @Override
             @SuppressWarnings("unchecked")
@@ -537,83 +418,13 @@ implements Iterable<List<V>> {
         return sb.toString();
     }
 
-    private static <V> List<List<V>> alloc(final int rows, final int columns) {
-        final List<List<V>> data = new ArrayList<List<V>>(columns);
-        for (int i = 0; i < columns; i++) {
-            data.add(new ArrayList<V>(rows));
-        }
-        return data;
+    public interface Function<I, O> {
+        O apply(I value);
     }
 
-    public static interface Aggregator<V> {
-        public V aggregate(List<V> values);
-    }
+    public interface KeyFunction<I>
+    extends Function<List<I>, Object> { }
 
-    public static class Sum<V>
-    implements Aggregator<V> {
-        @Override
-        @SuppressWarnings("unchecked")
-        public V aggregate(final List<V> values) {
-            V result = (V)new Double(0);
-            for (final V value : values) {
-                if (result instanceof Double) {
-                    result = (V)new Double(Number.class.cast(result).doubleValue() + Number.class.cast(value).doubleValue());
-                }
-            }
-            return result;
-        }
-    }
-
-    public static class Product<V>
-    implements Aggregator<V> {
-        @Override
-        @SuppressWarnings("unchecked")
-        public V aggregate(final List<V> values) {
-            V result = (V)new Double(1);
-            for (final V value : values) {
-                if (result instanceof Number) {
-                    result = (V)new Double(Number.class.cast(result).doubleValue() * Number.class.cast(value).doubleValue());
-                }
-            }
-            return result;
-        }
-    }
-
-    public static class Count<V>
-    implements Aggregator<V> {
-        @Override
-        @SuppressWarnings("unchecked")
-        public V aggregate(final List<V> values) {
-            return (V)new Integer(values.size());
-        }
-    }
-
-    public static class CountTrue<V>
-    implements Aggregator<V> {
-        @Override
-        @SuppressWarnings("unchecked")
-        public V aggregate(final List<V> values) {
-            int positive = 0;
-            for (final V value : values) {
-                if (value != null) {
-                    if (Boolean.class.cast(value)) {
-                        positive++;
-                    }
-                }
-            }
-            return (V)new Integer(positive);
-        }
-    }
-
-    public static class Unique<V>
-    implements Aggregator<V> {
-        @Override
-        public V aggregate(final List<V> values) {
-            final Set<V> unique = new HashSet<V>(values);
-            if (unique.size() > 1) {
-                throw new IllegalArgumentException("values not unique: " + unique);
-            }
-            return values.isEmpty() ? null : values.get(0);
-        }
-    }
+    public interface Aggregate<I, O>
+    extends Function<List<I>, O> { }
 }
