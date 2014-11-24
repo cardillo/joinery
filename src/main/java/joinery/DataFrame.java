@@ -35,6 +35,7 @@ import joinery.impl.Aggregation;
 import joinery.impl.BlockManager;
 import joinery.impl.Grouping;
 import joinery.impl.Index;
+import joinery.impl.Views;
 
 /**
  * A minimal data frame implementation in the spirit
@@ -121,7 +122,7 @@ implements Iterable<List<V>> {
         final List<String> keepCols = new ArrayList<String>(data.size() - cols.length);
         for (int i = 0; i < data.size(); i++) {
             if (!removeCols.contains(i)) {
-                keep.add(data.list(i));
+                keep.add(col(i));
                 keepCols.add(columns.get(i));
             }
         }
@@ -180,12 +181,20 @@ implements Iterable<List<V>> {
         return columns.names();
     }
 
+    public V get(final String row, final String col) {
+        return get(index.get(row), columns.get(col));
+    }
+
+    public V get(final int row, final int col) {
+        return data.get(col, row);
+    }
+
     public List<V> col(final String column) {
         return col(columns.get(column));
     }
 
     public List<V> col(final int c) {
-        return data.list(c);
+        return new Views.SeriesListView<>(this, c, true);
     }
 
     public List<V> row(final String row) {
@@ -193,11 +202,7 @@ implements Iterable<List<V>> {
     }
 
     public List<V> row(final int r) {
-        final List<V> row = new ArrayList<V>(data.size());
-        for (int c = 0; c < data.size(); c++) {
-            row.add(data.get(c, r));
-        }
-        return row;
+        return new Views.SeriesListView<>(this, r, false);
     }
 
     public DataFrame<V> groupBy(final String ... colnames) {
@@ -288,27 +293,7 @@ implements Iterable<List<V>> {
 
     @Override
     public ListIterator<List<V>> iterator() {
-        return new ListIterator<List<V>>() {
-            private int r = 0;
-            @Override
-            public boolean hasNext() { return r < length(); }
-            @Override
-            public List<V> next() { return row(r++); }
-            @Override
-            public boolean hasPrevious() { return r > 0; }
-            @Override
-            public List<V> previous() { return row(--r); }
-            @Override
-            public int nextIndex() { return r + 1; }
-            @Override
-            public int previousIndex() { return r - 1; }
-            @Override
-            public void remove() { throw new UnsupportedOperationException(); }
-            @Override
-            public void set(final List<V> e) { throw new UnsupportedOperationException(); }
-            @Override
-            public void add(final List<V> e) { append(e); }
-        };
+        return new Views.ListView<>(this, true).listIterator();
     }
 
     @SuppressWarnings("unchecked")

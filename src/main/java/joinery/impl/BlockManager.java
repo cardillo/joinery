@@ -18,7 +18,6 @@
 
 package joinery.impl;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -57,20 +56,6 @@ public class BlockManager<V> {
 
     public void set(final V value, final int col, final int row) {
         blocks.get(col).set(row, value);
-    }
-
-    public List<V> list(final int col) {
-        return new AbstractList<V>() {
-            @Override
-            public V get(final int index) {
-                return blocks.get(col).get(index);
-            }
-
-            @Override
-            public int size() {
-                return blocks.get(col).size();
-            }
-        };
     }
 
     public void add(final List<V> col) {
