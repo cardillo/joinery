@@ -38,6 +38,7 @@ import java.util.Set;
 
 import joinery.impl.Aggregation;
 import joinery.impl.BlockManager;
+import joinery.impl.Conversion;
 import joinery.impl.Grouping;
 import joinery.impl.Index;
 import joinery.impl.Selection;
@@ -192,6 +193,14 @@ implements Iterable<List<V>> {
         return data.get(col, row);
     }
 
+    public void set(final String row, final String col, final V value) {
+        set(index.get(row), columns.get(col), value);
+    }
+
+    public void set(final int row, final int col, final V value) {
+        data.set(value, col, row);
+    }
+
     public List<V> col(final String column) {
         return col(columns.get(column));
     }
@@ -210,12 +219,55 @@ implements Iterable<List<V>> {
 
     public DataFrame<V> select(final Predicate<V> predicate) {
         final BitSet selected = Selection.select(this, predicate);
-        return new DataFrame<V>(
+        return new DataFrame<>(
                 Selection.select(index, selected),
                 columns,
                 Selection.select(data, selected),
                 new Grouping()
             );
+    }
+
+    public DataFrame<V> transpose() {
+        return new DataFrame<>(
+                index.names(),
+                columns.names(),
+                new Views.ListView<>(this, true)
+            );
+    }
+
+    public <U> DataFrame<U> transform(final Function<V, U> transform) {
+        return new DataFrame<>(
+                index.names(),
+                columns.names(),
+                new Views.TransformedView<V, U>(this, transform, true)
+            );
+    }
+
+    public DataFrame<V> convert() {
+        Conversion.convert(this);
+        return this;
+    }
+
+    @SafeVarargs
+    public final DataFrame<V> convert(final Class<? extends V> ... columnTypes) {
+        Conversion.convert(this, columnTypes);
+        return this;
+    }
+
+    public DataFrame<Boolean> isnull() {
+        return Conversion.isnull(this);
+    }
+
+    public DataFrame<Boolean> notnull() {
+        return Conversion.notnull(this);
+    }
+
+    public Object[] toArray() {
+        return toArray(new Object[size() * length()]);
+    }
+
+    public <U> U[] toArray(final U[] array) {
+        return new Views.FlatView<>(this).toArray(array);
     }
 
     public DataFrame<V> groupBy(final String ... colnames) {
