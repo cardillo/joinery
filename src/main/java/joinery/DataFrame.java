@@ -20,6 +20,7 @@ package joinery;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -35,6 +36,7 @@ import joinery.impl.Aggregation;
 import joinery.impl.BlockManager;
 import joinery.impl.Grouping;
 import joinery.impl.Index;
+import joinery.impl.Selection;
 import joinery.impl.Views;
 
 /**
@@ -203,6 +205,16 @@ implements Iterable<List<V>> {
 
     public List<V> row(final int r) {
         return new Views.SeriesListView<>(this, r, false);
+    }
+
+    public DataFrame<V> select(final Predicate<V> predicate) {
+        final BitSet selected = Selection.select(this, predicate);
+        return new DataFrame<V>(
+                Selection.select(index, selected),
+                columns,
+                Selection.select(data, selected),
+                new Grouping()
+            );
     }
 
     public DataFrame<V> groupBy(final String ... colnames) {
@@ -412,4 +424,7 @@ implements Iterable<List<V>> {
 
     public interface Aggregate<I, O>
     extends Function<List<I>, O> { }
+
+    public interface Predicate<I>
+    extends Function<List<I>, Boolean> { }
 }
