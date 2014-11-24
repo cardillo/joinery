@@ -15,74 +15,74 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class DataFrameSerializationTest {
-	private DataFrame<Object> df;
+    private DataFrame<Object> df;
 
-	@Before
-	public void setUp()
-	throws Exception {
-		df = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization.csv"));
-	}
+    @Before
+    public void setUp()
+    throws Exception {
+        df = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization.csv"));
+    }
 
-	@Test(expected=FileNotFoundException.class)
-	public void testReadCsvString()
-	throws IOException {
-	    DataFrame.readCsv("does-not-exist.csv");
-	}
+    @Test(expected=FileNotFoundException.class)
+    public void testReadCsvString()
+    throws IOException {
+        DataFrame.readCsv("does-not-exist.csv");
+    }
 
-	@Test
-	public void testReadCsvInputStream() {
-	    final Object[][] expected = new Object[][] {
-	            new Object[] { "a", "a", "b", "b", "c", "c" },
-	            new Object[] { "alpha", "bravo", "charlie", "delta", "echo", "foxtrot" },
-	            new Object[] { "1", "2", "3", "4", "5", "6" }
-	        };
+    @Test
+    public void testReadCsvInputStream() {
+        final Object[][] expected = new Object[][] {
+                new Object[] { "a", "a", "b", "b", "c", "c" },
+                new Object[] { "alpha", "bravo", "charlie", "delta", "echo", "foxtrot" },
+                new Object[] { "1", "2", "3", "4", "5", "6" }
+            };
 
-	    for (int i = 0; i < expected.length; i++) {
-	        assertArrayEquals(
-	                expected[i],
-	                df.col(i).toArray()
-	            );
-	    }
-	}
+        for (int i = 0; i < expected.length; i++) {
+            assertArrayEquals(
+                    expected[i],
+                    df.col(i).toArray()
+                );
+        }
+    }
 
-	@Test
-	public void testWriteCsvString()
-	throws IOException {
-	    final File tmp = File.createTempFile(getClass().getName(), ".csv");
-	    tmp.deleteOnExit();
-	    df.writeCsv(tmp.getPath());
-	}
+    @Test
+    public void testWriteCsvString()
+    throws IOException {
+        final File tmp = File.createTempFile(getClass().getName(), ".csv");
+        tmp.deleteOnExit();
+        df.writeCsv(tmp.getPath());
+    }
 
-	@Test
-	public void testWriteCsvInputStream()
-	throws IOException {
-	    final File tmp = File.createTempFile(getClass().getName(), ".csv");
-	    tmp.deleteOnExit();
-	    df.writeCsv(new FileOutputStream(tmp));
-	}
+    @Test
+    public void testWriteCsvInputStream()
+    throws IOException {
+        final File tmp = File.createTempFile(getClass().getName(), ".csv");
+        tmp.deleteOnExit();
+        df.writeCsv(new FileOutputStream(tmp));
+    }
 
-	@Test
-	public void testToStringInt() {
-		assertThat(
-				df.toString(2),
-				containsString(String.format("... %d rows skipped ...", df.length() - 2))
-			);
-		assertEquals(
-				6,
-				df.toString(2).split("\n").length
-			);
-	}
+    @Test
+    public void testToStringInt() {
+        assertThat(
+                df.toString(2),
+                containsString(String.format("... %d rows skipped ...", df.length() - 2))
+            );
+        assertEquals(
+                6,
+                df.toString(2).split("\n").length
+            );
+    }
 
-	@Test
-	public void testToString() {
-		assertThat(
-				df.toString(),
-				not(containsString("..."))
-			);
-		assertEquals(
-				7,
-				df.toString().split("\n").length
-			);
-	}
+    @Test
+    public void testToString() {
+        assertThat(
+                df.toString(),
+                not(containsString("..."))
+            );
+        assertEquals(
+                7,
+                df.toString().split("\n").length
+            );
+    }
 
 }
