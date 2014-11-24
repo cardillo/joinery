@@ -37,6 +37,7 @@ import joinery.impl.BlockManager;
 import joinery.impl.Grouping;
 import joinery.impl.Index;
 import joinery.impl.Selection;
+import joinery.impl.Serialization;
 import joinery.impl.Views;
 
 /**
@@ -375,44 +376,13 @@ implements Iterable<List<V>> {
         return unique;
     }
 
+    public final String toString(final int limit) {
+        return Serialization.toString(this, limit);
+    }
+
     @Override
     public String toString() {
         return toString(10);
-    }
-
-    public String toString(final int limit) {
-        final int len = length();
-
-        final StringBuilder sb = new StringBuilder();
-        for (final String column : columns.names()) {
-            sb.append("\t");
-            sb.append(column);
-        }
-        sb.append("\n");
-
-        final Iterator<String> names = index.names().iterator();
-        for (int r = 0; r < len; r++) {
-            sb.append(names.hasNext() ? names.next() : String.valueOf(r));
-            for (int c = 0; c < size(); c++) {
-                sb.append("\t");
-                sb.append(String.valueOf(data.get(c, r)));
-            }
-            sb.append("\n");
-
-            if (limit - 3 < r && r < (limit << 1) && r < len - 4) {
-                sb.append("\n... ");
-                sb.append(len - limit);
-                sb.append(" rows skipped ...\n\n");
-                while (r < len - 2) {
-                    if (names.hasNext()) {
-                        names.next();
-                    }
-                    r++;
-                }
-            }
-        }
-
-        return sb.toString();
     }
 
     public interface Function<I, O> {
