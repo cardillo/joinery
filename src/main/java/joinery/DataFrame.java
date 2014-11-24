@@ -18,6 +18,10 @@
 
 package joinery;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -374,6 +378,26 @@ implements Iterable<List<V>> {
         }
 
         return unique;
+    }
+
+    public static final DataFrame<Object> readCsv(final String file)
+    throws IOException {
+        return Serialization.readCsv(file);
+    }
+
+    public static final DataFrame<Object> readCsv(final InputStream input)
+    throws IOException {
+        return Serialization.readCsv(input);
+    }
+
+    public final void writeCsv(final String file)
+    throws IOException {
+        Serialization.writeCsv(this, new FileOutputStream(file));
+    }
+
+    public final void writeCsv(final OutputStream output)
+    throws IOException {
+        Serialization.writeCsv(this, output);
     }
 
     public final String toString(final int limit) {

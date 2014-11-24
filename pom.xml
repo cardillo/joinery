@@ -14,9 +14,15 @@
     <project.build.sourceEncoding>iso-8859-1</project.build.sourceEncoding>
     <java.version>1.7</java.version>
     <junit.version>4.11</junit.version>
+    <supercsv.version>2.2.0</supercsv.version>
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>net.sf.supercsv</groupId>
+      <artifactId>super-csv</artifactId>
+      <version>${supercsv.version}</version>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

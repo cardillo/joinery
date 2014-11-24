@@ -18,10 +18,7 @@
 
 package joinery;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
 import java.util.List;
@@ -117,12 +114,5 @@ public class DataFrameBasicTest {
                 new Object[] { "beta", "three", 60 },
                 row.toArray()
             );
-    }
-
-    @Test
-    public final void testToString() {
-        assertThat(df.toString(), not(containsString("...")));
-        assertThat(df.toString(2), containsString(
-            String.format("... %d rows skipped ...", df.length() - 2)));
     }
 }

@@ -18,9 +18,26 @@
 
 package joinery.impl;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 import joinery.DataFrame;
+
+import org.supercsv.cellprocessor.ConvertNullTo;
+import org.supercsv.cellprocessor.ift.CellProcessor;
+import org.supercsv.io.CsvListReader;
+import org.supercsv.io.CsvListWriter;
+import org.supercsv.prefs.CsvPreference;
 
 public class Serialization {
     public static String toString(final DataFrame<?> df, final int limit) {
@@ -38,7 +55,7 @@ public class Serialization {
             sb.append(names.hasNext() ? names.next() : String.valueOf(r));
             for (int c = 0; c < df.size(); c++) {
                 sb.append("\t");
-                sb.append(String.valueOf(df.get(c, r)));
+                sb.append(String.valueOf(df.get(r, c)));
             }
             sb.append("\n");
 
@@ -57,4 +74,43 @@ public class Serialization {
 
         return sb.toString();
     }
+
+    public static DataFrame<Object> readCsv(final String file)
+    throws IOException {
+        return readCsv(file.contains("://") ?
+                    new URL(file).openStream() : new FileInputStream(file));
+    }
+
+    public static DataFrame<Object> readCsv(final InputStream input)
+    throws IOException {
+        try (CsvListReader reader = new CsvListReader(
+                new InputStreamReader(input), CsvPreference.STANDARD_PREFERENCE)) {
+            final List<String> header = Arrays.asList(reader.getHeader(true));
+            final CellProcessor[] procs = new CellProcessor[header.size()];
+            final DataFrame<Object> df = new DataFrame<>(header);
+            for (List<Object> row = reader.read(procs); row != null; row = reader.read(procs)) {
+                df.append(new ArrayList<>(row));
+            }
+            return df;
+        }
+    }
+
+    public static <V> void writeCsv(final DataFrame<V> df, final String output)
+    throws IOException {
+        writeCsv(df, new FileOutputStream(output));
+    }
+
+    public static <V> void writeCsv(final DataFrame<V> df, final OutputStream output)
+    throws IOException {
+        try (CsvListWriter writer = new CsvListWriter(
+                new OutputStreamWriter(output), CsvPreference.STANDARD_PREFERENCE)) {
+            writer.writeHeader(df.columns().toArray(new String[df.size()]));
+            final CellProcessor[] procs = new CellProcessor[df.size()];
+            Arrays.fill(procs, new ConvertNullTo(""));
+            for (final List<V> row : df) {
+                writer.write(row, procs);
+            }
+        }
+    }
+
 }
