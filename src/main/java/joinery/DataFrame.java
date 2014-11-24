@@ -60,7 +60,7 @@ implements Iterable<List<V>> {
     private final Grouping groups;
 
     public DataFrame() {
-        this(new ArrayList<String>());
+        this(Collections.<String>emptyList());
     }
 
     public DataFrame(final Collection<String> columns) {
@@ -71,25 +71,21 @@ implements Iterable<List<V>> {
         this(rows, columns, Collections.<List<V>>emptyList());
     }
 
+    public DataFrame(final List<List<V>> data) {
+        this(Collections.<String>emptyList(), Collections.<String>emptyList(), data);
+    }
+
     public DataFrame(final Collection<String> rows, final Collection<String> columns, final List<List<V>> data) {
-        this.data = new BlockManager<>(data);
-        this.data.reshape(columns.size(), rows.size());
+        final BlockManager<V> mgr = new BlockManager<>(data);
+        mgr.reshape(
+                Math.max(mgr.size(), columns.size()),
+                Math.max(mgr.length(), rows.size())
+            );
 
-        this.columns = new Index();
-        int c = 0;
-        for (final String column : columns) {
-            this.columns.add(column, c++);
-        }
-
-        final int len = length();
-        this.index = new Index();
-        final Iterator<String> it = rows.iterator();
-        for (int r = 0; r < len; r++) {
-            final String row = it.hasNext() ? it.next() : String.valueOf(r);
-            this.index.add(row, r);
-        }
-
-        groups = new Grouping();
+        this.data = mgr;
+        this.columns = new Index(columns, mgr.size());
+        this.index = new Index(rows, mgr.length());
+        this.groups = new Grouping();
     }
 
     private DataFrame(final Index index, final Index columns, final BlockManager<V> data, final Grouping groups) {

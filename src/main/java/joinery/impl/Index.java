@@ -18,6 +18,9 @@
 
 package joinery.impl;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -27,7 +30,20 @@ public class Index {
     private final Map<String, Integer> index;
 
     public Index() {
-        index = new LinkedHashMap<>();
+        this(Collections.<String>emptyList());
+    }
+
+    public Index(final Collection<String> names) {
+        this(names, names.size());
+    }
+
+    public Index(final Collection<String> names, final int size) {
+        index = new LinkedHashMap<>(names.size());
+        final Iterator<String> it = names.iterator();
+        for (int i = 0; i < size; i++) {
+            final String name = it.hasNext() ? it.next() : String.valueOf(i);
+            add(name, i);
+        }
     }
 
     public void add(final String name, final Integer value) {
