@@ -442,7 +442,23 @@ implements Iterable<List<V>> {
 
     @Override
     public ListIterator<List<V>> iterator() {
+        return iterrows();
+    }
+
+    public ListIterator<List<V>> iterrows() {
         return new Views.ListView<>(this, true).listIterator();
+    }
+
+    public ListIterator<List<V>> itercols() {
+        return new Views.ListView<>(this, false).listIterator();
+    }
+
+    public ListIterator<Map<String, V>> itermap() {
+        return new Views.MapView<>(this, true).listIterator();
+    }
+
+    public ListIterator<V> itervalues() {
+        return new Views.FlatView<>(this).listIterator();
     }
 
     @SuppressWarnings("unchecked")

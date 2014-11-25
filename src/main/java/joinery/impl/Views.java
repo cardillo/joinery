@@ -19,7 +19,12 @@
 package joinery.impl;
 
 import java.util.AbstractList;
+import java.util.AbstractMap;
+import java.util.AbstractSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import joinery.DataFrame;
 import joinery.DataFrame.Function;
@@ -67,6 +72,94 @@ public class Views {
         @Override
         public int size() {
             return transpose ? df.length() : df.size();
+        }
+    }
+
+    public static class MapView<V>
+    extends AbstractList<Map<String, V>> {
+        private final DataFrame<V> df;
+        private final boolean transpose;
+
+        public MapView(final DataFrame<V> df, final boolean transpose) {
+            this.df = df;
+            this.transpose = transpose;
+        }
+
+        @Override
+        public Map<String, V> get(final int index) {
+            return new SeriesMapView<>(df, index, !transpose);
+        }
+
+        @Override
+        public int size() {
+            return transpose ? df.length() : df.size();
+        }
+    }
+
+    public static class SeriesMapView<V>
+    extends AbstractMap<String, V> {
+        private final DataFrame<V> df;
+        private final int index;
+        private final boolean transpose;
+
+        public SeriesMapView(final DataFrame<V> df, final int index, final boolean transpose) {
+            this.df = df;
+            this.index = index;
+            this.transpose = transpose;
+        }
+
+        @Override
+        public Set<Map.Entry<String, V>> entrySet() {
+            return new AbstractSet<Map.Entry<String, V>>() {
+                @Override
+                public Iterator<Map.Entry<String, V>> iterator() {
+                    final Set<String> names = transpose ? df.index() : df.columns();
+                    final Iterator<String> it = names.iterator();
+
+                    return new Iterator<Map.Entry<String, V>>() {
+                        int value = 0;
+
+                        @Override
+                        public boolean hasNext() {
+                            return it.hasNext();
+                        }
+
+                        @Override
+                        public Map.Entry<String, V> next() {
+                            final String key = it.next();
+                            final int value = this.value++;
+                            return new Map.Entry<String, V>() {
+                                @Override
+                                public String getKey() {
+                                    return key;
+                                }
+
+                                @Override
+                                public V getValue() {
+                                    return transpose ?
+                                            df.get(value, index) :
+                                            df.get(index, value);
+                                }
+
+                                @Override
+                                public V setValue(final V value) {
+                                    throw new UnsupportedOperationException();
+                                }
+                            };
+                        }
+
+                        @Override
+                        public void remove() {
+                            throw new UnsupportedOperationException();
+                        }
+                    };
+                }
+
+                @Override
+                public int size() {
+                    return transpose ? df.length() : df.size();
+                }
+            };
         }
     }
 
