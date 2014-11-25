@@ -42,6 +42,7 @@ import joinery.impl.BlockManager;
 import joinery.impl.Conversion;
 import joinery.impl.Grouping;
 import joinery.impl.Index;
+import joinery.impl.Inspection;
 import joinery.impl.Selection;
 import joinery.impl.Serialization;
 import joinery.impl.Views;
@@ -421,6 +422,22 @@ implements Iterable<List<V>> {
         }
 
         return sorted;
+    }
+
+    public List<Class<?>> types() {
+        return Inspection.types(this);
+    }
+
+    public DataFrame<V> numeric() {
+        final BitSet numeric = Inspection.numeric(this);
+        final Set<String> keep = Selection.select(columns, numeric).names();
+        return retain(keep.toArray(new String[keep.size()]));
+    }
+
+    public DataFrame<V> nonnumeric() {
+        final BitSet nonnumeric = Inspection.nonnumeric(this);
+        final Set<String> keep = Selection.select(columns, nonnumeric).names();
+        return retain(keep.toArray(new String[keep.size()]));
     }
 
     @Override
