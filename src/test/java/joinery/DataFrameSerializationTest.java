@@ -34,7 +34,7 @@ public class DataFrameSerializationTest {
         final Object[][] expected = new Object[][] {
                 new Object[] { "a", "a", "b", "b", "c", "c" },
                 new Object[] { "alpha", "bravo", "charlie", "delta", "echo", "foxtrot" },
-                new Object[] { "1", "2", "3", "4", "5", "6" }
+                new Object[] { 1L, 2L, 3L, 4L, 5L, 6L }
             };
 
         for (int i = 0; i < expected.length; i++) {

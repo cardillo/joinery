@@ -15,6 +15,7 @@
     <java.version>1.7</java.version>
     <junit.version>4.11</junit.version>
     <supercsv.version>2.2.0</supercsv.version>
+    <commons-math3.version>3.3</commons-math3.version>
   </properties>
 
   <dependencies>
@@ -22,6 +23,11 @@
       <groupId>net.sf.supercsv</groupId>
       <artifactId>super-csv</artifactId>
       <version>${supercsv.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-math3</artifactId>
+      <version>${commons-math3.version}</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

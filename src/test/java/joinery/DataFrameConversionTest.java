@@ -42,7 +42,7 @@ public class DataFrameConversionTest {
                         "t", "true", "f", "false", "yes", "no",
                         null, null, null, null, null, null
                 },
-                strings.transpose().toArray()
+                strings.toArray()
             );
     }
 
@@ -108,7 +108,7 @@ public class DataFrameConversionTest {
         };
         assertArrayEquals(
                 expected,
-                nulls.toArray()
+                nulls.transpose().toArray()
             );
     }
 
@@ -125,7 +125,7 @@ public class DataFrameConversionTest {
         };
         assertArrayEquals(
                 expected,
-                nonnulls.toArray()
+                nonnulls.transpose().toArray()
             );
     }
 

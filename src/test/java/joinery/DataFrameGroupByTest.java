@@ -21,7 +21,13 @@ package joinery;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import joinery.DataFrame.Aggregate;
+import joinery.DataFrame.KeyFunction;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,12 +36,14 @@ public class DataFrameGroupByTest {
     private DataFrame<Object> df;
 
     @Before
-    public final void setUp() {
-        df = new DataFrame<Object>();
+    public final void setUp()
+    throws IOException {
+        df = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("grouping.csv"));
     }
 
     @Test
     public final void testGroupBy() {
+        final DataFrame<Object> df = new DataFrame<>();
         df.add("name", Arrays.<Object>asList("one", "two", "three", "four", "one", "two"));
         df.add("value", Arrays.<Object>asList(1, 2, 3, 4, 5, 6));
         final DataFrame<Object> grouped = df.groupBy(0).count();
@@ -56,28 +64,6 @@ public class DataFrameGroupByTest {
             );
     }
 
-    @Test
-    public final void testGroupBySum() {
-        df.add("name", Arrays.<Object>asList("one", "two", "three", "four", "one", "two"));
-        df.add("value", Arrays.<Object>asList(1, 2, 3, 4, 5, 6));
-        final DataFrame<Object> grouped = df.groupBy(0).sum();
-        assertEquals(
-                "group by result has correct number of rows",
-                4,
-                grouped.length()
-            );
-        assertArrayEquals(
-                "group by result has correct names",
-                new Object[] { "one", "two", "three", "four" },
-                grouped.index().toArray()
-            );
-        assertArrayEquals(
-                "group by result has correct values",
-                new Object[] { 6.0, 8.0, 3.0, 4.0 },
-                grouped.col(0).toArray()
-            );
-    }
-
     @Test(expected=IllegalArgumentException.class)
     public final void testGroupByInvalid() {
         new DataFrame<String>()
@@ -89,6 +75,7 @@ public class DataFrameGroupByTest {
 
     @Test
     public final void testGroupByMultiple() {
+        final DataFrame<Object> df = new DataFrame<>();
         df.add("name", Arrays.<Object>asList("one", "two", "three", "four", "one", "two"));
         df.add("category", Arrays.<Object>asList("alpha", "beta", "alpha", "beta", "alpha", "beta"));
         df.add("value", Arrays.<Object>asList(1, 2, 3, 4, 5, 6));
@@ -105,5 +92,73 @@ public class DataFrameGroupByTest {
                     df.groupBy("category", "name").count().row(i).toArray()
                 );
         }
+    }
+
+    @Test
+    public void testGroups() {
+        final Map<Object, DataFrame<Object>> groups =
+                df.convert().groupBy("b").groups();
+
+        assertArrayEquals(
+                new Object[] {
+                    "alpha", "bravo",
+                    "one", "one",
+                    10L, 20L,
+                    10.0, 20.0
+                },
+                groups.get("one").toArray()
+            );
+        assertArrayEquals(
+                new Object[] {
+                    "charlie", "delta",
+                    "two", "two",
+                    30L, 40L,
+                    30.0, 40.0
+                },
+                groups.get("two").toArray()
+            );
+        assertArrayEquals(
+                new Object[] {
+                    "echo", "foxtrot", "golf",
+                    "three", "three", "three",
+                    50L, 60L, 70L,
+                    50.0, 60.0, 70.0
+                },
+                groups.get("three").toArray()
+            );
+    }
+
+    @Test
+    public void testGroupApply() {
+        assertArrayEquals(
+                new Object[] {
+                    2, 2, 3,
+                    2, 2, 3,
+                    2, 2, 3,
+                    2, 2, 3
+                },
+                df.groupBy("b").apply(new Aggregate<Object, Object>() {
+                    @Override
+                    public Integer apply(final List<Object> value) {
+                        return value.size();
+                    }
+                }).toArray()
+            );
+    }
+
+    @Test
+    public void testKeyFunction() {
+        assertArrayEquals(
+                new Object[] {
+                    30.0, 70.0, 180.0,
+                    30.0, 70.0, 180.0
+                },
+                df.convert().groupBy(new KeyFunction<Object>() {
+                    @Override
+                    public Object apply(final List<Object> value) {
+                        return value.get(1);
+                    }
+                }).sum().toArray()
+            );
     }
 }

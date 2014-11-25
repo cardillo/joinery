@@ -91,7 +91,7 @@ public class Serialization {
             for (List<Object> row = reader.read(procs); row != null; row = reader.read(procs)) {
                 df.append(new ArrayList<>(row));
             }
-            return df;
+            return df.convert();
         }
     }
 

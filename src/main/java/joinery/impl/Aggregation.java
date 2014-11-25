@@ -22,6 +22,9 @@ import java.util.List;
 
 import joinery.DataFrame.Aggregate;
 
+import org.apache.commons.math3.stat.descriptive.StorelessUnivariateStatistic;
+import org.apache.commons.math3.stat.descriptive.UnivariateStatistic;
+
 public class Aggregation {
     public static class Count<V>
     implements Aggregate<V, V> {
@@ -32,29 +35,109 @@ public class Aggregation {
         }
     }
 
-    public static class Sum<V>
-    implements Aggregate<V, V> {
+    private static abstract class AbstractStorelessStatistic<V>
+    implements Aggregate<V, Double> {
+        protected final StorelessUnivariateStatistic stat;
+
+        protected AbstractStorelessStatistic(final StorelessUnivariateStatistic stat) {
+            this.stat = stat;
+        }
+
         @Override
-        @SuppressWarnings("unchecked")
-        public V apply(final List<V> values) {
-            Double sum = new Double(0);
-            for (final V value : values) {
-                sum += Number.class.cast(value).doubleValue();
+        public Double apply(final List<V> values) {
+            stat.clear();
+            for (final Object value : values) {
+                stat.increment(Number.class.cast(value).doubleValue());
             }
-            return (V)sum;
+            return stat.getResult();
+        }
+    }
+
+    public static class Sum<V>
+    extends AbstractStorelessStatistic<V> {
+        public Sum() {
+            super(new org.apache.commons.math3.stat.descriptive.summary.Sum());
         }
     }
 
     public static class Product<V>
-    implements Aggregate<V, V> {
+    extends AbstractStorelessStatistic<V> {
+        public Product() {
+            super(new org.apache.commons.math3.stat.descriptive.summary.Product());
+        }
+    }
+
+    public static class Mean<V>
+    extends AbstractStorelessStatistic<V> {
+        public Mean() {
+            super(new org.apache.commons.math3.stat.descriptive.moment.Mean());
+        }
+    }
+
+    public static class StdDev<V>
+    extends AbstractStorelessStatistic<V> {
+        public StdDev() {
+            super(new org.apache.commons.math3.stat.descriptive.moment.StandardDeviation());
+        }
+    }
+
+    public static class Variance<V>
+    extends AbstractStorelessStatistic<V> {
+        public Variance() {
+            super(new org.apache.commons.math3.stat.descriptive.moment.Variance());
+        }
+    }
+
+    public static class Skew<V>
+    extends AbstractStorelessStatistic<V> {
+        public Skew() {
+            super(new org.apache.commons.math3.stat.descriptive.moment.Skewness());
+        }
+    }
+
+    public static class Kurtosis<V>
+    extends AbstractStorelessStatistic<V> {
+        public Kurtosis() {
+            super(new org.apache.commons.math3.stat.descriptive.moment.Kurtosis());
+        }
+    }
+
+    public static class Min<V>
+    extends AbstractStorelessStatistic<V> {
+        public Min() {
+            super(new org.apache.commons.math3.stat.descriptive.rank.Min());
+        }
+    }
+
+    public static class Max<V>
+    extends AbstractStorelessStatistic<V> {
+        public Max() {
+            super(new org.apache.commons.math3.stat.descriptive.rank.Max());
+        }
+    }
+
+    private static abstract class AbstractStatistic<V>
+    implements Aggregate<V, Double> {
+        protected final UnivariateStatistic stat;
+
+        protected AbstractStatistic(final UnivariateStatistic stat) {
+            this.stat = stat;
+        }
+
         @Override
-        @SuppressWarnings("unchecked")
-        public V apply(final List<V> values) {
-            Double product = new Double(1);
-            for (final V value : values) {
-                product *= Number.class.cast(value).doubleValue();
+        public Double apply(final List<V> values) {
+            final double[] vals = new double[values.size()];
+            for (int i = 0; i < vals.length; i++) {
+                vals[i] = Number.class.cast(values.get(i)).doubleValue();
             }
-            return (V)product;
+            return stat.evaluate(vals);
+        }
+    }
+
+    public static class Median<V>
+    extends AbstractStatistic<V> {
+        public Median() {
+            super(new org.apache.commons.math3.stat.descriptive.rank.Median());
         }
     }
 }

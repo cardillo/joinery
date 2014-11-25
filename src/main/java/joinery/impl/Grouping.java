@@ -30,15 +30,17 @@ import joinery.DataFrame;
 import joinery.DataFrame.Aggregate;
 import joinery.DataFrame.KeyFunction;
 
-public class Grouping {
+public class Grouping
+implements Iterable<Map.Entry<Object, BitSet>> {
+
     private final Map<Object, BitSet> groups = new LinkedHashMap<>();
 
     public Grouping() { }
 
-    public <T> Grouping(final DataFrame<T> df, final KeyFunction<T> function) {
-        final Iterator<List<T>> iter = df.iterator();
+    public <V> Grouping(final DataFrame<V> df, final KeyFunction<V> function) {
+        final Iterator<List<V>> iter = df.iterator();
         for (int r = 0; iter.hasNext(); r++) {
-            final List<T> row = iter.next();
+            final List<V> row = iter.next();
             final Object key = function.apply(row);
             BitSet group = groups.get(key);
             if (group == null) {
@@ -49,18 +51,18 @@ public class Grouping {
         }
     }
 
-    public <T> Grouping(final DataFrame<T> df, final int ... columns) {
+    public <V> Grouping(final DataFrame<V> df, final int ... columns) {
         this(df, columns.length == 1 ?
-                new KeyFunction<T>() {
+                new KeyFunction<V>() {
                     @Override
-                    public Object apply(final List<T> value) {
+                    public Object apply(final List<V> value) {
                         return value.get(columns[0]);
                     }
 
                 } :
-                new KeyFunction<T>() {
+                new KeyFunction<V>() {
                     @Override
-                    public Object apply(final List<T> value) {
+                    public Object apply(final List<V> value) {
                         final List<Object> key = new ArrayList<>(columns.length);
                         for (final int column : columns) {
                             key.add(value.get(column));
@@ -70,14 +72,14 @@ public class Grouping {
             });
     }
 
-    public <V> DataFrame<V> apply(final DataFrame<V> df, final Aggregate<V, V> function) {
-        final List<List<V>> grouped = new ArrayList<>();
+    public <I, O> DataFrame<O> apply(final DataFrame<I> df, final Aggregate<I, O> function) {
+        final List<List<O>> grouped = new ArrayList<>();
         final List<String> names = new ArrayList<>(df.columns());
         final List<String> newcols = new ArrayList<>();
         final List<String> labels = new ArrayList<String>();
 
         for (int c = 0; c < df.size(); c++) {
-            final List<V> column = new ArrayList<>();
+            final List<O> column = new ArrayList<>();
             if (groups.isEmpty()) {
                 try {
                     column.add(function.apply(df.col(c)));
@@ -85,7 +87,7 @@ public class Grouping {
             } else {
                 for (final Map.Entry<Object, BitSet> entry : groups.entrySet()) {
                     final BitSet rows = entry.getValue();
-                    final List<V> values = new ArrayList<>(rows.cardinality());
+                    final List<I> values = new ArrayList<>(rows.cardinality());
                     for (int r = rows.nextSetBit(0); r >= 0; r = rows.nextSetBit(r + 1)) {
                         values.add(df.col(c).get(r));
                     }
@@ -108,6 +110,11 @@ public class Grouping {
             throw new IllegalArgumentException("no results for aggregate function " + function.getClass().getSimpleName());
         }
 
-        return new DataFrame<V>(labels, newcols, grouped);
+        return new DataFrame<O>(labels, newcols, grouped);
+    }
+
+    @Override
+    public Iterator<Map.Entry<Object, BitSet>> iterator() {
+        return groups.entrySet().iterator();
     }
 }

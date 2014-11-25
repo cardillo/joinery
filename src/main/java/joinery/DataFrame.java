@@ -22,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -270,6 +271,22 @@ implements Iterable<List<V>> {
         return new Views.FlatView<>(this).toArray(array);
     }
 
+    public Object toArray(final Class<?> cls) {
+        if (cls.getComponentType() == null) {
+            throw new IllegalArgumentException("class must be an array class");
+        }
+
+        final int size = size();
+        final int len = length();
+        final Object a = Array.newInstance(cls.getComponentType(), size * len);
+
+        for (int i = 0; i < size * len; i++) {
+            Array.set(a, i, data.get(i / size, i % len));
+        }
+
+        return a;
+    }
+
     public DataFrame<V> groupBy(final String ... colnames) {
         final int[] indices = new int[colnames.length];
         for (int i = 0; i < colnames.length; i++) {
@@ -296,16 +313,66 @@ implements Iterable<List<V>> {
             );
     }
 
+    public Map<Object, DataFrame<V>> groups() {
+        final Map<Object, DataFrame<V>> grouped = new LinkedHashMap<>();
+        for (final Map.Entry<Object, BitSet> entry : groups) {
+            final BitSet selected = entry.getValue();
+            grouped.put(entry.getKey(), new DataFrame<V>(
+                    Selection.select(index, selected),
+                    columns,
+                    Selection.select(data, selected),
+                    new Grouping()
+                ));
+        }
+        return grouped;
+    }
+
+    public <U> DataFrame<U> apply(final Aggregate<V, U> function) {
+        return groups.apply(this, function);
+    }
+
     public DataFrame<V> count() {
         return groups.apply(this, new Aggregation.Count<V>());
     }
 
-    public DataFrame<V> sum() {
+    public DataFrame<? super Double> sum() {
         return groups.apply(this, new Aggregation.Sum<V>());
     }
 
-    public DataFrame<V> prod() {
+    public DataFrame<? super Double> prod() {
         return groups.apply(this, new Aggregation.Product<V>());
+    }
+
+    public DataFrame<? super Double> mean() {
+        return groups.apply(this, new Aggregation.Mean<V>());
+    }
+
+    public DataFrame<? super Double> stddev() {
+        return groups.apply(this, new Aggregation.StdDev<V>());
+    }
+
+    public DataFrame<? super Double> var() {
+        return groups.apply(this, new Aggregation.Variance<V>());
+    }
+
+    public DataFrame<? super Double> skew() {
+        return groups.apply(this, new Aggregation.Skew<V>());
+    }
+
+    public DataFrame<? super Double> kurt() {
+        return groups.apply(this, new Aggregation.Kurtosis<V>());
+    }
+
+    public DataFrame<? super Double> min() {
+        return groups.apply(this, new Aggregation.Min<V>());
+    }
+
+    public DataFrame<? super Double> max() {
+        return groups.apply(this, new Aggregation.Max<V>());
+    }
+
+    public DataFrame<? super Double> median() {
+        return groups.apply(this, new Aggregation.Median<V>());
     }
 
     public DataFrame<V> sortBy(final String ... cols) {
