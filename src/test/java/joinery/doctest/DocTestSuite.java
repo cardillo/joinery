@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import javax.tools.Diagnostic;
+import javax.tools.DiagnosticListener;
 import javax.tools.FileObject;
 import javax.tools.ForwardingJavaFileManager;
 import javax.tools.JavaCompiler;
@@ -83,7 +85,8 @@ extends Suite {
                             // inject return before last statement
                             int last;
                             for (last = lines.size() - 1; last > 0; last--) {
-                                if (lines.get(last - 1).contains(";")) {
+                                final String check = lines.get(last - 1);
+                                if (check.contains(";") && !check.contains("return")) {
                                     break;
                                 }
                             }
@@ -122,6 +125,7 @@ extends Suite {
                         final String name = String.format("%sDocTest", cls.name());
                         final String source =
                             "import " + cls.qualifiedName() + ";\n" +
+                            "import " + cls.qualifiedName() + ".*;\n" +
                             "import java.util.*;\n" +
                             "public class " + name + "\n" +
                             "implements java.util.concurrent.Callable<Object> {\n" +
@@ -173,7 +177,23 @@ extends Suite {
                                         return source;
                                     }
                                 });
-                        compiler.getTask(null,  mgr,  null , null,  null, files).call();
+
+                        final StringBuilder error = new StringBuilder();
+                        final DiagnosticListener<FileObject> diags =
+                                new DiagnosticListener<FileObject>() {
+                                    @Override
+                                    public void report(final Diagnostic<? extends FileObject> diagnostic) {
+                                        if (diagnostic.getKind() == Diagnostic.Kind.ERROR) {
+                                            error.append("\t");
+                                            error.append(diagnostic.getMessage(null));
+                                            error.append("\n");
+                                        }
+                                    }
+                            };
+                        compiler.getTask(null,  mgr,  diags, null,  null, files).call();
+                        if (error.length() > 0) {
+                            throw new Exception("Doctest failed to compile:\n" + error.toString());
+                        }
 
                         final Class<?> cls = mgr.getClassLoader(null).loadClass(name);
                         value = Callable.class.cast(cls.newInstance()).call();
@@ -181,12 +201,12 @@ extends Suite {
                         if (expected != null) {
                             org.junit.Assert.assertEquals(expected, String.valueOf(value));
                         }
-
-                        notifier.fireTestFinished(getDescription());
                     } catch (final AssertionError err) {
-                        throw err;
+                        notifier.fireTestFailure(new Failure(getDescription(), err));
                     } catch (final Exception ex) {
                         notifier.fireTestFailure(new Failure(getDescription(), ex));
+                    } finally {
+                        notifier.fireTestFinished(getDescription());
                     }
                 }
             });
