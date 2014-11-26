@@ -47,6 +47,8 @@ import joinery.impl.Selection;
 import joinery.impl.Serialization;
 import joinery.impl.Views;
 
+import com.codahale.metrics.annotation.Timed;
+
 /**
  * A minimal data frame implementation in the spirit
  * of <a href="http://pandas.pydata.org">Pandas</a> or
@@ -64,6 +66,10 @@ implements Iterable<List<V>> {
 
     public DataFrame() {
         this(Collections.<String>emptyList());
+    }
+
+    public DataFrame(final String ... columns) {
+        this(Arrays.asList(columns));
     }
 
     public DataFrame(final Collection<String> columns) {
@@ -161,6 +167,7 @@ implements Iterable<List<V>> {
         return append(String.valueOf(length()), row);
     }
 
+    @Timed
     public DataFrame<V> append(final String name, final List<V> row) {
         final int len = length();
         index.add(name, len);
@@ -288,6 +295,7 @@ implements Iterable<List<V>> {
         return a;
     }
 
+    @Timed
     public DataFrame<V> groupBy(final String ... colnames) {
         final int[] indices = new int[colnames.length];
         for (int i = 0; i < colnames.length; i++) {
@@ -296,6 +304,7 @@ implements Iterable<List<V>> {
         return groupBy(indices);
     }
 
+    @Timed
     public DataFrame<V> groupBy(final int ... cols) {
         return new DataFrame<>(
                 index,
@@ -305,6 +314,7 @@ implements Iterable<List<V>> {
             );
     }
 
+    @Timed
     public DataFrame<V> groupBy(final KeyFunction<V> function) {
         return new DataFrame<>(
                 index,
@@ -332,46 +342,57 @@ implements Iterable<List<V>> {
         return groups.apply(this, function);
     }
 
+    @Timed
     public DataFrame<V> count() {
         return groups.apply(this, new Aggregation.Count<V>());
     }
 
+    @Timed
     public DataFrame<? super Double> sum() {
         return groups.apply(this, new Aggregation.Sum<V>());
     }
 
+    @Timed
     public DataFrame<? super Double> prod() {
         return groups.apply(this, new Aggregation.Product<V>());
     }
 
+    @Timed
     public DataFrame<? super Double> mean() {
         return groups.apply(this, new Aggregation.Mean<V>());
     }
 
+    @Timed
     public DataFrame<? super Double> stddev() {
         return groups.apply(this, new Aggregation.StdDev<V>());
     }
 
+    @Timed
     public DataFrame<? super Double> var() {
         return groups.apply(this, new Aggregation.Variance<V>());
     }
 
+    @Timed
     public DataFrame<? super Double> skew() {
         return groups.apply(this, new Aggregation.Skew<V>());
     }
 
+    @Timed
     public DataFrame<? super Double> kurt() {
         return groups.apply(this, new Aggregation.Kurtosis<V>());
     }
 
+    @Timed
     public DataFrame<? super Double> min() {
         return groups.apply(this, new Aggregation.Min<V>());
     }
 
+    @Timed
     public DataFrame<? super Double> max() {
         return groups.apply(this, new Aggregation.Max<V>());
     }
 
+    @Timed
     public DataFrame<? super Double> median() {
         return groups.apply(this, new Aggregation.Median<V>());
     }
@@ -388,6 +409,7 @@ implements Iterable<List<V>> {
         return sortBy(indices);
     }
 
+    @Timed
     public DataFrame<V> sortBy(final Integer ... cols) {
         final DataFrame<V> sorted = new DataFrame<V>(columns.names());
         final Comparator<Integer> cmp = new Comparator<Integer>() {
