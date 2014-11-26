@@ -384,7 +384,7 @@ implements Iterable<List<V>> {
      * bravo }</pre>
      *
      * @param row the row
-     * @param column the column
+     * @param col the column
      * @return the value
      */
     public V get(final String row, final String col) {
@@ -407,7 +407,7 @@ implements Iterable<List<V>> {
      * bravo }</pre>
      *
      * @param row the row index
-     * @param column the column index
+     * @param col the column index
      * @return the value
      */
     public V get(final int row, final int col) {
@@ -615,10 +615,10 @@ implements Iterable<List<V>> {
      * @return the grouped data frame
      */
     @Timed
-    public DataFrame<V> groupBy(final String ... colnames) {
-        final int[] indices = new int[colnames.length];
-        for (int i = 0; i < colnames.length; i++) {
-            indices[i] = columns.get(colnames[i]);
+    public DataFrame<V> groupBy(final String ... cols) {
+        final int[] indices = new int[cols.length];
+        for (int i = 0; i < cols.length; i++) {
+            indices[i] = columns.get(cols[i]);
         }
         return groupBy(indices);
     }
