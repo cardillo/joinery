@@ -96,6 +96,29 @@
           <groups>joinery.perf.PerformanceTests</groups>
         </configuration>
       </plugin>
+
+      <!-- configure javadoc generation -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.10.1</version>
+        <configuration>
+          <docletArtifact>
+            <groupId>com.google.doclava</groupId>
+            <artifactId>doclava</artifactId>
+            <version>1.0.5</version>
+          </docletArtifact>
+          <doclet>com.google.doclava.Doclava</doclet>
+          <additionalparam>
+            -quiet
+            -hdf project.name "${project.name}"
+            -d ${project.build.directory}/site/apidocs
+            -templatedir ${basedir}/src/main/resources/templates
+          </additionalparam>
+          <useStandardDocletOptions>false</useStandardDocletOptions>
+          <excludePackageNames>joinery.impl</excludePackageNames>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
