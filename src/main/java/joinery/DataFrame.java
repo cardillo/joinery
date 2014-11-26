@@ -158,8 +158,21 @@ implements Iterable<List<V>> {
         this(Collections.<String>emptyList(), columns, Collections.<List<V>>emptyList());
     }
 
-    public DataFrame(final Collection<String> rows, final Collection<String> columns) {
-        this(rows, columns, Collections.<List<V>>emptyList());
+    /**
+     * Construct a data frame containing the specified rows and columns.
+     *
+     * <pre> {@code
+     * > List<String> rows = Arrays.asList("row1", "row2", "row3");
+     * > List<String> columns = Arrays.asList("col1", "col2");
+     * > DataFrame<Object> df = new DataFrame<>(rows, columns);
+     * > df.get("row1", "col1");
+     * null }</pre>
+     *
+     * @param index the row names
+     * @param columns the column names
+     */
+    public DataFrame(final Collection<String> index, final Collection<String> columns) {
+        this(index, columns, Collections.<List<V>>emptyList());
     }
 
     /**
@@ -183,9 +196,9 @@ implements Iterable<List<V>> {
     /**
      * Construct a new data frame using the specified data and indices.
      *
-     * @param index
-     * @param columns
-     * @param data
+     * @param index the row names
+     * @param columns the column names
+     * @param data the data
      */
     public DataFrame(final Collection<String> index, final Collection<String> columns, final List<List<V>> data) {
         final BlockManager<V> mgr = new BlockManager<>(data);
@@ -207,6 +220,20 @@ implements Iterable<List<V>> {
         this.groups = groups;
     }
 
+    /**
+     * Add a new column to the data frame.
+     *
+     * Any existing rows will have {@code null} values for the new column.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>();
+     * > df.add("value");
+     * > df.columns();
+     * [value] }</pre>
+     *
+     * @param column the new column name
+     * @return the data frame with the column added
+     */
     public DataFrame<V> add(final String column) {
         final List<V> values = new ArrayList<V>(length());
         for (int r = 0; r < values.size(); r++) {
@@ -215,6 +242,22 @@ implements Iterable<List<V>> {
         return add(column, values);
     }
 
+    /**
+     * Add a new column to the data frame containing the value provided.
+     *
+     * Any existing rows with indices greater than the size of the
+     * specified column data will have {@code null} values for the new column.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>();
+     * > df.add("value", Arrays.<Object>asList(1));
+     * > df.columns();
+     * [value] }</pre>
+     *
+     * @param column the new column names
+     * @param values the new column values
+     * @return the data frame with the column added
+     */
     public DataFrame<V> add(final String column, final List<V> values) {
         columns.add(column, data.size());
         data.add(values);
@@ -310,10 +353,37 @@ implements Iterable<List<V>> {
         return drop(todrop.toArray(new Integer[todrop.size()]));
     }
 
+    /**
+     * Append rows to the data frame.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("name", "value");
+     * > df.append(Arrays.<Object>asList("alpha", 1));
+     * > df.append(Arrays.<Object>asList("bravo", 2));
+     * > df.length();
+     * 2 }</pre>
+     *
+     * @param row the row to append
+     * @return the data frame with the new data appended
+     */
     public DataFrame<V> append(final List<V> row) {
         return append(String.valueOf(length()), row);
     }
 
+    /**
+     * Append rows indexed by the the specified name to the data frame.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("name", "value");
+     * > df.append("row1", Arrays.<Object>asList("alpha", 1));
+     * > df.append("row2", Arrays.<Object>asList("bravo", 2));
+     * > df.index();
+     * [row1, row2] }</pre>
+     *
+     * @param name the row name to add to the index
+     * @param row the row to append
+     * @return the data frame with the new data appended
+     */
     @Timed
     public DataFrame<V> append(final String name, final List<V> row) {
         final int len = length();
@@ -325,18 +395,50 @@ implements Iterable<List<V>> {
         return this;
     }
 
+    /**
+     * Return the size (number of columns) of the data frame.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("name", "value");
+     * > df.size();
+     * 2 }</pre>
+     *
+     * @return the number of columns
+     */
     public int size() {
         return data.size();
     }
 
+    /**
+     * Return the length (number of rows) of the data frame.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("name", "value");
+     * > df.append(Arrays.<Object>asList("alpha", 1));
+     * > df.append(Arrays.<Object>asList("bravo", 2));
+     * > df.append(Arrays.<Object>asList("charlie", 3));
+     * > df.length();
+     * 3 }</pre>
+     *
+     * @return the number of columns
+     */
     public int length() {
         return data.length();
     }
 
+    /**
+     * Return {@code true} if the data frame contains no data.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>();
+     * > df.isEmpty();
+     * true }</pre>
+     *
+     * @return the number of columns
+     */
     public boolean isEmpty() {
         return length() == 0;
     }
-
 
     /**
      * Return the index names for the data frame.
@@ -352,7 +454,6 @@ implements Iterable<List<V>> {
     public Set<String> index() {
         return index.names();
     }
-
 
     /**
      * Return the column names for the data frame.
@@ -383,8 +484,8 @@ implements Iterable<List<V>> {
      * > df.get("row2", "name");
      * bravo }</pre>
      *
-     * @param row the row
-     * @param col the column
+     * @param row the row name
+     * @param col the column name
      * @return the value
      */
     public V get(final String row, final String col) {
@@ -414,10 +515,42 @@ implements Iterable<List<V>> {
         return data.get(col, row);
     }
 
+    /**
+     * Set the value located by the names (row, column).
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>(
+     * >        Arrays.asList("row1", "row2"),
+     * >        Arrays.asList("col1", "col2")
+     * >     );
+     * > df.set("row1", "col2", new Integer(7));
+     * > df.col(1);
+     * [7, null] }</pre>
+     *
+     * @param row the row name
+     * @param col the column name
+     * @param value the new value
+     */
     public void set(final String row, final String col, final V value) {
         set(index.get(row), columns.get(col), value);
     }
 
+    /**
+     * Set the value located by the coordinates (row, column).
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>(
+     * >        Arrays.asList("row1", "row2"),
+     * >        Arrays.asList("col1", "col2")
+     * >     );
+     * > df.set(1, 0, new Integer(7));
+     * > df.col(0);
+     * [null, 7] }</pre>
+     *
+     * @param row the row index
+     * @param col the column index
+     * @param value the new value
+     */
     public void set(final int row, final int col, final V value) {
         data.set(value, col, row);
     }
@@ -454,10 +587,37 @@ implements Iterable<List<V>> {
             );
     }
 
+    /**
+     * Return a data frame containing the first ten rows of this data frame.
+     *
+     * <pre> {@code
+     * > DataFrame<Integer> df = new DataFrame<>("value");
+     * > for (int i = 0; i < 20; i++)
+     * >     df.append(Arrays.asList(i));
+     * > df.head()
+     * >   .col("value");
+     * [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] }</pre>
+     *
+     * @return the new data frame
+     */
     public DataFrame<V> head() {
         return head(10);
     }
 
+    /**
+     * Return a data frame containing the first {@code limit} rows of this data frame.
+     *
+     * <pre> {@code
+     * > DataFrame<Integer> df = new DataFrame<>("value");
+     * > for (int i = 0; i < 20; i++)
+     * >     df.append(Arrays.asList(i));
+     * > df.head(3)
+     * >   .col("value");
+     * [0, 1, 2] }</pre>
+     *
+     * @param limit the number of rows to include in the result
+     * @return the new data frame
+     */
     public DataFrame<V> head(final int limit) {
         final BitSet selected = new BitSet();
         selected.set(0, limit);
@@ -469,10 +629,37 @@ implements Iterable<List<V>> {
             );
     }
 
+    /**
+     * Return a data frame containing the last ten rows of this data frame.
+     *
+     * <pre> {@code
+     * > DataFrame<Integer> df = new DataFrame<>("value");
+     * > for (int i = 0; i < 20; i++)
+     * >     df.append(Arrays.asList(i));
+     * > df.tail()
+     * >   .col("value");
+     * [10, 11, 12, 13, 14, 15, 16, 17, 18, 19] }</pre>
+     *
+     * @return the new data frame
+     */
     public DataFrame<V> tail() {
         return tail(10);
     }
 
+    /**
+     * Return a data frame containing the last {@code limit} rows of this data frame.
+     *
+     * <pre> {@code
+     * > DataFrame<Integer> df = new DataFrame<>("value");
+     * > for (int i = 0; i < 20; i++)
+     * >     df.append(Arrays.asList(i));
+     * > df.tail(3)
+     * >   .col("value");
+     * [17, 18, 19] }</pre>
+     *
+     * @param limit the number of rows to include in the result
+     * @return the new data frame
+     */
     public DataFrame<V> tail(final int limit) {
         final BitSet selected = new BitSet();
         final int len = length();
@@ -485,6 +672,40 @@ implements Iterable<List<V>> {
             );
     }
 
+    /**
+     * Return the values of the data frame as a flat list.
+     *
+     * <pre> {@code
+     * > DataFrame<String> df = new DataFrame<>(
+     * >         Arrays.asList(
+     * >                 Arrays.asList("one", "two"),
+     * >                 Arrays.asList("alpha", "bravo")
+     * >             )
+     * >     );
+     * > df.flatten();
+     * [one, two, alpha, bravo] }</pre>
+     *
+     * @return the list of values
+     */
+    public List<V> flatten() {
+        return new Views.FlatView<>(this);
+    }
+
+    /**
+     * Transpose the rows and columns of the data frame.
+     *
+     * <pre> {@code
+     * > DataFrame<String> df = new DataFrame<>(
+     * >         Arrays.asList(
+     * >                 Arrays.asList("one", "two"),
+     * >                 Arrays.asList("alpha", "bravo")
+     * >             )
+     * >     );
+     * > df.transpose().flatten();
+     * [one, alpha, two, bravo] }</pre>
+     *
+     * @return a new data frame with the rows and columns transposed
+     */
     public DataFrame<V> transpose() {
         return new DataFrame<>(
                 index.names(),
@@ -493,6 +714,27 @@ implements Iterable<List<V>> {
             );
     }
 
+    /**
+     * Apply a function to each value in the data frame.
+     *
+     * <pre> {@code
+     * > DataFrame<Number> df = new DataFrame<>(
+     * >         Arrays.<List<Number>>asList(
+     * >                 Arrays.<Number>asList(1, 2),
+     * >                 Arrays.<Number>asList(3, 4)
+     * >             )
+     * >     );
+     * > df = df.transform(new Function<Number, Number>() {
+     * >         public Number apply(Number value) {
+     * >             return value.intValue() * value.intValue();
+     * >         }
+     * >     });
+     * > df.flatten();
+     * [1, 4, 9, 16] }</pre>
+     *
+     * @param transform the function to apply
+     * @return a new data frame with the function results
+     */
     public <U> DataFrame<U> transform(final Function<V, U> transform) {
         return new DataFrame<>(
                 index.names(),
