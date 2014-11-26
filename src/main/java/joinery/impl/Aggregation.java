@@ -27,16 +27,15 @@ import org.apache.commons.math3.stat.descriptive.UnivariateStatistic;
 
 public class Aggregation {
     public static class Count<V>
-    implements Aggregate<V, V> {
+    implements Aggregate<V, Number> {
         @Override
-        @SuppressWarnings("unchecked")
-        public V apply(final List<V> values) {
-            return (V)new Integer(values.size());
+        public Number apply(final List<V> values) {
+            return new Integer(values.size());
         }
     }
 
     private static abstract class AbstractStorelessStatistic<V>
-    implements Aggregate<V, Double> {
+    implements Aggregate<V, Number> {
         protected final StorelessUnivariateStatistic stat;
 
         protected AbstractStorelessStatistic(final StorelessUnivariateStatistic stat) {
@@ -44,7 +43,7 @@ public class Aggregation {
         }
 
         @Override
-        public Double apply(final List<V> values) {
+        public Number apply(final List<V> values) {
             stat.clear();
             for (final Object value : values) {
                 stat.increment(Number.class.cast(value).doubleValue());
@@ -117,7 +116,7 @@ public class Aggregation {
     }
 
     private static abstract class AbstractStatistic<V>
-    implements Aggregate<V, Double> {
+    implements Aggregate<V, Number> {
         protected final UnivariateStatistic stat;
 
         protected AbstractStatistic(final UnivariateStatistic stat) {
@@ -125,7 +124,7 @@ public class Aggregation {
         }
 
         @Override
-        public Double apply(final List<V> values) {
+        public Number apply(final List<V> values) {
             final double[] vals = new double[values.size()];
             for (int i = 0; i < vals.length; i++) {
                 vals[i] = Number.class.cast(values.get(i)).doubleValue();

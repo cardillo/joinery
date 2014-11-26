@@ -355,57 +355,57 @@ implements Iterable<List<V>> {
     }
 
     @Timed
-    public DataFrame<V> count() {
+    public DataFrame<Number> count() {
         return groups.apply(this, new Aggregation.Count<V>());
     }
 
     @Timed
-    public DataFrame<? super Double> sum() {
+    public DataFrame<Number> sum() {
         return groups.apply(this, new Aggregation.Sum<V>());
     }
 
     @Timed
-    public DataFrame<? super Double> prod() {
+    public DataFrame<Number> prod() {
         return groups.apply(this, new Aggregation.Product<V>());
     }
 
     @Timed
-    public DataFrame<? super Double> mean() {
+    public DataFrame<Number> mean() {
         return groups.apply(this, new Aggregation.Mean<V>());
     }
 
     @Timed
-    public DataFrame<? super Double> stddev() {
+    public DataFrame<Number> stddev() {
         return groups.apply(this, new Aggregation.StdDev<V>());
     }
 
     @Timed
-    public DataFrame<? super Double> var() {
+    public DataFrame<Number> var() {
         return groups.apply(this, new Aggregation.Variance<V>());
     }
 
     @Timed
-    public DataFrame<? super Double> skew() {
+    public DataFrame<Number> skew() {
         return groups.apply(this, new Aggregation.Skew<V>());
     }
 
     @Timed
-    public DataFrame<? super Double> kurt() {
+    public DataFrame<Number> kurt() {
         return groups.apply(this, new Aggregation.Kurtosis<V>());
     }
 
     @Timed
-    public DataFrame<? super Double> min() {
+    public DataFrame<Number> min() {
         return groups.apply(this, new Aggregation.Min<V>());
     }
 
     @Timed
-    public DataFrame<? super Double> max() {
+    public DataFrame<Number> max() {
         return groups.apply(this, new Aggregation.Max<V>());
     }
 
     @Timed
-    public DataFrame<? super Double> median() {
+    public DataFrame<Number> median() {
         return groups.apply(this, new Aggregation.Median<V>());
     }
 

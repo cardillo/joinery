@@ -46,7 +46,7 @@ public class DataFrameGroupByTest {
         final DataFrame<Object> df = new DataFrame<>();
         df.add("name", Arrays.<Object>asList("one", "two", "three", "four", "one", "two"));
         df.add("value", Arrays.<Object>asList(1, 2, 3, 4, 5, 6));
-        final DataFrame<Object> grouped = df.groupBy(0).count();
+        final DataFrame<Number> grouped = df.groupBy(0).count();
         assertEquals(
                 "group by result has correct number of rows",
                 4,
