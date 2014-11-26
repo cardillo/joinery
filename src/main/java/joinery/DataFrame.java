@@ -50,10 +50,61 @@ import joinery.impl.Views;
 import com.codahale.metrics.annotation.Timed;
 
 /**
- * A minimal data frame implementation in the spirit
+ * A data frame implementation in the spirit
  * of <a href="http://pandas.pydata.org">Pandas</a> or
  * <a href="http://cran.r-project.org/doc/manuals/r-release/R-intro.html#Data-frames">
  * R</a> data frames.
+ *
+ * <p>Below is a simple motivating example.  When working in Java,
+ * data operations like the following should be easy.  The code
+ * below retrieves the S&P 500 daily market data for 2008 from
+ * Yahoo! Finance and returns the average monthly close for
+ * the three top months of the year.</p>
+ *
+ * <pre> {@code
+ * > DataFrame.readCsv(String.format(
+ * >         "%s?s=%s&a=%d&b=%d&c=%d&d=%d&e=%d&f=%d",
+ * >         "http://real-chart.finance.yahoo.com/table.csv",
+ * >         "^GSPC",           // symbol for S&P 500
+ * >         0, 2, 2008,        // start date
+ * >         11, 31, 2008       // end date
+ * >     ))
+ * >     .retain("Date", "Close")
+ * >     .groupBy(new KeyFunction<Object>() {
+ * >         public Object apply(List<Object> row) {
+ * >             return Date.class.cast(row.get(0)).getMonth();
+ * >         }
+ * >     })
+ * >     .mean()
+ * >     .sortBy("Close")
+ * >     .tail(3)
+ * >     .transform(new Function<Number, Number>() {
+ * >         public Number apply(Number value) {
+ * >             return value.intValue();
+ * >         }
+ * >     })
+ * >     .col("Close");
+ * [1370, 1378, 1403] }</pre>
+ *
+ * <p>Taking each step in turn:
+ *   <ol>
+ *     <li>{@link #readCsv(String)} reads csv data from files and urls</li>
+ *     <li>{@link #retain(String...)} is used to
+ *         eliminate columns that are not needed</li>
+ *     <li>{@link #groupBy(KeyFunction)} with a key function
+ *         is used to group the rows by month</li>
+ *     <li>{@link #mean()} calculates the average close for each month</li>
+ *     <li>{@link #sortBy(String...)} orders the rows according
+ *         to average closing price</li>
+ *     <li>{@link #tail(int)} returns the last three rows
+ *         (alternatively, sort in descending order and use head)</li>
+ *     <li>{@link #transform(Function)} is used to convert the
+ *         closing prices to integers (this is purely to ease
+ *         comparisons for verifying the results</li>
+ *     <li>finally, {@link #col(String)} is used to
+ *         extract the values as a list</li>
+ *   </ol>
+ * </p>
  *
  * @param <V> the type of values in this data frame
  */
@@ -76,10 +127,33 @@ implements Iterable<List<V>> {
         this(Collections.<String>emptyList());
     }
 
+    /**
+     * Construct an empty data frame with the specified columns.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("name", "value");
+     * > df.columns();
+     * [name, value] }</pre>
+     *
+     * @param columns the data frame column names.
+     */
     public DataFrame(final String ... columns) {
         this(Arrays.asList(columns));
     }
 
+    /**
+     * Construct an empty data frame with the specified columns.
+     *
+     * <pre> {@code
+     * > List<String> columns = new ArrayList<>();
+     * > columns.add("name");
+     * > columns.add("value");
+     * > DataFrame<Object> df = new DataFrame<>(columns);
+     * > df.columns();
+     * [name, value] }</pre>
+     *
+     * @param columns the data frame column names.
+     */
     public DataFrame(final Collection<String> columns) {
         this(Collections.<String>emptyList(), columns, Collections.<List<V>>emptyList());
     }
@@ -88,20 +162,41 @@ implements Iterable<List<V>> {
         this(rows, columns, Collections.<List<V>>emptyList());
     }
 
+    /**
+     * Construct a data frame from the specified list of columns.
+     *
+     * <pre> {@code
+     * > List<List<Object>> data = Arrays.asList(
+     * >       Arrays.<Object>asList("alpha", "bravo", "charlie"),
+     * >       Arrays.<Object>asList(1, 2, 3)
+     * > );
+     * > DataFrame<Object> df = new DataFrame<>(data);
+     * > df.row(0);
+     * [alpha, 1] }</pre>
+     *
+     * @param data a list of columns containing the data elements.
+     */
     public DataFrame(final List<List<V>> data) {
         this(Collections.<String>emptyList(), Collections.<String>emptyList(), data);
     }
 
-    public DataFrame(final Collection<String> rows, final Collection<String> columns, final List<List<V>> data) {
+    /**
+     * Construct a new data frame using the specified data and indices.
+     *
+     * @param index
+     * @param columns
+     * @param data
+     */
+    public DataFrame(final Collection<String> index, final Collection<String> columns, final List<List<V>> data) {
         final BlockManager<V> mgr = new BlockManager<>(data);
         mgr.reshape(
                 Math.max(mgr.size(), columns.size()),
-                Math.max(mgr.length(), rows.size())
+                Math.max(mgr.length(), index.size())
             );
 
         this.data = mgr;
         this.columns = new Index(columns, mgr.size());
-        this.index = new Index(rows, mgr.length());
+        this.index = new Index(index, mgr.length());
         this.groups = new Grouping();
     }
 
@@ -126,6 +221,17 @@ implements Iterable<List<V>> {
         return this;
     }
 
+    /**
+     * Create a new data frame by leaving out the specified columns.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("name", "value", "category");
+     * > df.drop("category").columns();
+     * [name, value] }</pre>
+     *
+     * @param cols the names of columns to be removed
+     * @return a shallow copy of the data frame with the columns removed
+     */
     public DataFrame<V> drop(final String ... cols) {
         final Integer[] indices = new Integer[cols.length];
         for (int i = 0; i < cols.length; i++) {
@@ -134,6 +240,17 @@ implements Iterable<List<V>> {
         return drop(indices);
     }
 
+    /**
+     * Create a new data frame by leaving out the specified columns.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("name", "value", "category");
+     * > df.drop(2).columns();
+     * [name, value] }</pre>
+     *
+     * @param cols the indices of the columns to be removed
+     * @return a shallow copy of the data frame with the columns removed
+     */
     public DataFrame<V> drop(final Integer ... cols) {
         final List<String> columns = new ArrayList<String>(this.columns.names());
         final List<String> rows = new ArrayList<String>(this.index.names());
@@ -149,6 +266,17 @@ implements Iterable<List<V>> {
         return new DataFrame<V>(rows, keepCols, keep);
     }
 
+    /**
+     * Create a new data frame containing only the specified columns.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("name", "value", "category");
+     * > df.retain("name", "category").columns();
+     * [name, category] }</pre>
+     *
+     * @param cols the columns to include in the new data frame
+     * @return a new data frame containing only the specified columns
+     */
     public DataFrame<V> retain(final String ... cols) {
         final Set<String> keep = new HashSet<String>(Arrays.asList(cols));
         final Set<String> todrop = new HashSet<String>();
@@ -160,6 +288,17 @@ implements Iterable<List<V>> {
         return drop(todrop.toArray(new String[todrop.size()]));
     }
 
+    /**
+     * Create a new data frame containing only the specified columns.
+     *
+     * <pre> {@code
+     *  DataFrame<Object> df = new DataFrame<>("name", "value", "category");
+     *  df.retain(0, 2).columns();
+     * [name, category] }</pre>
+     *
+     * @param cols the columns to include in the new data frame
+     * @return a new data frame containing only the specified columns
+     */
     public DataFrame<V> retain(final Integer ... cols) {
         final Set<Integer> keep = new HashSet<Integer>(Arrays.asList(cols));
         final Set<Integer> todrop = new HashSet<Integer>();
@@ -198,18 +337,79 @@ implements Iterable<List<V>> {
         return length() == 0;
     }
 
+
+    /**
+     * Return the index names for the data frame.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("name", "value");
+     * > df.append("row1", Arrays.<Object>asList("one", 1));
+     * > df.index();
+     * [row1] }</pre>
+     *
+     * @return the index names
+     */
     public Set<String> index() {
         return index.names();
     }
 
+
+    /**
+     * Return the column names for the data frame.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("name", "value");
+     * > df.columns();
+     * [name, value] }</pre>
+     *
+     * @return the column names
+     */
     public Set<String> columns() {
         return columns.names();
     }
 
+    /**
+     * Return the value located by the (row, column) names.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<Object>(
+     * >     Arrays.asList("row1", "row2", "row3"),
+     * >     Arrays.asList("name", "value"),
+     * >     Arrays.asList(
+     * >         Arrays.<Object>asList("alpha", "bravo", "charlie"),
+     * >         Arrays.<Object>asList(10, 20, 30)
+     * >     )
+     * > );
+     * > df.get("row2", "name");
+     * bravo }</pre>
+     *
+     * @param row the row
+     * @param column the column
+     * @return the value
+     */
     public V get(final String row, final String col) {
         return get(index.get(row), columns.get(col));
     }
 
+    /**
+     * Return the value located by the (row, column) coordinates.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<Object>(
+     * >     Collections.<String>emptyList(),
+     * >     Arrays.asList("name", "value"),
+     * >     Arrays.asList(
+     * >         Arrays.<Object>asList("alpha", "bravo", "charlie"),
+     * >         Arrays.<Object>asList(10, 20, 30)
+     * >     )
+     * > );
+     * > df.get(1, 0);
+     * bravo }</pre>
+     *
+     * @param row the row index
+     * @param column the column index
+     * @return the value
+     */
     public V get(final int row, final int col) {
         return data.get(col, row);
     }
@@ -238,12 +438,49 @@ implements Iterable<List<V>> {
         return new Views.SeriesListView<>(this, r, false);
     }
 
+    /**
+     * Select a subset of the data frame using a predicate function.
+     *
+     * @param predicate a function returning true for rows to be included in the subset
+     * @return a subset of the data frame
+     */
     public DataFrame<V> select(final Predicate<V> predicate) {
         final BitSet selected = Selection.select(this, predicate);
         return new DataFrame<>(
                 Selection.select(index, selected),
                 columns,
                 Selection.select(data, selected),
+                new Grouping()
+            );
+    }
+
+    public DataFrame<V> head() {
+        return head(10);
+    }
+
+    public DataFrame<V> head(final int limit) {
+        final BitSet selected = new BitSet();
+        selected.set(0, limit);
+        return new DataFrame<>(
+                Selection.select(index, selected),
+                columns,
+                Selection.select(data,  selected),
+                new Grouping()
+            );
+    }
+
+    public DataFrame<V> tail() {
+        return tail(10);
+    }
+
+    public DataFrame<V> tail(final int limit) {
+        final BitSet selected = new BitSet();
+        final int len = length();
+        selected.set(len - limit, len);
+        return new DataFrame<>(
+                Selection.select(index, selected),
+                columns,
+                Selection.select(data,  selected),
                 new Grouping()
             );
     }
@@ -264,21 +501,85 @@ implements Iterable<List<V>> {
             );
     }
 
+    /**
+     * Attempt to infer better types for object columns.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("name", "value");
+     * > df.append(Arrays.<Object>asList("one", "1"));
+     * > df.convert();
+     * > df.types();
+     * [class java.lang.String, class java.lang.Long] }</pre>
+     *
+     * @return the data frame with the converted values
+     */
     public DataFrame<V> convert() {
         Conversion.convert(this);
         return this;
     }
 
+    /**
+     * Convert columns based on the requested types.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("a", "b", "c");
+     * > df.append(Arrays.<Object>asList("one", 1, 1.0));
+     * > df.append(Arrays.<Object>asList("two", 2, 2.0));
+     * > df.convert(
+     * >     null,         // leave column "a" as is
+     * >     Long.class,   // convert column "b" to Long
+     * >     Number.class  // convert column "c" to Double
+     * > );
+     * > df.types();
+     * [class java.lang.String, class java.lang.Long, class java.lang.Double] }</pre>
+     *
+     * @param columnTypes
+     * @return the data frame with the converted values
+     */
     @SafeVarargs
     public final DataFrame<V> convert(final Class<? extends V> ... columnTypes) {
         Conversion.convert(this, columnTypes);
         return this;
     }
 
+    /**
+     * Create a new data frame containing boolean values such that
+     * {@code null} object references in the original data frame
+     * yield {@code true} and valid references yield {@code false}.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<Object>(
+     * >     Arrays.asList(
+     * >         Arrays.<Object>asList("alpha", "bravo", null),
+     * >         Arrays.<Object>asList(null, 2, 3)
+     * >     )
+     * > );
+     * > df.isnull().row(0);
+     * [false, true] }</pre>
+     *
+     * @return the new boolean data frame
+     */
     public DataFrame<Boolean> isnull() {
         return Conversion.isnull(this);
     }
 
+    /**
+     * Create a new data frame containing boolean values such that
+     * valid object references in the original data frame yield {@code true}
+     * and {@code null} references yield {@code false}.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>(
+     * >     Arrays.asList(
+     * >         Arrays.<Object>asList("alpha", "bravo", null),
+     * >         Arrays.<Object>asList(null, 2, 3)
+     * >     )
+     * > );
+     * > df.notnull().row(0);
+     * [true, false] }</pre>
+     *
+     * @return the new boolean data frame
+     */
     public DataFrame<Boolean> notnull() {
         return Conversion.notnull(this);
     }
@@ -307,6 +608,12 @@ implements Iterable<List<V>> {
         return a;
     }
 
+    /**
+     * Group the data frame rows by the specified column names.
+     *
+     * @param cols the column names
+     * @return the grouped data frame
+     */
     @Timed
     public DataFrame<V> groupBy(final String ... colnames) {
         final int[] indices = new int[colnames.length];
@@ -316,6 +623,12 @@ implements Iterable<List<V>> {
         return groupBy(indices);
     }
 
+    /**
+     * Group the data frame rows by the specified columns.
+     *
+     * @param cols the column indices
+     * @return the grouped data frame
+     */
     @Timed
     public DataFrame<V> groupBy(final int ... cols) {
         return new DataFrame<>(
@@ -326,6 +639,12 @@ implements Iterable<List<V>> {
             );
     }
 
+    /**
+     * Group the data frame rows using the specified key function.
+     *
+     * @param function the function to reduce rows to grouping keys
+     * @return the grouped data frame
+     */
     @Timed
     public DataFrame<V> groupBy(final KeyFunction<V> function) {
         return new DataFrame<>(
@@ -336,6 +655,12 @@ implements Iterable<List<V>> {
             );
     }
 
+    /**
+     * Return a map of group names to data frame for grouped
+     * data frames.
+     *
+     * @return a map of group names to data frames
+     */
     public Map<Object, DataFrame<V>> groups() {
         final Map<Object, DataFrame<V>> grouped = new LinkedHashMap<>();
         for (final Map.Entry<Object, BitSet> entry : groups) {
@@ -359,6 +684,12 @@ implements Iterable<List<V>> {
         return groups.apply(this, new Aggregation.Count<V>());
     }
 
+    /**
+     * Compute the sum of the numeric columns for each group
+     * or the entire data frame if the data is not grouped.
+     *
+     * @return the new data frame
+     */
     @Timed
     public DataFrame<Number> sum() {
         return groups.apply(this, new Aggregation.Sum<V>());
@@ -369,6 +700,21 @@ implements Iterable<List<V>> {
         return groups.apply(this, new Aggregation.Product<V>());
     }
 
+    /**
+     * Compute the mean of the numeric columns for each group
+     * or the entire data frame if the data is not grouped.
+     *
+     * <pre> {@code
+     * > DataFrame<Integer> df = new DataFrame<>("value");
+     * > df.append("one", Arrays.asList(1));
+     * > df.append("two", Arrays.asList(5));
+     * > df.append("three", Arrays.asList(3));
+     * > df.append("four",  Arrays.asList(7));
+     * > df.mean().col(0);
+     * [4.0] }</pre>
+     *
+     * @return the new data frame
+     */
     @Timed
     public DataFrame<Number> mean() {
         return groups.apply(this, new Aggregation.Mean<V>());
@@ -458,22 +804,71 @@ implements Iterable<List<V>> {
         return sorted;
     }
 
+    /**
+     * Return the types for each of the data frame columns.
+     *
+     * @return the list of column types
+     */
     public List<Class<?>> types() {
         return Inspection.types(this);
     }
 
-    public DataFrame<V> numeric() {
+    /**
+     * Return a data frame containing only columns with numeric data.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("name", "value");
+     * > df.append(Arrays.<Object>asList("one", 1));
+     * > df.append(Arrays.<Object>asList("two", 2));
+     * > df.numeric().columns();
+     * [value] }</pre>
+     *
+     * @return a data frame containing only the numeric columns
+     */
+    public DataFrame<Number> numeric() {
         final BitSet numeric = Inspection.numeric(this);
         final Set<String> keep = Selection.select(columns, numeric).names();
-        return retain(keep.toArray(new String[keep.size()]));
+        return retain(keep.toArray(new String[keep.size()]))
+                .cast(Number.class);
     }
 
+    /**
+     * Return a data frame containing only columns with non-numeric data.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("name", "value");
+     * > df.append(Arrays.<Object>asList("one", 1));
+     * > df.append(Arrays.<Object>asList("two", 2));
+     * > df.nonnumeric().columns();
+     * [name] }</pre>
+     *
+     * @return a data frame containing only the non-numeric columns
+     */
     public DataFrame<V> nonnumeric() {
         final BitSet nonnumeric = Inspection.nonnumeric(this);
         final Set<String> keep = Selection.select(columns, nonnumeric).names();
         return retain(keep.toArray(new String[keep.size()]));
     }
 
+    /**
+     * Return an iterator over the rows of the data frame.  Also used
+     * implicitly with {@code foreach} loops.
+     *
+     * <pre> {@code
+     * > DataFrame<Integer> df = new DataFrame<>(
+     * >         Arrays.asList(
+     * >             Arrays.asList(1, 2),
+     * >             Arrays.asList(3, 4)
+     * >         )
+     * >     );
+     * > List<Integer> results = new ArrayList<>();
+     * > for (List<Integer> row : df)
+     * >     results.add(row.get(0));
+     * > results;
+     * [1, 2] }</pre>
+     *
+     * @return an iterator over the rows of the data frame.
+     */
     @Override
     public ListIterator<List<V>> iterator() {
         return iterrows();
@@ -495,11 +890,36 @@ implements Iterable<List<V>> {
         return new Views.FlatView<>(this).listIterator();
     }
 
+    /**
+     * Cast this data frame to the specified type.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("name", "value");
+     * > df.append(Arrays.<Object>asList("one", "1"));
+     * > DataFrame<String> dfs = df.cast(String.class);
+     * > dfs.get(0, 0).getClass().getName();
+     * java.lang.String }</pre>
+     *
+     * @param cls
+     * @return the data frame cast to the specified type
+     */
     @SuppressWarnings("unchecked")
     public <T> DataFrame<T> cast(final Class<T> cls) {
         return (DataFrame<T>)this;
     }
 
+    /**
+     * Return a map of index names to rows.
+     *
+     * <pre> {@code
+     * > DataFrame<Integer> df = new DataFrame<>("value");
+     * > df.append("alpha", Arrays.asList(1));
+     * > df.append("bravo", Arrays.asList(2));
+     * > df.map();
+     * {alpha=[1], bravo=[2]}}</pre>
+     *
+     * @return a map of index names to rows.
+     */
     public Map<String, List<V>> map() {
         final Map<String, List<V>> m = new LinkedHashMap<String, List<V>>();
 
@@ -591,16 +1011,68 @@ implements Iterable<List<V>> {
         return toString(10);
     }
 
+    /**
+     * A function that is applied to objects (rows or values)
+     * in a {@linkplain DataFrame data frame}.
+     *
+     * <p>Implementors define {@link #apply(Object)} to perform
+     * the desired calculation and return the result.</p>
+     *
+     * @param <I> the type of the input values
+     * @param <O> the type of the output values
+     * @see DataFrame#transform(Function)
+     * @see DataFrame#apply(Aggregate)
+     */
     public interface Function<I, O> {
+        /**
+         * Perform computation on the specified
+         * input value and return the result.
+         *
+         * @param value the input value
+         * @return the result
+         */
         O apply(I value);
     }
 
+    /**
+     * A function that converts {@linkplain DataFrame data frame}
+     * rows to index or group keys.
+     *
+     * <p>Implementors define {@link #apply(Object)} to accept
+     * a data frame row as input and return a key value, most
+     * commonly used by {@link DataFrame#groupBy(KeyFunction)}.</p>
+     *
+     * @param <T> the type of the input values
+     * @see DataFrame#groupBy(KeyFunction)
+     */
     public interface KeyFunction<I>
     extends Function<List<I>, Object> { }
 
+    /**
+     * A function that converts lists of {@linkplain DataFrame data frame}
+     * values to aggregate results.
+     *
+     * <p>Implementors define {@link #apply(Object)} to accept
+     * a list of data frame values as input and return an aggregate
+     * result.</p>
+     *
+     * @param <T> the type of the input values
+     * @param <U> the type of the result
+     * @see DataFrame#apply(Aggregate)
+     */
     public interface Aggregate<I, O>
     extends Function<List<I>, O> { }
 
+    /**
+     * An interface used to filter a {@linkplain DataFrame data frame}.
+     *
+     * <p>Implementors define {@link #apply(Object)} to
+     * return {@code true} for rows that should be included
+     * in the filtered data frame.</p>
+     *
+     * @param <T> the type of the input values
+     * @see DataFrame#select(Predicate)
+     */
     public interface Predicate<I>
     extends Function<List<I>, Boolean> { }
 }
