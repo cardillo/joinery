@@ -64,6 +64,14 @@ implements Iterable<List<V>> {
     private final BlockManager<V> data;
     private final Grouping groups;
 
+    /**
+     * Construct an empty data frame.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>();
+     * > df.isEmpty();
+     * true }</pre>
+     */
     public DataFrame() {
         this(Collections.<String>emptyList());
     }
@@ -184,6 +192,10 @@ implements Iterable<List<V>> {
 
     public int length() {
         return data.length();
+    }
+
+    public boolean isEmpty() {
+        return length() == 0;
     }
 
     public Set<String> index() {
