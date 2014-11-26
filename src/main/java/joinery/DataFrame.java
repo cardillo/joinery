@@ -260,7 +260,7 @@ implements Iterable<List<V>> {
         return new DataFrame<>(
                 index.names(),
                 columns.names(),
-                new Views.TransformedView<V, U>(this, transform, true)
+                new Views.TransformedView<V, U>(this, transform, false)
             );
     }
 

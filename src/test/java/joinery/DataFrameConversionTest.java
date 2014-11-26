@@ -108,7 +108,7 @@ public class DataFrameConversionTest {
         };
         assertArrayEquals(
                 expected,
-                nulls.transpose().toArray()
+                nulls.toArray()
             );
     }
 
@@ -125,7 +125,7 @@ public class DataFrameConversionTest {
         };
         assertArrayEquals(
                 expected,
-                nonnulls.transpose().toArray()
+                nonnulls.toArray()
             );
     }
 
