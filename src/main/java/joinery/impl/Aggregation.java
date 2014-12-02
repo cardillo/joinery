@@ -18,7 +18,9 @@
 
 package joinery.impl;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import joinery.DataFrame.Aggregate;
 
@@ -31,6 +33,18 @@ public class Aggregation {
         @Override
         public Number apply(final List<V> values) {
             return new Integer(values.size());
+        }
+    }
+
+    public static class Unique<V>
+    implements Aggregate<V, V> {
+        @Override
+        public V apply(final List<V> values) {
+            final Set<V> unique = new HashSet<>(values);
+            if (unique.size() > 1) {
+                throw new IllegalArgumentException("values not unique: " + unique);
+            }
+            return values.get(0);
         }
     }
 
