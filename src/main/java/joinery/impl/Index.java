@@ -18,6 +18,7 @@
 
 package joinery.impl;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -70,10 +71,14 @@ public class Index {
     }
 
     public int[] indices(final String[] names) {
-        final int size = names.length;
+        return indices(Arrays.asList(names));
+    }
+
+    public int[] indices(final List<String> names) {
+        final int size = names.size();
         final int[] indices = new int[size];
         for (int i = 0; i < size; i++) {
-            indices[i] = get(names[i]);
+            indices[i] = get(names.get(i));
         }
         return indices;
     }

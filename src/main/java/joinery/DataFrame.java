@@ -43,6 +43,7 @@ import joinery.impl.Conversion;
 import joinery.impl.Grouping;
 import joinery.impl.Index;
 import joinery.impl.Inspection;
+import joinery.impl.Pivoting;
 import joinery.impl.Selection;
 import joinery.impl.Serialization;
 import joinery.impl.Views;
@@ -994,6 +995,28 @@ implements Iterable<List<V>> {
     @Timed
     public DataFrame<Number> median() {
         return groups.apply(this, new Aggregation.Median<V>());
+    }
+
+    public DataFrame<V> pivot(final String row, final String col, final String ... values) {
+        return pivot(Collections.singletonList(row), Collections.singletonList(col), Arrays.asList(values));
+    }
+
+    public DataFrame<V> pivot(final List<String> rows, final List<String> cols, final List<String> values) {
+        return pivot(columns.indices(rows), columns.indices(cols), columns.indices(values));
+    }
+
+    public DataFrame<V> pivot(final int row, final int col, final int ... values) {
+        return pivot(new int[] { row }, new int[] { col }, values);
+    }
+
+    @Timed
+    public DataFrame<V> pivot(final int[] rows, final int[] cols, final int[] values) {
+        return Pivoting.pivot(this, rows, cols, values);
+    }
+
+    @Timed
+    public <U> DataFrame<U> pivot(final KeyFunction<V> rows, final KeyFunction<V> cols, final Map<Integer, Aggregate<V,U>> values) {
+        return Pivoting.pivot(this, rows, cols, values);
     }
 
     public DataFrame<V> sortBy(final String ... cols) {
