@@ -708,8 +708,8 @@ implements Iterable<List<V>> {
      */
     public DataFrame<V> transpose() {
         return new DataFrame<>(
-                index.names(),
                 columns.names(),
+                index.names(),
                 new Views.ListView<>(this, true)
             );
     }
