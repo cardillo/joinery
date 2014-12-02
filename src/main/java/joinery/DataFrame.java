@@ -292,15 +292,15 @@ implements Iterable<List<V>> {
      * @return a shallow copy of the data frame with the columns removed
      */
     public DataFrame<V> drop(final int ... cols) {
-        List<String> colnames = new ArrayList<>(columns.names());
-        List<String> todrop = new ArrayList<>(cols.length);
-        for (int col : cols) {
+        final List<String> colnames = new ArrayList<>(columns.names());
+        final List<String> todrop = new ArrayList<>(cols.length);
+        for (final int col : cols) {
             todrop.add(colnames.get(col));
         }
         colnames.removeAll(todrop);
 
-        List<List<V>> keep = new ArrayList<>(colnames.size());
-        for (String col : colnames) {
+        final List<List<V>> keep = new ArrayList<>(colnames.size());
+        for (final String col : colnames) {
             keep.add(col(col));
         }
 
@@ -346,8 +346,8 @@ implements Iterable<List<V>> {
      */
     public DataFrame<V> retain(final int ... cols) {
         final Set<Integer> keep = new HashSet<Integer>();
-        for (int c : cols) keep.add(c);
-        int[] todrop = new int[size() - keep.size()];
+        for (final int c : cols) keep.add(c);
+        final int[] todrop = new int[size() - keep.size()];
         int i = 0;
         for (final Integer col : cols) {
             if (!keep.contains(col)) {
@@ -559,24 +559,109 @@ implements Iterable<List<V>> {
         data.set(value, col, row);
     }
 
+    /**
+     * Return a data frame column as a list.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>(
+     * >         Collections.<String>emptyList(),
+     * >         Arrays.asList("name", "value"),
+     * >         Arrays.asList(
+     * >             Arrays.<Object>asList("alpha", "bravo", "charlie"),
+     * >             Arrays.<Object>asList(1, 2, 3)
+     * >         )
+     * >     );
+     * > df.col("value");
+     * [1, 2, 3] }</pre>
+     *
+     * @param column the column name
+     * @return the list of values
+     */
     public List<V> col(final String column) {
         return col(columns.get(column));
     }
 
-    public List<V> col(final int c) {
-        return new Views.SeriesListView<>(this, c, true);
+    /**
+     * Return a data frame column as a list.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>(
+     * >         Collections.<String>emptyList(),
+     * >         Arrays.asList("name", "value"),
+     * >         Arrays.asList(
+     * >             Arrays.<Object>asList("alpha", "bravo", "charlie"),
+     * >             Arrays.<Object>asList(1, 2, 3)
+     * >         )
+     * >     );
+     * > df.col(1);
+     * [1, 2, 3] }</pre>
+     *
+     * @param column the column index
+     * @return the list of values
+     */
+    public List<V> col(final int column) {
+        return new Views.SeriesListView<>(this, column, true);
     }
 
+    /**
+     * Return a data frame row as a list.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>(
+     * >         Arrays.asList("row1", "row2", "row3"),
+     * >         Collections.<String>emptyList(),
+     * >         Arrays.asList(
+     * >             Arrays.<Object>asList("alpha", "bravo", "charlie"),
+     * >             Arrays.<Object>asList(1, 2, 3)
+     * >         )
+     * >     );
+     * > df.row("row2");
+     * [bravo, 2] }</pre>
+     *
+     * @param row the row name
+     * @return the list of values
+     */
     public List<V> row(final String row) {
         return row(index.get(row));
     }
 
-    public List<V> row(final int r) {
-        return new Views.SeriesListView<>(this, r, false);
+    /**
+     * Return a data frame row as a list.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>(
+     * >         Collections.<String>emptyList(),
+     * >         Collections.<String>emptyList(),
+     * >         Arrays.asList(
+     * >             Arrays.<Object>asList("alpha", "bravo", "charlie"),
+     * >             Arrays.<Object>asList(1, 2, 3)
+     * >         )
+     * >     );
+     * > df.row(1);
+     * [bravo, 2] }</pre>
+     *
+     * @param row the row index
+     * @return the list of values
+     */
+    public List<V> row(final int row) {
+        return new Views.SeriesListView<>(this, row, false);
     }
 
     /**
      * Select a subset of the data frame using a predicate function.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("name", "value");
+     * > for (int i = 0; i < 10; i++)
+     * >     df.append(Arrays.<Object>asList("name" + i, i));
+     * > df.select(new Predicate<Object>() {
+     * >         @Override
+     * >         public Boolean apply(List<Object> values) {
+     * >             return Integer.class.cast(values.get(1)).intValue() % 2 == 0;
+     * >         }
+     * >     })
+     * >   .col(1);
+     * [0, 2, 4, 6, 8] } </pre>
      *
      * @param predicate a function returning true for rows to be included in the subset
      * @return a subset of the data frame
@@ -750,12 +835,28 @@ implements Iterable<List<V>> {
     /**
      * Attempt to infer better types for object columns.
      *
+     * <p>The following conversions are performed where applicable:
+     * <ul>
+     *     <li>Floating point numbers are converted to {@code Double} values</li>
+     *     <li>Whole numbers are converted to {@code Long} values</li>
+     *     <li>True, false, yes, and no are converted to {@code Boolean} values</li>
+     *     <li>Date strings in the following formats are converted to {@code Date} values:<br>
+     *         {@literal 2000-01-01T00:00:00+1, 2000-01-01T00:00:00EST, 2000-01-01}</li>
+     *     <li>Time strings in the following formats are converted to {@code Date} values:<br>
+     *         {@literal 2000/01/01, 1/01/2000, 12:01:01 AM, 23:01:01, 12:01 AM, 23:01}</li>
+     *     </li>
+     *   </ul>
+     * </p>
+     *
+     * <p>Note, the conversion process replaces existing values
+     * with values of the converted type.</p>
+     *
      * <pre> {@code
-     * > DataFrame<Object> df = new DataFrame<>("name", "value");
-     * > df.append(Arrays.<Object>asList("one", "1"));
+     * > DataFrame<Object> df = new DataFrame<>("name", "value", "date");
+     * > df.append(Arrays.<Object>asList("one", "1", new Date()));
      * > df.convert();
      * > df.types();
-     * [class java.lang.String, class java.lang.Long] }</pre>
+     * [class java.lang.String, class java.lang.Long, class java.util.Date] }</pre>
      *
      * @return the data frame with the converted values
      */
@@ -766,6 +867,9 @@ implements Iterable<List<V>> {
 
     /**
      * Convert columns based on the requested types.
+     *
+     * <p>Note, the conversion process replaces existing values
+     * with values of the converted type.</p>
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>("a", "b", "c");
