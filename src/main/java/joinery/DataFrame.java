@@ -276,11 +276,7 @@ implements Iterable<List<V>> {
      * @return a shallow copy of the data frame with the columns removed
      */
     public DataFrame<V> drop(final String ... cols) {
-        final Integer[] indices = new Integer[cols.length];
-        for (int i = 0; i < cols.length; i++) {
-            indices[i] = columns.get(cols[i]);
-        }
-        return drop(indices);
+        return drop(columns.indices(cols));
     }
 
     /**
@@ -294,19 +290,24 @@ implements Iterable<List<V>> {
      * @param cols the indices of the columns to be removed
      * @return a shallow copy of the data frame with the columns removed
      */
-    public DataFrame<V> drop(final Integer ... cols) {
-        final List<String> columns = new ArrayList<String>(this.columns.names());
-        final List<String> rows = new ArrayList<String>(this.index.names());
-        final Set<Integer> removeCols = new HashSet<Integer>(Arrays.asList(cols));
-        final List<List<V>> keep = new ArrayList<List<V>>(data.size() - cols.length);
-        final List<String> keepCols = new ArrayList<String>(data.size() - cols.length);
-        for (int i = 0; i < data.size(); i++) {
-            if (!removeCols.contains(i)) {
-                keep.add(col(i));
-                keepCols.add(columns.get(i));
-            }
+    public DataFrame<V> drop(final int ... cols) {
+        List<String> colnames = new ArrayList<>(columns.names());
+        List<String> todrop = new ArrayList<>(cols.length);
+        for (int col : cols) {
+            todrop.add(colnames.get(col));
         }
-        return new DataFrame<V>(rows, keepCols, keep);
+        colnames.removeAll(todrop);
+
+        List<List<V>> keep = new ArrayList<>(colnames.size());
+        for (String col : colnames) {
+            keep.add(col(col));
+        }
+
+        return new DataFrame<>(
+                index.names(),
+                colnames,
+                keep
+            );
     }
 
     /**
@@ -342,15 +343,17 @@ implements Iterable<List<V>> {
      * @param cols the columns to include in the new data frame
      * @return a new data frame containing only the specified columns
      */
-    public DataFrame<V> retain(final Integer ... cols) {
-        final Set<Integer> keep = new HashSet<Integer>(Arrays.asList(cols));
-        final Set<Integer> todrop = new HashSet<Integer>();
+    public DataFrame<V> retain(final int ... cols) {
+        final Set<Integer> keep = new HashSet<Integer>();
+        for (int c : cols) keep.add(c);
+        int[] todrop = new int[size() - keep.size()];
+        int i = 0;
         for (final Integer col : cols) {
             if (!keep.contains(col)) {
-                todrop.add(col);
+                todrop[i++] = col;
             }
         }
-        return drop(todrop.toArray(new Integer[todrop.size()]));
+        return drop(todrop);
     }
 
     /**
@@ -858,11 +861,7 @@ implements Iterable<List<V>> {
      */
     @Timed
     public DataFrame<V> groupBy(final String ... cols) {
-        final int[] indices = new int[cols.length];
-        for (int i = 0; i < cols.length; i++) {
-            indices[i] = columns.get(cols[i]);
-        }
-        return groupBy(indices);
+        return groupBy(columns.indices(cols));
     }
 
     /**
@@ -998,19 +997,11 @@ implements Iterable<List<V>> {
     }
 
     public DataFrame<V> sortBy(final String ... cols) {
-        final Integer[] indices = new Integer[cols.length];
-        for (int i = 0; i < cols.length; i++) {
-            if (cols[i].startsWith("-")) {
-                indices[i] = -columns.get(cols[i].substring(1));
-            } else {
-                indices[i] = columns.get(cols[i]);
-            }
-        }
-        return sortBy(indices);
+        return sortBy(columns.indices(cols));
     }
 
     @Timed
-    public DataFrame<V> sortBy(final Integer ... cols) {
+    public DataFrame<V> sortBy(final int ... cols) {
         final DataFrame<V> sorted = new DataFrame<V>(columns.names());
         final Comparator<Integer> cmp = new Comparator<Integer>() {
             @Override

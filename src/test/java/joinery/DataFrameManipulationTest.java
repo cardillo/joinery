@@ -54,7 +54,7 @@ public class DataFrameManipulationTest {
     @Test
     public final void testDrop() {
         df.add("test1").add("test2");
-        DataFrame<Object> newDf = df.drop("test1").drop("does-not-exist");
+        final DataFrame<Object> newDf = df.drop("test1");
         assertEquals(
                 "original size is equal to number of columns",
                 2,
@@ -75,6 +75,11 @@ public class DataFrameManipulationTest {
                 new Object[] { "test2" },
                 newDf.columns().toArray()
             );
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public final void testDropInvalid() {
+        df.drop("does-not-exist");
     }
 
     @Test

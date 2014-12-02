@@ -69,11 +69,11 @@ public class Index {
         return index.keySet();
     }
 
-    public int[] indices(final List<String> names) {
-        final int size = names.size();
+    public int[] indices(final String[] names) {
+        final int size = names.length;
         final int[] indices = new int[size];
         for (int i = 0; i < size; i++) {
-            indices[i] = get(names.get(i));
+            indices[i] = get(names[i]);
         }
         return indices;
     }
