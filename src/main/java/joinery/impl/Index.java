@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -48,7 +49,7 @@ public class Index {
 
     public void add(final String name, final Integer value) {
         if (index.put(name, value) != null) {
-            throw new IllegalArgumentException("duplicate name " + name +  " in index");
+            throw new IllegalArgumentException("duplicate name '" + name +  "' in index");
         }
     }
 
@@ -57,10 +58,23 @@ public class Index {
     }
 
     public Integer get(final String name) {
-        return index.get(name);
+        final Integer i = index.get(name);
+        if (i == null) {
+            throw new IllegalArgumentException("name '" + name + "' not in index");
+        }
+        return i;
     }
 
     public Set<String> names() {
         return index.keySet();
+    }
+
+    public int[] indices(final List<String> names) {
+        final int size = names.size();
+        final int[] indices = new int[size];
+        for (int i = 0; i < size; i++) {
+            indices[i] = get(names.get(i));
+        }
+        return indices;
     }
 }
