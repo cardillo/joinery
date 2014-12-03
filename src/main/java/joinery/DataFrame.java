@@ -1021,6 +1021,13 @@ implements Iterable<List<V>> {
         return grouped;
     }
 
+    /**
+     * Apply an aggregate function to each group or the entire
+     * data frame if the data is not grouped.
+     *
+     * @param function the aggregate function
+     * @return the new data frame
+     */
     public <U> DataFrame<U> apply(final Aggregate<V, U> function) {
         return groups.apply(this, function);
     }
@@ -1034,6 +1041,20 @@ implements Iterable<List<V>> {
      * Compute the sum of the numeric columns for each group
      * or the entire data frame if the data is not grouped.
      *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>(
+     * >         Collections.<String>emptyList(),
+     * >         Arrays.asList("name", "value"),
+     * >         Arrays.asList(
+     * >                 Arrays.<Object>asList("alpha", "alpha", "alpha", "bravo", "bravo"),
+     * >                 Arrays.<Object>asList(1, 2, 3, 4, 5)
+     * >             )
+     * >     );
+     * > df.groupBy("name")
+     * >   .sum()
+     * >   .col("value");
+     * [6.0, 9.0]} </pre>
+     *
      * @return the new data frame
      */
     @Timed
@@ -1041,6 +1062,26 @@ implements Iterable<List<V>> {
         return groups.apply(this, new Aggregation.Sum<V>());
     }
 
+    /**
+     * Compute the product of the numeric columns for each group
+     * or the entire data frame if the data is not grouped.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>(
+     * >         Collections.<String>emptyList(),
+     * >         Arrays.asList("name", "value"),
+     * >         Arrays.asList(
+     * >                 Arrays.<Object>asList("alpha", "alpha", "alpha", "bravo", "bravo"),
+     * >                 Arrays.<Object>asList(1, 2, 3, 4, 5)
+     * >             )
+     * >     );
+     * > df.groupBy("name")
+     * >   .prod()
+     * >   .col("value");
+     * [6.0, 20.0]} </pre>
+     *
+     * @return the new data frame
+     */
     @Timed
     public DataFrame<Number> prod() {
         return groups.apply(this, new Aggregation.Product<V>());
@@ -1066,6 +1107,26 @@ implements Iterable<List<V>> {
         return groups.apply(this, new Aggregation.Mean<V>());
     }
 
+    /**
+     * Compute the standard deviation of the numeric columns for each group
+     * or the entire data frame if the data is not grouped.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>(
+     * >         Collections.<String>emptyList(),
+     * >         Arrays.asList("name", "value"),
+     * >         Arrays.asList(
+     * >                 Arrays.<Object>asList("alpha", "alpha", "alpha", "bravo", "bravo", "bravo"),
+     * >                 Arrays.<Object>asList(1, 2, 3, 4, 5, 6)
+     * >             )
+     * >     );
+     * > df.groupBy("name")
+     * >   .stddev()
+     * >   .col("value");
+     * [1.0, 1.0]} </pre>
+     *
+     * @return the new data frame
+     */
     @Timed
     public DataFrame<Number> stddev() {
         return groups.apply(this, new Aggregation.StdDev<V>());
