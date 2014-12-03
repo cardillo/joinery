@@ -835,6 +835,16 @@ implements Iterable<List<V>> {
             );
     }
 
+    public <U> DataFrame<U> transform(final RowFunction<V, U> transform) {
+        final DataFrame<U> transformed = new DataFrame<>(columns.names());
+        for (final List<V> row : this) {
+            for (final List<U> trans : transform.apply(row)) {
+                transformed.append(trans);
+            }
+        }
+        return transformed;
+    }
+
     /**
      * Attempt to infer better types for object columns.
      *
@@ -1438,6 +1448,10 @@ implements Iterable<List<V>> {
          * @return the result
          */
         O apply(I value);
+    }
+
+    public interface RowFunction<I, O> {
+        List<List<O>> apply(List<I> values);
     }
 
     /**
