@@ -28,7 +28,6 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -46,6 +45,7 @@ import joinery.impl.Inspection;
 import joinery.impl.Pivoting;
 import joinery.impl.Selection;
 import joinery.impl.Serialization;
+import joinery.impl.Sorting;
 import joinery.impl.Views;
 
 import com.codahale.metrics.annotation.Timed;
@@ -1185,44 +1185,26 @@ implements Iterable<List<V>> {
     }
 
     public DataFrame<V> sortBy(final String ... cols) {
-        return sortBy(columns.indices(cols));
+        final Map<Integer, SortDirection> sortCols = new LinkedHashMap<>();
+        for (final String col : cols) {
+            final SortDirection dir = col.startsWith("-") ?
+                    SortDirection.DESCENDING : SortDirection.ASCENDING;
+            final int c = columns.get(
+                    col.startsWith("-") ? col.substring(1) : col);
+            sortCols.put(c, dir);
+        }
+        return Sorting.sort(this, sortCols);
     }
 
     @Timed
     public DataFrame<V> sortBy(final int ... cols) {
-        final DataFrame<V> sorted = new DataFrame<V>(columns.names());
-        final Comparator<Integer> cmp = new Comparator<Integer>() {
-            @Override
-            @SuppressWarnings("unchecked")
-            public int compare(final Integer r1, final Integer r2) {
-                int result = 0;
-                for (final int i : cols) {
-                    final int c = Math.abs(i);
-                    final Comparable<Object> o1 = Comparable.class.cast(data.get(c, r1));
-                    final Comparable<Object> o2 = Comparable.class.cast(data.get(c, r2));
-                    result = o1.compareTo(o2);
-                    if (result != 0) {
-                        result *= Integer.signum(i != 0 ? i : 1);
-                        break;
-                    }
-                }
-                return result;
-            }
-        };
-
-        final List<Integer> rows = new ArrayList<>(length());
-        for (int r = 0; r < length(); r++) {
-            rows.add(r);
+        final Map<Integer, SortDirection> sortCols = new LinkedHashMap<>();
+        for (final int c : cols) {
+            final SortDirection dir = c < 0 ?
+                    SortDirection.DESCENDING : SortDirection.ASCENDING;
+            sortCols.put(Math.abs(c), dir);
         }
-        Collections.sort(rows, cmp);
-
-        final List<String> labels = new ArrayList<>(this.index.names());
-        for (final Integer r : rows) {
-            final String label = r < labels.size() ? labels.get(r) : String.valueOf(r);
-            sorted.append(label, row(r));
-        }
-
-        return sorted;
+        return Sorting.sort(this, sortCols);
     }
 
     /**
@@ -1496,4 +1478,9 @@ implements Iterable<List<V>> {
      */
     public interface Predicate<I>
     extends Function<List<I>, Boolean> { }
+
+    public enum SortDirection {
+        ASCENDING,
+        DESCENDING
+    }
 }

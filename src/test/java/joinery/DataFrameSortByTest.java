@@ -29,21 +29,22 @@ import org.junit.Test;
 
 public class DataFrameSortByTest {
     private DataFrame<Object> df;
+    private List<Object> values;
 
     @Before
     public final void setUp() {
         df = new DataFrame<Object>();
-    }
 
-    @Test
-    public final void testSortBy() {
-        List<Object> values = Arrays.<Object>asList(1, 2, 3, 4, 5, 6);
+        values = Arrays.<Object>asList(1, 2, 3, 4, 5, 6);
         Collections.shuffle(values);
 
         df.add("name", Arrays.<Object>asList("one", "two", "three", "four", "one", "two"));
         df.add("value", values);
+    }
 
-        DataFrame<Object> sorted = df.sortBy(1);
+    @Test
+    public final void testSortBy() {
+        final DataFrame<Object> sorted = df.sortBy(1);
         assertArrayEquals(
                 "original values are unsorted",
                 values.toArray(),
@@ -52,6 +53,51 @@ public class DataFrameSortByTest {
         assertArrayEquals(
                 "values are sorted",
                 new Object[] { 1, 2, 3, 4, 5, 6 },
+                sorted.col(1).toArray()
+            );
+    }
+
+    @Test
+    public final void testSortByString() {
+        final DataFrame<Object> sorted = df.sortBy("value");
+        assertArrayEquals(
+                "original values are unsorted",
+                values.toArray(),
+                df.col(1).toArray()
+            );
+        assertArrayEquals(
+                "values are sorted",
+                new Object[] { 1, 2, 3, 4, 5, 6 },
+                sorted.col(1).toArray()
+            );
+    }
+
+    @Test
+    public final void testSortByDesc() {
+        final DataFrame<Object> sorted = df.sortBy(-1);
+        assertArrayEquals(
+                "original values are unsorted",
+                values.toArray(),
+                df.col(1).toArray()
+            );
+        assertArrayEquals(
+                "values are sorted",
+                new Object[] { 6, 5, 4, 3, 2, 1 },
+                sorted.col(1).toArray()
+            );
+    }
+
+    @Test
+    public final void testSortByStringDesc() {
+        final DataFrame<Object> sorted = df.sortBy("-value");
+        assertArrayEquals(
+                "original values are unsorted",
+                values.toArray(),
+                df.col(1).toArray()
+            );
+        assertArrayEquals(
+                "values are sorted",
+                new Object[] { 6, 5, 4, 3, 2, 1 },
                 sorted.col(1).toArray()
             );
     }
