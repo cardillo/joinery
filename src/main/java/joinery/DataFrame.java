@@ -1050,6 +1050,14 @@ implements Iterable<List<V>> {
         return groups.apply(this, new Aggregation.Count<V>());
     }
 
+    public DataFrame<String> collapse() {
+        return groups.apply(this, new Aggregation.Collapse<V>());
+    }
+
+    public DataFrame<V> unique() {
+        return groups.apply(this, new Aggregation.Unique<V>());
+    }
+
     /**
      * Compute the sum of the numeric columns for each group
      * or the entire data frame if the data is not grouped.

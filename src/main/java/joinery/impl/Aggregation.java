@@ -48,6 +48,35 @@ public class Aggregation {
         }
     }
 
+    public static class Collapse<V>
+    implements Aggregate<V, String> {
+        private final String delimiter;
+
+        public Collapse() {
+            this(",");
+        }
+
+        public Collapse(final String delimiter) {
+            this.delimiter = delimiter;
+        }
+
+        @Override
+        public String apply(final List<V> values) {
+            final Set<V> seen = new HashSet<>();
+            final StringBuilder sb = new StringBuilder();
+            for (final V value : values) {
+                if (!seen.contains(value)) {
+                    if (sb.length() > 0) {
+                        sb.append(delimiter);
+                    }
+                    sb.append(String.valueOf(value));
+                    seen.add(value);
+                }
+            }
+            return sb.toString();
+        }
+    }
+
     private static abstract class AbstractStorelessStatistic<V>
     implements Aggregate<V, Number> {
         protected final StorelessUnivariateStatistic stat;
