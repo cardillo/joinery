@@ -222,9 +222,9 @@ implements Iterable<List<V>> {
     }
 
     /**
-     * Add a new column to the data frame.
+     * Add new columns to the data frame.
      *
-     * Any existing rows will have {@code null} values for the new column.
+     * Any existing rows will have {@code null} values for the new columns.
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>();
@@ -232,15 +232,18 @@ implements Iterable<List<V>> {
      * > df.columns();
      * [value] }</pre>
      *
-     * @param column the new column name
-     * @return the data frame with the column added
+     * @param columns the new column names
+     * @return the data frame with the columns added
      */
-    public DataFrame<V> add(final String column) {
-        final List<V> values = new ArrayList<V>(length());
-        for (int r = 0; r < values.size(); r++) {
-            values.add(null);
+    public DataFrame<V> add(final String ... columns) {
+        for (final String column : columns) {
+            final List<V> values = new ArrayList<V>(length());
+            for (int r = 0; r < values.size(); r++) {
+                values.add(null);
+            }
+            add(column, values);
         }
-        return add(column, values);
+        return this;
     }
 
     /**
