@@ -59,6 +59,10 @@ public class BlockManager<V> {
     }
 
     public void add(final List<V> col) {
+        final int len = length();
+        for (int r = col.size(); r < len; r++) {
+            col.add(null);
+        }
         blocks.add(col);
     }
 

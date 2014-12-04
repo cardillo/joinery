@@ -45,6 +45,33 @@ public class DataFrameManipulationTest {
             );
     }
 
+    @Test
+    public final void testAddMultiple() {
+        df.add("one", "two", "three");
+        System.out.println(df);
+        assertArrayEquals(
+                new String[] { "one", "two", "three" },
+                df.columns().toArray()
+            );
+    }
+
+    @Test
+    public final void testAddWithRows() {
+        df.add("one");
+        df.append(Arrays.<Object>asList(1));
+        System.out.println(df);
+        df.add("two");
+        System.out.println(df);
+        assertArrayEquals(
+                new String[] { "one", "two" },
+                df.columns().toArray()
+            );
+        assertArrayEquals(
+                new Object[] { 1, null },
+                df.toArray()
+            );
+    }
+
     @Test(expected=IllegalArgumentException.class)
     public final void testAddExisting() {
         df.add("test")
