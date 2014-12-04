@@ -152,6 +152,14 @@ implements Iterable<Map.Entry<Object, BitSet>> {
         return new DataFrame<>(index, newcols, grouped);
     }
 
+    public Set<Object> keys() {
+        return groups.keySet();
+    }
+
+    public Set<Integer> columns() {
+        return columns;
+    }
+
     @Override
     public Iterator<Map.Entry<Object, BitSet>> iterator() {
         return groups.entrySet().iterator();

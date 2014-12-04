@@ -1014,24 +1014,28 @@ implements Iterable<List<V>> {
             );
     }
 
+    public Grouping groups() {
+        return groups;
+    }
+
     /**
      * Return a map of group names to data frame for grouped
      * data frames.
      *
      * @return a map of group names to data frames
      */
-    public Map<Object, DataFrame<V>> groups() {
-        final Map<Object, DataFrame<V>> grouped = new LinkedHashMap<>();
+    public Map<Object, DataFrame<V>> explode() {
+        final Map<Object, DataFrame<V>> exploded = new LinkedHashMap<>();
         for (final Map.Entry<Object, BitSet> entry : groups) {
             final BitSet selected = entry.getValue();
-            grouped.put(entry.getKey(), new DataFrame<V>(
+            exploded.put(entry.getKey(), new DataFrame<V>(
                     Selection.select(index, selected),
                     columns,
                     Selection.select(data, selected),
                     new Grouping()
                 ));
         }
-        return grouped;
+        return exploded;
     }
 
     /**

@@ -97,7 +97,7 @@ public class DataFrameGroupByTest {
     @Test
     public void testGroups() {
         final Map<Object, DataFrame<Object>> groups =
-                df.convert().groupBy("b").groups();
+                df.convert().groupBy("b").explode();
 
         assertArrayEquals(
                 new Object[] {
