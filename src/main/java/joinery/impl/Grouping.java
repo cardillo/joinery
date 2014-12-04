@@ -23,8 +23,10 @@ import java.util.BitSet;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import joinery.DataFrame;
 import joinery.DataFrame.Aggregate;
@@ -34,10 +36,11 @@ public class Grouping
 implements Iterable<Map.Entry<Object, BitSet>> {
 
     private final Map<Object, BitSet> groups = new LinkedHashMap<>();
+    private final Set<Integer> columns = new LinkedHashSet<>();
 
     public Grouping() { }
 
-    public <V> Grouping(final DataFrame<V> df, final KeyFunction<V> function) {
+    public <V> Grouping(final DataFrame<V> df, final KeyFunction<V> function, final int ... columns) {
         final Iterator<List<V>> iter = df.iterator();
         for (int r = 0; iter.hasNext(); r++) {
             final List<V> row = iter.next();
@@ -49,10 +52,16 @@ implements Iterable<Map.Entry<Object, BitSet>> {
             }
             group.set(r);
         }
+
+        for (final int column : columns) {
+            this.columns.add(column);
+        }
     }
 
     public <V> Grouping(final DataFrame<V> df, final int ... columns) {
-        this(df, columns.length == 1 ?
+        this(
+            df,
+            columns.length == 1 ?
                 new KeyFunction<V>() {
                     @Override
                     public Object apply(final List<V> value) {
@@ -69,48 +78,78 @@ implements Iterable<Map.Entry<Object, BitSet>> {
                         }
                         return Collections.unmodifiableList(key);
                     }
-            });
+            },
+            columns
+        );
     }
 
-    public <I, O> DataFrame<O> apply(final DataFrame<I> df, final Aggregate<I, O> function) {
-        final List<List<O>> grouped = new ArrayList<>();
+    @SuppressWarnings("unchecked")
+    public <V> DataFrame<V> apply(final DataFrame<V> df, final Aggregate<V, ?> function) {
+        final List<List<V>> grouped = new ArrayList<>();
         final List<String> names = new ArrayList<>(df.columns());
         final List<String> newcols = new ArrayList<>();
-        final List<String> labels = new ArrayList<String>();
+        final List<String> index = new ArrayList<String>();
 
-        for (int c = 0; c < df.size(); c++) {
-            final List<O> column = new ArrayList<>();
+        // construct new row index
+        if (!groups.isEmpty()) {
+            for (final Object key : groups.keySet()) {
+                index.add(String.valueOf(key));
+            }
+        }
+
+        // add key columns
+        for (final int c : columns) {
             if (groups.isEmpty()) {
-                try {
-                    column.add(function.apply(df.col(c)));
-                } catch (final ClassCastException ignored) { }
+                grouped.add(df.col(c));
+                newcols.add(names.get(c));
             } else {
+                final List<V> column = new ArrayList<>();
                 for (final Map.Entry<Object, BitSet> entry : groups.entrySet()) {
                     final BitSet rows = entry.getValue();
-                    final List<I> values = new ArrayList<>(rows.cardinality());
-                    for (int r = rows.nextSetBit(0); r >= 0; r = rows.nextSetBit(r + 1)) {
-                        values.add(df.col(c).get(r));
-                    }
-                    try {
-                        column.add(function.apply(values));
-                        if (grouped.isEmpty()) {
-                            labels.add(String.valueOf(entry.getKey()));
-                        }
-                    } catch (final ClassCastException ignored) { }
+                    final int r = rows.nextSetBit(0);
+                    column.add(df.get(r, c));
                 }
-            }
-
-            if (!column.isEmpty()) {
                 grouped.add(column);
                 newcols.add(names.get(c));
             }
         }
 
-        if (newcols.isEmpty()) {
-            throw new IllegalArgumentException("no results for aggregate function " + function.getClass().getSimpleName());
+        // add aggregated data columns
+        for (int c = 0; c < df.size(); c++) {
+            if (!columns.contains(c)) {
+                final List<V> column = new ArrayList<>();
+                if (groups.isEmpty()) {
+                    try {
+                        column.add((V)function.apply(df.col(c)));
+                    } catch (final ClassCastException ignored) { }
+                } else {
+                    for (final Map.Entry<Object, BitSet> entry : groups.entrySet()) {
+                        final BitSet rows = entry.getValue();
+                        final List<V> values = new ArrayList<>(rows.cardinality());
+                        for (int r = rows.nextSetBit(0); r >= 0; r = rows.nextSetBit(r + 1)) {
+                            values.add(df.get(r, c));
+                        }
+                        try {
+                            column.add((V)function.apply(values));
+                        } catch (final ClassCastException ignored) { }
+                    }
+                }
+
+                if (!column.isEmpty()) {
+                    grouped.add(column);
+                    newcols.add(names.get(c));
+                }
+            }
         }
 
-        return new DataFrame<O>(labels, newcols, grouped);
+        if (newcols.size() <= columns.size()) {
+            throw new IllegalArgumentException(
+                    "no results for aggregate function " +
+                    function.getClass().getSimpleName()
+                );
+        }
+
+        return new DataFrame<>(index, newcols, grouped);
     }
 
     @Override

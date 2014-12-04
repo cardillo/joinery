@@ -79,9 +79,9 @@ import com.codahale.metrics.annotation.Timed;
  * >     .mean()
  * >     .sortBy("Close")
  * >     .tail(3)
- * >     .transform(new Function<Number, Number>() {
- * >         public Number apply(Number value) {
- * >             return value.intValue();
+ * >     .transform(new Function<Object, Number>() {
+ * >         public Number apply(Object value) {
+ * >             return Number.class.cast(value).intValue();
  * >         }
  * >     })
  * >     .col("Close");
@@ -1041,16 +1041,16 @@ implements Iterable<List<V>> {
      * @param function the aggregate function
      * @return the new data frame
      */
-    public <U> DataFrame<U> apply(final Aggregate<V, U> function) {
+    public <U> DataFrame<V> apply(final Aggregate<V, U> function) {
         return groups.apply(this, function);
     }
 
     @Timed
-    public DataFrame<Number> count() {
+    public DataFrame<V> count() {
         return groups.apply(this, new Aggregation.Count<V>());
     }
 
-    public DataFrame<String> collapse() {
+    public DataFrame<V> collapse() {
         return groups.apply(this, new Aggregation.Collapse<V>());
     }
 
@@ -1079,7 +1079,7 @@ implements Iterable<List<V>> {
      * @return the new data frame
      */
     @Timed
-    public DataFrame<Number> sum() {
+    public DataFrame<V> sum() {
         return groups.apply(this, new Aggregation.Sum<V>());
     }
 
@@ -1104,7 +1104,7 @@ implements Iterable<List<V>> {
      * @return the new data frame
      */
     @Timed
-    public DataFrame<Number> prod() {
+    public DataFrame<V> prod() {
         return groups.apply(this, new Aggregation.Product<V>());
     }
 
@@ -1124,7 +1124,7 @@ implements Iterable<List<V>> {
      * @return the new data frame
      */
     @Timed
-    public DataFrame<Number> mean() {
+    public DataFrame<V> mean() {
         return groups.apply(this, new Aggregation.Mean<V>());
     }
 
@@ -1149,37 +1149,37 @@ implements Iterable<List<V>> {
      * @return the new data frame
      */
     @Timed
-    public DataFrame<Number> stddev() {
+    public DataFrame<V> stddev() {
         return groups.apply(this, new Aggregation.StdDev<V>());
     }
 
     @Timed
-    public DataFrame<Number> var() {
+    public DataFrame<V> var() {
         return groups.apply(this, new Aggregation.Variance<V>());
     }
 
     @Timed
-    public DataFrame<Number> skew() {
+    public DataFrame<V> skew() {
         return groups.apply(this, new Aggregation.Skew<V>());
     }
 
     @Timed
-    public DataFrame<Number> kurt() {
+    public DataFrame<V> kurt() {
         return groups.apply(this, new Aggregation.Kurtosis<V>());
     }
 
     @Timed
-    public DataFrame<Number> min() {
+    public DataFrame<V> min() {
         return groups.apply(this, new Aggregation.Min<V>());
     }
 
     @Timed
-    public DataFrame<Number> max() {
+    public DataFrame<V> max() {
         return groups.apply(this, new Aggregation.Max<V>());
     }
 
     @Timed
-    public DataFrame<Number> median() {
+    public DataFrame<V> median() {
         return groups.apply(this, new Aggregation.Median<V>());
     }
 
@@ -1470,7 +1470,7 @@ implements Iterable<List<V>> {
      * a data frame row as input and return a key value, most
      * commonly used by {@link DataFrame#groupBy(KeyFunction)}.</p>
      *
-     * @param <T> the type of the input values
+     * @param <I> the type of the input values
      * @see DataFrame#groupBy(KeyFunction)
      */
     public interface KeyFunction<I>
@@ -1484,8 +1484,8 @@ implements Iterable<List<V>> {
      * a list of data frame values as input and return an aggregate
      * result.</p>
      *
-     * @param <T> the type of the input values
-     * @param <U> the type of the result
+     * @param <I> the type of the input values
+     * @param <O> the type of the result
      * @see DataFrame#apply(Aggregate)
      */
     public interface Aggregate<I, O>
@@ -1498,7 +1498,7 @@ implements Iterable<List<V>> {
      * return {@code true} for rows that should be included
      * in the filtered data frame.</p>
      *
-     * @param <T> the type of the input values
+     * @param <I> the type of the input values
      * @see DataFrame#select(Predicate)
      */
     public interface Predicate<I>

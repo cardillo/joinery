@@ -46,7 +46,7 @@ public class DataFrameGroupByTest {
         final DataFrame<Object> df = new DataFrame<>();
         df.add("name", Arrays.<Object>asList("one", "two", "three", "four", "one", "two"));
         df.add("value", Arrays.<Object>asList(1, 2, 3, 4, 5, 6));
-        final DataFrame<Number> grouped = df.groupBy(0).count();
+        final DataFrame<Object> grouped = df.groupBy(0).count();
         assertEquals(
                 "group by result has correct number of rows",
                 4,
@@ -80,10 +80,10 @@ public class DataFrameGroupByTest {
         df.add("category", Arrays.<Object>asList("alpha", "beta", "alpha", "beta", "alpha", "beta"));
         df.add("value", Arrays.<Object>asList(1, 2, 3, 4, 5, 6));
         final Object[][] expected = new Object[][] {
-                new Object[] { 2, 2, 2 },
-                new Object[] { 2, 2, 2 },
-                new Object[] { 1, 1, 1 },
-                new Object[] { 1, 1, 1 }
+                new Object[] { "alpha", "one",   2 },
+                new Object[] { "beta",  "two",   2 },
+                new Object[] { "alpha", "three", 1 },
+                new Object[] { "beta",  "four",  1 }
             };
         for (int i = 0; i < expected.length; i++) {
             assertArrayEquals(
@@ -132,7 +132,7 @@ public class DataFrameGroupByTest {
     public void testGroupApply() {
         assertArrayEquals(
                 new Object[] {
-                    2, 2, 3,
+                    "one", "two", "three",
                     2, 2, 3,
                     2, 2, 3,
                     2, 2, 3
