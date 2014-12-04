@@ -34,84 +34,119 @@ public class Pivoting {
     public static <V> DataFrame<V> pivot(
             final DataFrame<V> df, final int[] rows,
             final int[] cols, final int[] values) {
-        final Map<Object, DataFrame<V>> grouped = df.groupBy(rows).groups();
+        final DataFrame<V> grouped = df.groupBy(rows);
+        final Map<Object, DataFrame<V>> exploded = grouped.explode();
         final Map<Integer, Unique<V>> aggregates = new LinkedHashMap<>();
-        for (final Map.Entry<Object, DataFrame<V>> entry : grouped.entrySet()) {
-            grouped.put(entry.getKey(), entry.getValue().groupBy(cols));
+        for (final Map.Entry<Object, DataFrame<V>> entry : exploded.entrySet()) {
+            exploded.put(entry.getKey(), entry.getValue().groupBy(cols));
         }
         for (final int v : values) {
             aggregates.put(v, new Unique<V>());
         }
-        return pivot(grouped, aggregates);
+        return pivot(exploded, aggregates, grouped.groups().columns());
     }
 
     public static <I, O> DataFrame<O> pivot(
             final DataFrame<I> df, final KeyFunction<I> rows,
             final KeyFunction<I> cols, final Map<Integer, ? extends Aggregate<I,O>> values) {
-        final Map<Object, DataFrame<I>> grouped = df.groupBy(rows).groups();
-        for (final Map.Entry<Object, DataFrame<I>> entry : grouped.entrySet()) {
-            grouped.put(entry.getKey(), entry.getValue().groupBy(cols));
+        final DataFrame<I> grouped = df.groupBy(rows);
+        final Map<Object, DataFrame<I>> exploded = grouped.explode();
+        for (final Map.Entry<Object, DataFrame<I>> entry : exploded.entrySet()) {
+            exploded.put(entry.getKey(), entry.getValue().groupBy(cols));
         }
-        return pivot(grouped, values);
+        return pivot(exploded, values, grouped.groups().columns());
     }
 
-    private static <I, O> DataFrame<O> pivot(final Map<Object, DataFrame<I>> grouped, final Map<Integer, ? extends Aggregate<I,O>> values) {
-        final Set<String> pivotRows = new LinkedHashSet<>();
+    @SuppressWarnings("unchecked")
+    private static <I, O> DataFrame<O> pivot(
+            final Map<Object, DataFrame<I>> grouped,
+            final Map<Integer, ? extends Aggregate<I,O>> values,
+            final Set<Integer> columns) {
         final Set<String> pivotCols = new LinkedHashSet<>();
         final Map<String, Map<String, List<I>>> pivotData = new LinkedHashMap<>();
-        final Map<String, Aggregate<I, O>> pivotFunctions = new LinkedHashMap<>();
-        List<String> colNames = null;
+        final Map<String, Aggregate<I, ?>> pivotFunctions = new LinkedHashMap<>();
+        final List<String> colNames = new ArrayList<>(grouped.values().iterator().next().columns());
 
+        // allocate row -> column -> data maps
+        for (final Map.Entry<Object, DataFrame<I>> rowEntry : grouped.entrySet()) {
+            final Map<String, List<I>> rowData = new LinkedHashMap<>();
+            for (final int c : columns) {
+                final String colName = colNames.get(c);
+                rowData.put(colName, new ArrayList<I>());
+                pivotCols.add(colName);
+            }
+            for (final Object colKey : rowEntry.getValue().groups().keys()) {
+                for (final int c : values.keySet()) {
+                    final String colName = name(colKey, colNames.get(c), values);
+                    rowData.put(colName, new ArrayList<I>());
+                    pivotCols.add(colName);
+                    pivotFunctions.put(colName, values.get(c));
+                }
+            }
+            pivotData.put(String.valueOf(rowEntry.getKey()), rowData);
+        }
+
+        // collect data for row and column groups
         for (final Map.Entry<Object, DataFrame<I>> rowEntry : grouped.entrySet()) {
             final String rowName = String.valueOf(rowEntry.getKey());
-            Map<String, List<I>> rowData = pivotData.get(rowName);
-            if (rowData == null) {
-                pivotRows.add(rowName);
-                rowData = new LinkedHashMap<>();
-                pivotData.put(rowName, rowData);
-            }
-
-            final Map<Object, DataFrame<I>> byCol = rowEntry.getValue().groups();
-
+            final Map<String, List<I>> rowData = pivotData.get(rowName);
+            final Map<Object, DataFrame<I>> byCol = rowEntry.getValue().explode();
             for (final Map.Entry<Object, DataFrame<I>> colEntry : byCol.entrySet()) {
+                // add columns used as pivot rows
+                for (final int c : columns) {
+                    final String colName = colNames.get(c);
+                    final List<I> colData = rowData.get(colName);
+                    // optimization, only add first value
+                    // since the values are all the same (due to grouping)
+                    colData.add(colEntry.getValue().get(0, c));
+                }
+
+                // add values for aggregation
                 for (final int c : values.keySet()) {
-                    String colName = String.valueOf(colEntry.getKey());
-                    if (values.size() > 1) {
-                        if (colNames == null) {
-                            colNames = new ArrayList<>(rowEntry.getValue().columns());
-                        }
-                        final List<Object> tmp = new ArrayList<>();
-                        tmp.add(colNames.get(c));
-                        if (colEntry.getKey() instanceof List) {
-                            for (final Object col : List.class.cast(colEntry.getKey())) {
-                                tmp.add(col);
-                            }
-                        } else {
-                            tmp.add(colEntry.getKey());
-                        }
-                        colName = String.valueOf(tmp);
-                    }
-
-                    List<I> colData = rowData.get(colName);
-                    if (colData == null) {
-                        pivotCols.add(colName);
-                        colData = new ArrayList<>();
-                        rowData.put(colName, colData);
-                    }
-
+                    final String colName = name(colEntry.getKey(), colNames.get(c), values);
+                    final List<I> colData = rowData.get(colName);
                     colData.addAll(colEntry.getValue().col(c));
-                    pivotFunctions.put(colName, values.get(c));
                 }
             }
         }
 
-        final DataFrame<O> pivot = new DataFrame<>(pivotRows, pivotCols);
+        // iterate over row, column pairs and apply aggregate functions
+        final DataFrame<O> pivot = new DataFrame<>(pivotData.keySet(), pivotCols);
         for (final String col : pivot.columns()) {
             for (final String row : pivot.index()) {
-                pivot.set(row, col, pivotFunctions.get(col).apply(pivotData.get(row).get(col)));
+                final List<I> data = pivotData.get(row).get(col);
+                if (data != null) {
+                    final Aggregate<I, ?> func = pivotFunctions.get(col);
+                    if (func != null) {
+                        pivot.set(row, col, (O)func.apply(data));
+                    } else {
+                        pivot.set(row, col, (O)data.get(0));
+                    }
+                }
             }
         }
 
         return pivot;
+    }
+
+    private static String name(final Object key, final String name, final Map<?, ?> values) {
+        String colName = String.valueOf(key);
+
+        // if multiple value columns are requested the
+        // value column name must be added to the pivot column name
+        if (values.size() > 1) {
+            final List<Object> tmp = new ArrayList<>();
+            tmp.add(name);
+            if (key instanceof List) {
+                for (final Object col : List.class.cast(key)) {
+                    tmp.add(col);
+                }
+            } else {
+                tmp.add(key);
+            }
+            colName = String.valueOf(tmp);
+        }
+
+        return colName;
     }
 }

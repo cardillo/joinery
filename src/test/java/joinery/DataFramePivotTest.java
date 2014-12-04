@@ -52,11 +52,16 @@ public class DataFramePivotTest {
             );
         assertArrayEquals(
                 pivot.columns().toArray(),
-                new Object[] { "alpha", "bravo", "charlie" }
+                new Object[] { "date", "alpha", "bravo", "charlie" }
             );
         assertArrayEquals(
                 pivot.toArray(),
                 new Object[] {
+                    fmt.parse("2014-01-01"),
+                        fmt.parse("2014-01-02"),
+                        fmt.parse("2014-01-03"),
+                        fmt.parse("2014-01-04"),
+                        fmt.parse("2014-01-05"),
                     1L,  2L,  3L,  4L,  5L,
                     2L,  3L,  5L,  7L, 11L,
                     1L,  2L,  4L,  8L, 16L
@@ -81,6 +86,7 @@ public class DataFramePivotTest {
         assertArrayEquals(
                 pivot.columns().toArray(),
                 new Object[] {
+                    "date",
                     Arrays.asList("value1", "alpha").toString(),
                     Arrays.asList("value2", "alpha").toString(),
                     Arrays.asList("value1", "bravo").toString(),
@@ -92,6 +98,11 @@ public class DataFramePivotTest {
         assertArrayEquals(
                 pivot.toArray(),
                 new Object[] {
+                    fmt.parse("2014-01-01"),
+                        fmt.parse("2014-01-02"),
+                        fmt.parse("2014-01-03"),
+                        fmt.parse("2014-01-04"),
+                        fmt.parse("2014-01-05"),
                       1L,    2L,    3L,    4L,    5L,
                     101L,  102L,  103L,  104L,  105L,
                       2L,    3L,    5L,    7L,   11L,
