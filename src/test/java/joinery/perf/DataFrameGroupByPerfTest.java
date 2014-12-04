@@ -18,9 +18,6 @@
 
 package joinery.perf;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import joinery.DataFrame;
 
 import org.junit.After;
@@ -38,14 +35,9 @@ public class DataFrameGroupByPerfTest {
     @Category(PerformanceTests.class)
     public void test() {
         final DataFrame<Object> df = PerformanceTestUtils.randomData(0.75);
-        final List<String> columns = new ArrayList<>(df.columns());
         for (int i = 0; i < 10; i++) {
-            // group by value or category
-            // (name is pathological, results in 1 group per row)
-            final int col = 1 + i % (columns.size() - 1);
-            final String key = columns.get(col);
-            System.out.printf("grouping %,d rows by %s\n", df.length(), key);
-            final DataFrame<Object> grouped = df.groupBy(key);
+            System.out.printf("grouping %,d rows by category\n", df.length());
+            final DataFrame<Object> grouped = df.groupBy("category");
             grouped.count();
             grouped.sum();
             grouped.min();
