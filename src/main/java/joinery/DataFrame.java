@@ -43,6 +43,7 @@ import joinery.impl.Grouping;
 import joinery.impl.Index;
 import joinery.impl.Inspection;
 import joinery.impl.Pivoting;
+import joinery.impl.Plotting;
 import joinery.impl.Selection;
 import joinery.impl.Serialization;
 import joinery.impl.Sorting;
@@ -1408,6 +1409,27 @@ implements Iterable<List<V>> {
         }
 
         return unique;
+    }
+
+    /**
+     * Display the numeric columns of this data frame
+     * as a line chart in a new swing frame.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<Object>(
+     * >     Collections.<String>emptyList(),
+     * >     Arrays.asList("name", "value"),
+     * >     Arrays.asList(
+     * >         Arrays.<Object>asList("alpha", "bravo", "charlie"),
+     * >         Arrays.<Object>asList(10, 20, 30)
+     * >     )
+     * > );
+     * > df.plot();
+     * } </pre>
+     *
+     */
+    public final void plot() {
+        Plotting.display(this);
     }
 
     public static final DataFrame<Object> readCsv(final String file)

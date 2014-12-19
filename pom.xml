@@ -19,6 +19,7 @@
     <commons-math3.version>3.3</commons-math3.version>
     <aspectj.version>1.8.2</aspectj.version>
     <metrics.version>3.1.0</metrics.version>
+    <xchart.version>2.4.2</xchart.version>
   </properties>
 
   <dependencies>
@@ -37,6 +38,17 @@
       <groupId>io.dropwizard.metrics</groupId>
       <artifactId>metrics-annotation</artifactId>
       <version>${metrics.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.xeiam.xchart</groupId>
+      <artifactId>xchart</artifactId>
+      <version>${xchart.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>de.erichseifert.vectorgraphics2d</groupId>
+          <artifactId>VectorGraphics2D</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <!-- test deps -->
