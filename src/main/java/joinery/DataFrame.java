@@ -363,6 +363,14 @@ implements Iterable<List<V>> {
         return drop(todrop);
     }
 
+    public DataFrame<V> reindex(final int ... cols) {
+        return Index.reindex(this, cols);
+    }
+
+    public DataFrame<V> reindex(final String ... cols) {
+        return reindex(columns.indices(cols));
+    }
+
     /**
      * Append rows to the data frame.
      *

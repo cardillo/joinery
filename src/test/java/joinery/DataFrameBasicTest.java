@@ -115,4 +115,56 @@ public class DataFrameBasicTest {
                 row.toArray()
             );
     }
+
+    @Test
+    public final void testReindexInt() {
+        assertArrayEquals(
+                "index is correct",
+                new Object[] { "10", "20", "30", "40", "50", "60" },
+                df.reindex(2).index().toArray()
+            );
+    }
+
+    @Test
+    public final void testReindexIntMultiple() {
+        assertArrayEquals(
+                "index is correct",
+                new Object[] {
+                    "[one, 10]", "[two, 20]", "[three, 30]",
+                    "[one, 40]", "[two, 50]", "[three, 60]"
+                },
+                df.reindex(1, 2).index().toArray()
+            );
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public final void testReindexIntDuplicates() {
+        df.reindex(0);
+    }
+
+    @Test
+    public final void testReindexString() {
+        assertArrayEquals(
+                "index is correct",
+                new Object[] { "10", "20", "30", "40", "50", "60" },
+                df.reindex("value").index().toArray()
+            );
+    }
+
+    @Test
+    public final void testReindexStringMultiple() {
+        assertArrayEquals(
+                "index is correct",
+                new Object[] {
+                    "[one, 10]", "[two, 20]", "[three, 30]",
+                    "[one, 40]", "[two, 50]", "[three, 60]"
+                },
+                df.reindex("name", "value").index().toArray()
+            );
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public final void testReindexStringDuplicates() {
+        df.reindex("category");
+    }
 }

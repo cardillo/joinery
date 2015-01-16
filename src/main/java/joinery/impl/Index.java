@@ -18,6 +18,7 @@
 
 package joinery.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,6 +27,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import joinery.DataFrame;
+import joinery.DataFrame.RowFunction;
 
 
 public class Index {
@@ -81,5 +85,39 @@ public class Index {
             indices[i] = get(names.get(i));
         }
         return indices;
+    }
+
+    public static <V> DataFrame<V> reindex(final DataFrame<V> df, final int ... cols) {
+        return new DataFrame<V>(
+                df.transform(
+                    cols.length == 1 ?
+                        new RowFunction<V, String>() {
+                            @Override
+                            public List<List<String>> apply(final List<V> values) {
+                                return Collections.singletonList(
+                                    Collections.singletonList(
+                                        String.valueOf(values.get(cols[0]))
+                                    )
+                                );
+                            }
+                        } :
+                        new RowFunction<V,String>() {
+                            @Override
+                            public List<List<String>> apply(final List<V> values) {
+                                final List<String> key = new ArrayList<>(cols.length);
+                                for (final int c : cols) {
+                                    key.add(String.valueOf(values.get(c)));
+                                }
+                                return Collections.singletonList(
+                                    Collections.singletonList(
+                                        String.valueOf(key)
+                                    )
+                                );
+                            }
+                        }
+                ).col(0),
+                df.columns(),
+                new Views.ListView<V>(df, true)
+            );
     }
 }
