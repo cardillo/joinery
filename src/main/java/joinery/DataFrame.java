@@ -38,6 +38,7 @@ import java.util.Set;
 
 import joinery.impl.Aggregation;
 import joinery.impl.BlockManager;
+import joinery.impl.Comparing;
 import joinery.impl.Conversion;
 import joinery.impl.Grouping;
 import joinery.impl.Index;
@@ -46,6 +47,7 @@ import joinery.impl.Pivoting;
 import joinery.impl.Plotting;
 import joinery.impl.Selection;
 import joinery.impl.Serialization;
+import joinery.impl.Shaping;
 import joinery.impl.Sorting;
 import joinery.impl.Views;
 
@@ -401,6 +403,14 @@ implements Iterable<List<V>> {
             data.set(c < row.size() ? row.get(c) : null, c, len);
         }
         return this;
+    }
+
+    public DataFrame<V> reshape(final int rows, final int cols) {
+        return Shaping.reshape(this, rows, cols);
+    }
+
+    public DataFrame<V> reshape(final Collection<String> rows, final Collection<String> cols) {
+        return Shaping.reshape(this, rows, cols);
     }
 
     /**
@@ -1432,6 +1442,10 @@ implements Iterable<List<V>> {
         Plotting.display(this);
     }
 
+    public static final <V> DataFrame<String> compare(final DataFrame<V> df1, final DataFrame<V> df2) {
+        return Comparing.compare(df1, df2);
+    }
+
     public static final DataFrame<Object> readCsv(final String file)
     throws IOException {
         return Serialization.readCsv(file);
@@ -1533,5 +1547,33 @@ implements Iterable<List<V>> {
     public enum SortDirection {
         ASCENDING,
         DESCENDING
+    }
+
+    public static final void main(final String[] args)
+    throws IOException {
+        final List<DataFrame<Object>> frames = new ArrayList<>(args.length - 1);
+        for (int i = 1; i < args.length; i++) {
+            frames.add(DataFrame.readCsv(args[i]));
+        }
+
+        if (args.length > 0 && "plot".equalsIgnoreCase(args[0])) {
+            if (frames.size() == 1) {
+                frames.get(0).plot();
+                return;
+            }
+        }
+
+        if (args.length > 0 && "compare".equalsIgnoreCase(args[0])) {
+            if (frames.size() == 2) {
+                System.out.println(DataFrame.compare(frames.get(0), frames.get(1)));
+                return;
+            }
+        }
+
+        System.err.printf(
+                "usage: %s [plot|compare] [csv-file ...]\n",
+                DataFrame.class.getCanonicalName()
+            );
+        System.exit(255);
     }
 }
