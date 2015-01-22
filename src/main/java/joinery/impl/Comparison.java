@@ -23,7 +23,7 @@ import java.util.Set;
 
 import joinery.DataFrame;
 
-public class Comparing {
+public class Comparison {
     public static final <V> DataFrame<String> compare(final DataFrame<V> df1, final DataFrame<V> df2) {
         // algorithm
         // 1. determine union of rows and columns
@@ -49,19 +49,19 @@ public class Comparing {
 
                 if (lval == null && rval == null) {
                     // equal but null
-                    comp.set(r, c, String.valueOf(lval));
+                    comp.set(r, c, "");
                 } else if (lval != null && lval.equals(rval)) {
                     // equal
                     comp.set(r, c, String.valueOf(lval));
                 } else if (lval == null) {
                     // missing from left
-                    comp.set(r, c, String.valueOf(rval) + " (added from right)");
+                    comp.set(r, c, String.valueOf(rval)); // + " (added from right)");
                 } else if (rval == null) {
                     // missing from right
-                    comp.set(r, c, String.valueOf(lval) + " (added from left)");
+                    comp.set(r, c, String.valueOf(lval)); // + " (added from left)");
                 } else {
                     // not equal
-                    comp.set(r, c, String.format("%s (changed from %s)", rval, lval));
+                    comp.set(r, c, String.format("%s | %s", lval, rval));
                 }
             }
         }

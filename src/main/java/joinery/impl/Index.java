@@ -117,7 +117,7 @@ public class Index {
                         }
                 ).col(0),
                 df.columns(),
-                new Views.ListView<V>(df, true)
+                new Views.ListView<V>(df, false)
             );
     }
 }

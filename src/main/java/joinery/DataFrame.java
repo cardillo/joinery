@@ -38,13 +38,13 @@ import java.util.Set;
 
 import joinery.impl.Aggregation;
 import joinery.impl.BlockManager;
-import joinery.impl.Comparing;
+import joinery.impl.Comparison;
 import joinery.impl.Conversion;
+import joinery.impl.Display;
 import joinery.impl.Grouping;
 import joinery.impl.Index;
 import joinery.impl.Inspection;
 import joinery.impl.Pivoting;
-import joinery.impl.Plotting;
 import joinery.impl.Selection;
 import joinery.impl.Serialization;
 import joinery.impl.Shaping;
@@ -1447,11 +1447,15 @@ implements Iterable<List<V>> {
      *
      */
     public final void plot() {
-        Plotting.display(this);
+        Display.plot(this);
+    }
+
+    public final void show() {
+        Display.show(this);
     }
 
     public static final <V> DataFrame<String> compare(final DataFrame<V> df1, final DataFrame<V> df2) {
-        return Comparing.compare(df1, df2);
+        return Comparison.compare(df1, df2);
     }
 
     public static final DataFrame<Object> readCsv(final String file)
@@ -1571,6 +1575,13 @@ implements Iterable<List<V>> {
             }
         }
 
+        if (args.length > 0 && "show".equalsIgnoreCase(args[0])) {
+            if (frames.size() == 1) {
+                frames.get(0).show();
+                return;
+            }
+        }
+
         if (args.length > 0 && "compare".equalsIgnoreCase(args[0])) {
             if (frames.size() == 2) {
                 System.out.println(DataFrame.compare(frames.get(0), frames.get(1)));
@@ -1579,7 +1590,7 @@ implements Iterable<List<V>> {
         }
 
         System.err.printf(
-                "usage: %s [plot|compare] [csv-file ...]\n",
+                "usage: %s [compare|plot|show] [csv-file ...]\n",
                 DataFrame.class.getCanonicalName()
             );
         System.exit(255);

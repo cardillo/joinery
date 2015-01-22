@@ -16,28 +16,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package joinery.impl;
+package joinery;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
 
-import joinery.DataFrame;
+import joinery.impl.Comparison;
 
-import com.xeiam.xchart.Chart;
-import com.xeiam.xchart.ChartBuilder;
-import com.xeiam.xchart.SwingWrapper;
+import org.junit.Before;
+import org.junit.Test;
 
-public class Plotting {
-    public static <V> void display(final DataFrame<V> df) {
-        final Chart chart = new ChartBuilder().build();
-        final DataFrame<Number> numeric = df.numeric();
-        final List<Number> xdata = new ArrayList<>(df.length());
-        for (int i = 0; i < df.length(); i++) {
-            xdata.add(i);
-        }
-        for (final String col : numeric.columns()) {
-            chart.addSeries(col, xdata, numeric.col(col));
-        }
-        new SwingWrapper(chart).displayChart();
+public class DataFrameComparisonTest {
+    private DataFrame<Object> left, right;
+
+    @Before
+    public void setUp()
+    throws IOException {
+        left = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("left.csv"));
+        right = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("right.csv"));
+    }
+
+    @Test
+    public void test() {
+        System.out.println(Comparison.compare(left, right));
     }
 }

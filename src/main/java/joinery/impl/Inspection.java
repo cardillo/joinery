@@ -28,7 +28,8 @@ public class Inspection {
     public static List<Class<?>> types(final DataFrame<?> df) {
         final List<Class<?>> types = new ArrayList<>(df.size());
         for (int c = 0; c < df.size() && 0 < df.length(); c++) {
-            types.add(df.get(0, c).getClass());
+            final Object value = df.get(0, c);
+            types.add(value != null ? value.getClass() : Object.class);
         }
         return types;
     }
