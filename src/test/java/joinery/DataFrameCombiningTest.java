@@ -265,4 +265,46 @@ public class DataFrameCombiningTest {
                 left.merge(right, JoinType.INNER).toArray()
             );
     }
+
+    @Test
+    public void testUpdate() {
+        right.set(1, 1, null);
+        assertArrayEquals(
+                new Object[] {
+                    1L, 2L, 4L,
+                    "b", "a" /* remains from left */, "b",
+                    30.0, 40.0, 80.0
+                },
+                left.update(right).toArray()
+            );
+    }
+
+    @Test
+    public void testUpdateNoNulls() {
+        assertArrayEquals(
+                right.toArray(),
+                left.update(right).toArray()
+            );
+    }
+
+    @Test
+    public void testCoalesce() {
+        left.set(1, 1, null);
+        assertArrayEquals(
+                new Object[] {
+                    1L, 2L, 3L,
+                    "a", "b" /* taken from right */, "a",
+                    10.0, 20.0, 30.0
+                },
+                left.coalesce(right).toArray()
+            );
+    }
+
+    @Test
+    public void testCoalesceNoNulls() {
+        assertArrayEquals(
+                left.toArray(),
+                left.coalesce(right).toArray()
+            );
+    }
 }

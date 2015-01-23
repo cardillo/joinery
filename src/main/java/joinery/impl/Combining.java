@@ -107,4 +107,23 @@ public class Combining {
         final String[] columns = intersection.toArray(new String[intersection.size()]);
         return join(left.reindex(columns), right.reindex(columns), how, null);
     }
+
+    @SafeVarargs
+    public static <V> void update(final DataFrame<V> dest,  final boolean overwrite, final DataFrame<? extends V> ... others) {
+        for (int col = 0; col < dest.size(); col++) {
+            for (int row = 0; row < dest.length(); row++) {
+                if (overwrite || dest.get(row, col) == null) {
+                    for (final DataFrame<? extends V> other : others) {
+                        if (col < other.size() && row < other.length()) {
+                            final V value = other.get(row, col);
+                            if (value != null) {
+                                dest.set(row, col, value);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

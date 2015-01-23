@@ -463,12 +463,14 @@ implements Iterable<List<V>> {
     }
 
     @SafeVarargs
-    public final DataFrame<V> coalesce(final DataFrame<? extends V> ... others) {
+    public final DataFrame<V> update(final DataFrame<? extends V> ... others) {
+        Combining.update(this, true, others);
         return this;
     }
 
     @SafeVarargs
-    public final DataFrame<V> update(final DataFrame<? extends V> ... others) {
+    public final DataFrame<V> coalesce(final DataFrame<? extends V> ... others) {
+        Combining.update(this, false, others);
         return this;
     }
 
