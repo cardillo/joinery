@@ -1,5 +1,4 @@
-id,name,category,value,left
-1,alpha,north,10.0,91
-2,bravo,south,20.0,92
-3,charlie,east,30.0,93
-4,delta,west,40.0,94
+key,a,value
+1,a,10.0
+2,a,20.0
+3,a,30.0

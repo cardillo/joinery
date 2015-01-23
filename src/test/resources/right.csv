@@ -1,5 +1,4 @@
-id,name,category,value,right
-91,whiskey,north,100.0,1
-92,xray,south,200.0,2
-93,yankee,east,300.0,3
-94,zulu,west,400.0,4
+key,b,value
+1,b,30.0
+2,b,40.0
+4,b,80.0

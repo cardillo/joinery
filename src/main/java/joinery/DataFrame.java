@@ -38,6 +38,7 @@ import java.util.Set;
 
 import joinery.impl.Aggregation;
 import joinery.impl.BlockManager;
+import joinery.impl.Combining;
 import joinery.impl.Comparison;
 import joinery.impl.Conversion;
 import joinery.impl.Display;
@@ -364,7 +365,7 @@ implements Iterable<List<V>> {
     }
 
     public DataFrame<V> reindex(final int ... cols) {
-        return Index.reindex(this, cols);
+        return Index.reindex(this, cols).drop(cols);
     }
 
     public DataFrame<V> reindex(final String ... cols) {
@@ -419,6 +420,56 @@ implements Iterable<List<V>> {
 
     public DataFrame<V> reshape(final Collection<String> rows, final Collection<String> cols) {
         return Shaping.reshape(this, rows, cols);
+    }
+
+    public final DataFrame<V> join(final DataFrame<V> other) {
+        return join(other, JoinType.LEFT, null);
+    }
+
+    public final DataFrame<V> join(final DataFrame<V> other, final JoinType join) {
+        return join(other, join, null);
+    }
+
+    public final DataFrame<V> join(final DataFrame<V> other, final KeyFunction<V> on) {
+        return join(other, JoinType.LEFT, on);
+    }
+
+    public final DataFrame<V> join(final DataFrame<V> other, final JoinType join, final KeyFunction<V> on) {
+        return Combining.join(this, other, join, on);
+    }
+
+    public final DataFrame<V> joinOn(final DataFrame<V> other, final int ... cols) {
+        return joinOn(other, JoinType.LEFT, cols);
+    }
+
+    public final DataFrame<V> joinOn(final DataFrame<V> other, final JoinType join, final int ... cols) {
+        return Combining.joinOn(this, other, join, cols);
+    }
+
+    public final DataFrame<V> joinOn(final DataFrame<V> other, final String ... cols) {
+        return joinOn(other, JoinType.LEFT, cols);
+    }
+
+    public final DataFrame<V> joinOn(final DataFrame<V> other, final JoinType join, final String ... cols) {
+        return joinOn(other, join, columns.indices(cols));
+    }
+
+    public final DataFrame<V> merge(final DataFrame<V> other) {
+        return merge(other, JoinType.LEFT);
+    }
+
+    public final DataFrame<V> merge(final DataFrame<V> other, final JoinType join) {
+        return Combining.merge(this, other, join);
+    }
+
+    @SafeVarargs
+    public final DataFrame<V> coalesce(final DataFrame<? extends V> ... others) {
+        return this;
+    }
+
+    @SafeVarargs
+    public final DataFrame<V> update(final DataFrame<? extends V> ... others) {
+        return this;
     }
 
     /**
@@ -1559,6 +1610,13 @@ implements Iterable<List<V>> {
     public enum SortDirection {
         ASCENDING,
         DESCENDING
+    }
+
+    public enum JoinType {
+        INNER,
+        OUTER,
+        LEFT,
+        RIGHT
     }
 
     public static final void main(final String[] args)
