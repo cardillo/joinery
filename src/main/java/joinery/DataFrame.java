@@ -364,12 +364,30 @@ implements Iterable<List<V>> {
         return drop(todrop);
     }
 
+    public DataFrame<V> reindex(final int col, boolean drop) {
+        DataFrame<V> df = Index.reindex(this, col);
+        return drop ? df.drop(col) : df;
+    }
+
+    public DataFrame<V> reindex(final int[] cols, boolean drop) {
+        DataFrame<V> df = Index.reindex(this, cols);
+        return drop ? df.drop(cols) : df;
+    }
+
     public DataFrame<V> reindex(final int ... cols) {
-        return Index.reindex(this, cols).drop(cols);
+        return reindex(cols, true);
+    }
+
+    public DataFrame<V> reindex(final String col, boolean drop) {
+        return reindex(columns.get(col), drop);
+    }
+
+    public DataFrame<V> reindex(final String[] cols, boolean drop) {
+        return reindex(columns.indices(cols), drop);
     }
 
     public DataFrame<V> reindex(final String ... cols) {
-        return reindex(columns.indices(cols));
+        return reindex(columns.indices(cols), true);
     }
 
     /**
