@@ -70,6 +70,22 @@ public class Index {
         return i;
     }
 
+    public void rename(Map<String, String> names) {
+        Map<String, Integer> idx = new LinkedHashMap<>();
+        for (Map.Entry<String, Integer> entry : index.entrySet()) {
+            String col = entry.getKey();
+            if (names.keySet().contains(col)) {
+                idx.put(names.get(col), entry.getValue());
+            } else {
+                idx.put(col, entry.getValue());
+            }
+        }
+
+        // clear and add all names back to preserve insertion order
+        index.clear();
+        index.putAll(idx);
+    }
+
     public Set<String> names() {
         return index.keySet();
     }
