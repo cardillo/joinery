@@ -195,7 +195,7 @@
     <profile>
       <id>build-doctest</id>
       <activation>
-        <jdk>1.7</jdk>
+        <jdk>[1.6,)</jdk>
       </activation>
       <dependencies>
         <dependency>
