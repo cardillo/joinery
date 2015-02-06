@@ -12,3 +12,5 @@ joinery
     pieces of data to produce insight.
   </dd>
 </dl>
+
+[![Build Status](https://travis-ci.org/cardillo/joinery.svg?branch=master)](https://travis-ci.org/cardillo/joinery)
