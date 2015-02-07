@@ -14,3 +14,10 @@ jdk:
 before_install:
     - "export DISPLAY=:99.0"
     - "sh -e /etc/init.d/xvfb start"
+
+env:
+    global:
+        secure: "e1vpYRrPEWiTt7E3Gd4n+m2t9oTNumvYoXUuBY9KwBgI0qTgHFVzEKVaXH51G7dCMonkFejIiLHFvNwCAi8zvm5ySapw+E4AkoetakIcYWaj1XdPAcf1lfwNpr0zJIiaigDcBA1iPCFy/FbcKnvKNAmOT0MB3aSHMd/DMa78axo="
+
+after_success:
+    - mvn --batch release:prepare release:perform
