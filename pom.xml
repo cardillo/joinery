@@ -133,66 +133,14 @@
         </configuration>
       </plugin>
 
-      <!-- configure javadoc generation -->
+      <!-- configure release plugin -->
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.10.1</version>
-        <executions>
-          <execution>
-            <id>attach-javadocs</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.4.1</version>
         <configuration>
-          <docletArtifact>
-            <groupId>com.google.doclava</groupId>
-            <artifactId>doclava</artifactId>
-            <version>1.0.5</version>
-          </docletArtifact>
-          <doclet>com.google.doclava.Doclava</doclet>
-          <additionalparam>
-            -quiet
-            -hdf project.name "${project.name}"
-            -d ${project.build.directory}/site/apidocs
-            -templatedir ${basedir}/src/main/resources/templates
-          </additionalparam>
-          <useStandardDocletOptions>false</useStandardDocletOptions>
-          <excludePackageNames>joinery.impl</excludePackageNames>
+          <useReleaseProfile>false</useReleaseProfile>
+          <releaseProfiles>release</releaseProfiles>
         </configuration>
-      </plugin>
-
-      <!-- configure source generation -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <version>2.2.1</version>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- configure signing -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-gpg-plugin</artifactId>
-        <version>1.5</version>
-        <executions>
-          <execution>
-            <id>sign-artifacts</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>sign</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
@@ -200,7 +148,7 @@
   <distributionManagement>
     <repository>
       <id>bintray</id>
-      <url>https://api.bintray.com/maven/bintray-user/bintray-repo/package</url>
+      <url>https://${env.BINTRAY_CREDENTIALS}@api.bintray.com/maven/bintray-user/bintray-repo/package</url>
     </repository>
   </distributionManagement>
 
@@ -277,6 +225,76 @@
           <optional>true</optional>
         </dependency>
       </dependencies>
+    </profile>
+
+    <!-- profile for release builds -->
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <!-- configure javadoc generation -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>2.10.1</version>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <docletArtifact>
+                <groupId>com.google.doclava</groupId>
+                <artifactId>doclava</artifactId>
+                <version>1.0.5</version>
+              </docletArtifact>
+              <doclet>com.google.doclava.Doclava</doclet>
+              <additionalparam>
+                -quiet
+                -hdf project.name "${project.name}"
+                -d ${project.build.directory}/site/apidocs
+                -templatedir ${basedir}/src/main/resources/templates
+              </additionalparam>
+              <useStandardDocletOptions>false</useStandardDocletOptions>
+              <excludePackageNames>joinery.impl</excludePackageNames>
+            </configuration>
+          </plugin>
+
+          <!-- configure source generation -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>2.2.1</version>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <!-- configure signing -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.5</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 </project>
