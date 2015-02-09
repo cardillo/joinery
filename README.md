@@ -40,6 +40,15 @@ df.groupBy("value")
   .head(3)
 ```
 
+Printing out the resulting data frame gives us the following table.
+
+```
+    value   number
+0   Fizz        27
+1   Buzz        14
+2   FizzBuzz    6
+```
+
 See [FizzBuzz.java](https://github.com/cardillo/joinery/blob/master/src/examples/java/FizzBuzz.java)
 for the complete code.
 
