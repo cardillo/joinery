@@ -136,4 +136,17 @@ public class Index {
                 new Views.ListView<V>(df, false)
             );
     }
+
+    public static <V> DataFrame<V> reset(final DataFrame<V> df) {
+        List<String> index = new ArrayList<>(df.length());
+        for (int i = 0; i < df.length(); i++) {
+            index.add(String.valueOf(i));
+        }
+
+        return new DataFrame<V>(
+                index,
+                df.columns(),
+                new Views.ListView<V>(df, false)
+            );
+    }
 }

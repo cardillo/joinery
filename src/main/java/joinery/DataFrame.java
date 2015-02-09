@@ -390,6 +390,10 @@ implements Iterable<List<V>> {
         return reindex(columns.indices(cols), true);
     }
 
+    public DataFrame<V> resetIndex() {
+        return Index.reset(this);
+    }
+
     public DataFrame<V> rename(final String old, final String name) {
         return rename(Collections.<String, String>singletonMap(old, name));
     }
