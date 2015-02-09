@@ -8,12 +8,12 @@
 
   <name>Joinery</name>
   <description>Data frames for Java</description>
-  <url>http://github.com/cardillo/joinery</url>
+  <url>http://cardillo.github.io/joinery</url>
 
   <licenses>
     <license>
       <name>GNU General Public License</name>
-      <url>https://www.gnu.org/licenses/gpl.html</url>
+      <url>https://www.gnu.org/licenses/gpl-3.0.txt</url>
     </license>
   </licenses>
 
@@ -28,7 +28,6 @@
     <connection>scm:git:git@github.com:cardillo/joinery.git</connection>
     <developerConnection>scm:git:git@github.com:cardillo/joinery.git</developerConnection>
     <url>git@github.com:cardillo/joinery.git</url>
-    <tag>HEAD</tag>
   </scm>
 
   <properties>
@@ -54,13 +53,11 @@
       <groupId>net.sf.supercsv</groupId>
       <artifactId>super-csv</artifactId>
       <version>${supercsv.version}</version>
-      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-math3</artifactId>
       <version>${commons-math3.version}</version>
-      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>com.xeiam.xchart</groupId>
