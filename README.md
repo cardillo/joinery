@@ -49,7 +49,7 @@ Printing out the resulting data frame gives us the following table.
 2   FizzBuzz    6
 ```
 
-See [FizzBuzz.java](https://github.com/cardillo/joinery/blob/master/src/examples/java/FizzBuzz.java)
+See [FizzBuzz.java](https://github.com/cardillo/joinery/blob/master/src/test/java/examples/FizzBuzz.java)
 for the complete code.
 
 maven
