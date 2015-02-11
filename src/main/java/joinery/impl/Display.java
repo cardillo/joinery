@@ -31,7 +31,7 @@ import joinery.DataFrame;
 
 import com.xeiam.xchart.Chart;
 import com.xeiam.xchart.ChartBuilder;
-import com.xeiam.xchart.SwingWrapper;
+import com.xeiam.xchart.XChartPanel;
 
 public class Display {
     public static <V> void plot(final DataFrame<V> df) {
@@ -44,19 +44,27 @@ public class Display {
         for (final String col : numeric.columns()) {
             chart.addSeries(col, xdata, numeric.col(col));
         }
-        new SwingWrapper(chart).displayChart();
+
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                final JFrame frame = new JFrame(title(df));
+                frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                frame.add(new XChartPanel(chart));
+                frame.pack();
+                frame.setVisible(true);
+            }
+        });
     }
 
     public static <V> void show(final DataFrame<V> df) {
         final List<String> columns = new ArrayList<>(df.columns());
         final List<Class<?>> types = df.types();
         SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    final String title = String.format("%s (%d rows x %d columns)",
-                            df.getClass().getCanonicalName(), df.length(), df.size());
-                    final JFrame frame = new JFrame(title);
-                    final JTable table = new JTable(
+            @Override
+            public void run() {
+                final JFrame frame = new JFrame(title(df));
+                final JTable table = new JTable(
                         new AbstractTableModel() {
                             private static final long serialVersionUID = 1L;
 
@@ -93,5 +101,14 @@ public class Display {
                 frame.setVisible(true);
             }
         });
+    }
+
+    private static final String title(final DataFrame<?> df) {
+        return String.format(
+                "%s (%d rows x %d columns)",
+                df.getClass().getCanonicalName(),
+                df.length(),
+                df.size()
+            );
     }
 }
