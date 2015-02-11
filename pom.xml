@@ -40,6 +40,7 @@
     <aspectj.version>1.8.2</aspectj.version>
     <metrics.version>3.1.0</metrics.version>
     <xchart.version>2.4.2</xchart.version>
+    <jline.version>2.6</jline.version>
   </properties>
 
   <dependencies>
@@ -59,6 +60,8 @@
       <artifactId>commons-math3</artifactId>
       <version>${commons-math3.version}</version>
     </dependency>
+
+    <!-- optional deps for additional functionality -->
     <dependency>
       <groupId>com.xeiam.xchart</groupId>
       <artifactId>xchart</artifactId>
@@ -70,6 +73,12 @@
           <artifactId>VectorGraphics2D</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>jline</groupId>
+      <artifactId>jline</artifactId>
+      <version>${jline.version}</version>
+      <optional>true</optional>
     </dependency>
 
     <!-- test deps -->

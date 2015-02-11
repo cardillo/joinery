@@ -49,6 +49,7 @@ import joinery.impl.Pivoting;
 import joinery.impl.Selection;
 import joinery.impl.Serialization;
 import joinery.impl.Shaping;
+import joinery.impl.Shell;
 import joinery.impl.Sorting;
 import joinery.impl.Views;
 
@@ -1652,9 +1653,10 @@ implements Iterable<List<V>> {
         RIGHT
     }
 
+
     public static final void main(final String[] args)
     throws IOException {
-        final List<DataFrame<Object>> frames = new ArrayList<>(args.length - 1);
+        final List<DataFrame<Object>> frames = new ArrayList<>();
         for (int i = 1; i < args.length; i++) {
             frames.add(DataFrame.readCsv(args[i]));
         }
@@ -1680,8 +1682,13 @@ implements Iterable<List<V>> {
             }
         }
 
+        if (args.length > 0 && "shell".equalsIgnoreCase(args[0])) {
+            Shell.repl(frames);
+            return;
+        }
+
         System.err.printf(
-                "usage: %s [compare|plot|show] [csv-file ...]\n",
+                "usage: %s [compare|plot|show|shell] [csv-file ...]\n",
                 DataFrame.class.getCanonicalName()
             );
         System.exit(255);
