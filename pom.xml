@@ -1,5 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <prerequisites>
+    <maven>3.0.0</maven>
+  </prerequisites>
+
 
   <groupId>joinery</groupId>
   <artifactId>joinery-dataframe</artifactId>
@@ -91,37 +95,164 @@
   </dependencies>
 
   <build>
-    <plugins>
-      <!-- configure compile phase -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
-        <configuration>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
-          <excludes>
-            <!-- exclude metrics by default -->
-            <exclude>**/Metrics.java</exclude>
-          </excludes>
-        </configuration>
-      </plugin>
+    <pluginManagement>
+      <plugins>
+        <!-- configure compile phase -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.2</version>
+          <configuration>
+            <source>${java.version}</source>
+            <target>${java.version}</target>
+            <excludes>
+              <!-- exclude metrics by default -->
+              <exclude>**/Metrics.java</exclude>
+            </excludes>
+          </configuration>
+        </plugin>
 
-      <!-- configure test phase -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.18</version>
-        <configuration>
-          <!-- exclude performance tests (they take a while) -->
-          <excludedGroups>joinery.perf.PerformanceTests</excludedGroups>
-        </configuration>
-      </plugin>
-      <!-- configure integration/verify phase -->
+        <!-- configure test phase -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.18.1</version>
+          <configuration>
+            <!-- exclude performance tests (they take a while) -->
+            <excludedGroups>joinery.perf.PerformanceTests</excludedGroups>
+          </configuration>
+        </plugin>
+
+        <!-- configure integration/verify phase -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <version>2.18.1</version>
+          <configuration>
+            <!-- run performance tests as part of integration/verify -->
+            <includes>
+              <include>**/*Test.java</include>
+            </includes>
+            <groups>joinery.perf.PerformanceTests</groups>
+          </configuration>
+        </plugin>
+
+        <!-- configure release plugin -->
+        <plugin>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>2.5.1</version>
+          <configuration>
+            <releaseProfiles>release</releaseProfiles>
+            <tagNameFormat>v@{project.version}</tagNameFormat>
+          </configuration>
+        </plugin>
+
+        <!-- configure javadoc generation -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>2.10.1</version>
+          <configuration>
+            <docletArtifact>
+              <groupId>com.google.doclava</groupId>
+              <artifactId>doclava</artifactId>
+              <version>1.0.5</version>
+            </docletArtifact>
+            <doclet>com.google.doclava.Doclava</doclet>
+            <additionalparam>
+              -quiet
+              -hdf project.name "${project.name}"
+              -d ${project.build.directory}/site/api
+              -templatedir ${basedir}/src/main/resources/templates
+            </additionalparam>
+            <useStandardDocletOptions>false</useStandardDocletOptions>
+            <excludePackageNames>joinery.impl</excludePackageNames>
+          </configuration>
+        </plugin>
+
+        <!-- configure executable jar creation -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>2.5.3</version>
+          <configuration>
+            <descriptorRefs>
+              <descriptorRef>jar-with-dependencies</descriptorRef>
+            </descriptorRefs>
+            <archive>
+              <manifest>
+                <mainClass>joinery.DataFrame</mainClass>
+              </manifest>
+            </archive>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-gpg-plugin</artifactId>
+          <version>1.6</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>2.4</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>2.6.1</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.2</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.2</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>2.5</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>2.7</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>3.4</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>aspectj-maven-plugin</artifactId>
+          <version>1.7</version>
+          <configuration>
+            <target>${java.version}</target>
+            <complianceLevel>${java.version}</complianceLevel>
+            <verbose>true</verbose>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <!-- run integration tests as part of verify goal -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>2.18</version>
         <executions>
           <execution>
             <goals>
@@ -130,23 +261,35 @@
             </goals>
           </execution>
         </executions>
-        <configuration>
-          <!-- run performance tests as part of integration/verify -->
-          <includes>
-            <include>**/*Test.java</include>
-          </includes>
-          <groups>joinery.perf.PerformanceTests</groups>
-        </configuration>
       </plugin>
 
-      <!-- configure release plugin -->
+      <!-- create executable jar with dependencies -->
       <plugin>
-        <artifactId>maven-release-plugin</artifactId>
-        <version>2.5.1</version>
-        <configuration>
-          <releaseProfiles>release</releaseProfiles>
-          <tagNameFormat>v@{project.version}</tagNameFormat>
-        </configuration>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>assemble-all</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- create javadoc archive -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
@@ -187,7 +330,6 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.1</version>
             <configuration>
               <includes>
                 <include>**/*.java</include>
@@ -197,12 +339,6 @@
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>aspectj-maven-plugin</artifactId>
-            <version>1.7</version>
-            <configuration>
-              <target>${java.version}</target>
-              <complianceLevel>${java.version}</complianceLevel>
-              <verbose>true</verbose>
-            </configuration>
             <executions>
               <execution>
                 <goals>
@@ -238,42 +374,10 @@
       <id>release</id>
       <build>
         <plugins>
-          <!-- configure javadoc generation -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.10.1</version>
-            <executions>
-              <execution>
-                <id>attach-javadocs</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <docletArtifact>
-                <groupId>com.google.doclava</groupId>
-                <artifactId>doclava</artifactId>
-                <version>1.0.5</version>
-              </docletArtifact>
-              <doclet>com.google.doclava.Doclava</doclet>
-              <additionalparam>
-                -quiet
-                -hdf project.name "${project.name}"
-                -d ${project.build.directory}/site/apidocs
-                -templatedir ${basedir}/src/main/resources/templates
-              </additionalparam>
-              <useStandardDocletOptions>false</useStandardDocletOptions>
-              <excludePackageNames>joinery.impl</excludePackageNames>
-            </configuration>
-          </plugin>
-
           <!-- configure source generation -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
-            <version>2.2.1</version>
             <executions>
               <execution>
                 <id>attach-sources</id>
@@ -288,7 +392,6 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.5</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
