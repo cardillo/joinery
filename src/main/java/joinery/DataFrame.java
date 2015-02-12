@@ -398,7 +398,7 @@ implements Iterable<List<V>> {
      * >   .index();
      * [[alpha, 1], [bravo, 2]] }</pre>
      *
-     * @param col the column to use as the new index
+     * @param cols the column to use as the new index
      * @param drop true to remove the index column from the data, false otherwise
      * @return a new data frame with index specified
      */
@@ -419,8 +419,7 @@ implements Iterable<List<V>> {
      * >   .index();
      * [alpha, bravo] }</pre>
      *
-     * @param col the column to use as the new index
-     * @param drop true to remove the index column from the data, false otherwise
+     * @param cols the column to use as the new index
      * @return a new data frame with index specified
      */
     public DataFrame<V> reindex(final int ... cols) {
@@ -459,7 +458,7 @@ implements Iterable<List<V>> {
      * >   .index();
      * [[alpha, 1], [bravo, 2]] }</pre>
      *
-     * @param col the column to use as the new index
+     * @param cols the column to use as the new index
      * @param drop true to remove the index column from the data, false otherwise
      * @return a new data frame with index specified
      */
@@ -479,8 +478,7 @@ implements Iterable<List<V>> {
      * >   .index();
      * [alpha, bravo] }</pre>
      *
-     * @param col the column to use as the new index
-     * @param drop true to remove the index column from the data, false otherwise
+     * @param cols the column to use as the new index
      * @return a new data frame with index specified
      */
     public DataFrame<V> reindex(final String ... cols) {
