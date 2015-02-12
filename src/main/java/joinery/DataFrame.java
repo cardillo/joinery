@@ -1532,7 +1532,28 @@ implements Iterable<List<V>> {
      *
      */
     public final void plot() {
-        Display.plot(this);
+        plot(PlotType.LINE);
+    }
+
+    /**
+     * Display the numeric columns of this data frame
+     * as a chart in a new swing frame using the specified type.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<Object>(
+     * >     Collections.<String>emptyList(),
+     * >     Arrays.asList("name", "value"),
+     * >     Arrays.asList(
+     * >         Arrays.<Object>asList("alpha", "bravo", "charlie"),
+     * >         Arrays.<Object>asList(10, 20, 30)
+     * >     )
+     * > );
+     * > df.plot(PlotType.AREA);
+     * } </pre>
+     *
+     */
+    public final void plot(final PlotType type) {
+        Display.plot(this, type);
     }
 
     public final void show() {
@@ -1653,6 +1674,13 @@ implements Iterable<List<V>> {
         RIGHT
     }
 
+    public enum PlotType {
+        SCATTER,
+        LINE,
+        LINE_AND_POINTS,
+        AREA,
+        BAR
+    }
 
     public static final void main(final String[] args)
     throws IOException {

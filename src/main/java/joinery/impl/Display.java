@@ -28,19 +28,39 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 
 import joinery.DataFrame;
+import joinery.DataFrame.PlotType;
 
 import com.xeiam.xchart.Chart;
 import com.xeiam.xchart.ChartBuilder;
+import com.xeiam.xchart.StyleManager.ChartType;
 import com.xeiam.xchart.XChartPanel;
 
 public class Display {
-    public static <V> void plot(final DataFrame<V> df) {
-        final Chart chart = new ChartBuilder().build();
+    private static ChartType chartType(final PlotType type) {
+        switch (type) {
+            case AREA:      return ChartType.Area;
+            case BAR:       return ChartType.Bar;
+            case SCATTER:   return ChartType.Scatter;
+            default:        return ChartType.Line;
+        }
+    }
+
+    public static <V> void plot(final DataFrame<V> df, final PlotType type) {
+        final Chart chart = new ChartBuilder()
+            .chartType(chartType(type))
+            .build();
+
+        switch (type) {
+            case SCATTER: case LINE_AND_POINTS: break;
+            default: chart.getStyleManager().setMarkerSize(0); break;
+        }
+
         final DataFrame<Number> numeric = df.numeric();
         final List<Number> xdata = new ArrayList<>(df.length());
         for (int i = 0; i < df.length(); i++) {
             xdata.add(i);
         }
+
         for (final String col : numeric.columns()) {
             chart.addSeries(col, xdata, numeric.col(col));
         }

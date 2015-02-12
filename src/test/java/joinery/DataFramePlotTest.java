@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
 
+import joinery.DataFrame.PlotType;
+
 public class DataFramePlotTest {
     public static void main(final String[] args)
     throws IOException {
@@ -47,5 +49,9 @@ public class DataFramePlotTest {
             );
 
         df.plot();
+        df.plot(PlotType.SCATTER);
+        df.plot(PlotType.AREA);
+        df.plot(PlotType.BAR);
+        df.plot(PlotType.LINE_AND_POINTS);
     }
 }
