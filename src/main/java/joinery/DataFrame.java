@@ -365,32 +365,142 @@ implements Iterable<List<V>> {
         return drop(todrop);
     }
 
-    public DataFrame<V> reindex(final int col, boolean drop) {
-        DataFrame<V> df = Index.reindex(this, col);
+    /**
+     * Re-index the rows of the data frame using the specified column index,
+     * optionally dropping the column from the data.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("one", "two");
+     * > df.append("a", Arrays.<Object>asList("alpha", 1));
+     * > df.append("b", Arrays.<Object>asList("bravo", 2));
+     * > df.reindex(0, true)
+     * >   .index();
+     * [alpha, bravo] }</pre>
+     *
+     * @param col the column to use as the new index
+     * @param drop true to remove the index column from the data, false otherwise
+     * @return a new data frame with index specified
+     */
+    public DataFrame<V> reindex(final int col, final boolean drop) {
+        final DataFrame<V> df = Index.reindex(this, col);
         return drop ? df.drop(col) : df;
     }
 
-    public DataFrame<V> reindex(final int[] cols, boolean drop) {
-        DataFrame<V> df = Index.reindex(this, cols);
+    /**
+     * Re-index the rows of the data frame using the specified column indices,
+     * optionally dropping the columns from the data.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("one", "two", "three");
+     * > df.append("a", Arrays.<Object>asList("alpha", 1, 10));
+     * > df.append("b", Arrays.<Object>asList("bravo", 2, 20));
+     * > df.reindex(new int[] { 0, 1 }, true)
+     * >   .index();
+     * [[alpha, 1], [bravo, 2]] }</pre>
+     *
+     * @param col the column to use as the new index
+     * @param drop true to remove the index column from the data, false otherwise
+     * @return a new data frame with index specified
+     */
+    public DataFrame<V> reindex(final int[] cols, final boolean drop) {
+        final DataFrame<V> df = Index.reindex(this, cols);
         return drop ? df.drop(cols) : df;
     }
 
+    /**
+     * Re-index the rows of the data frame using the specified column indices
+     * and dropping the columns from the data.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("one", "two");
+     * > df.append("a", Arrays.<Object>asList("alpha", 1));
+     * > df.append("b", Arrays.<Object>asList("bravo", 2));
+     * > df.reindex(0)
+     * >   .index();
+     * [alpha, bravo] }</pre>
+     *
+     * @param col the column to use as the new index
+     * @param drop true to remove the index column from the data, false otherwise
+     * @return a new data frame with index specified
+     */
     public DataFrame<V> reindex(final int ... cols) {
         return reindex(cols, true);
     }
 
-    public DataFrame<V> reindex(final String col, boolean drop) {
+    /**
+     * Re-index the rows of the data frame using the specified column name,
+     * optionally dropping the row from the data.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("one", "two");
+     * > df.append("a", Arrays.<Object>asList("alpha", 1));
+     * > df.append("b", Arrays.<Object>asList("bravo", 2));
+     * > df.reindex("one", true)
+     * >   .index();
+     * [alpha, bravo] }</pre>
+     *
+     * @param col the column to use as the new index
+     * @param drop true to remove the index column from the data, false otherwise
+     * @return a new data frame with index specified
+     */
+    public DataFrame<V> reindex(final String col, final boolean drop) {
         return reindex(columns.get(col), drop);
     }
 
-    public DataFrame<V> reindex(final String[] cols, boolean drop) {
+    /**
+     * Re-index the rows of the data frame using the specified column names,
+     * optionally dropping the columns from the data.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("one", "two", "three");
+     * > df.append("a", Arrays.<Object>asList("alpha", 1, 10));
+     * > df.append("b", Arrays.<Object>asList("bravo", 2, 20));
+     * > df.reindex(new String[] { "one", "two" }, true)
+     * >   .index();
+     * [[alpha, 1], [bravo, 2]] }</pre>
+     *
+     * @param col the column to use as the new index
+     * @param drop true to remove the index column from the data, false otherwise
+     * @return a new data frame with index specified
+     */
+    public DataFrame<V> reindex(final String[] cols, final boolean drop) {
         return reindex(columns.indices(cols), drop);
     }
 
+    /**
+     * Re-index the rows of the data frame using the specified column names
+     * and removing the columns from the data.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("one", "two");
+     * > df.append("a", Arrays.<Object>asList("alpha", 1));
+     * > df.append("b", Arrays.<Object>asList("bravo", 2));
+     * > df.reindex("one", true)
+     * >   .index();
+     * [alpha, bravo] }</pre>
+     *
+     * @param col the column to use as the new index
+     * @param drop true to remove the index column from the data, false otherwise
+     * @return a new data frame with index specified
+     */
     public DataFrame<V> reindex(final String ... cols) {
         return reindex(columns.indices(cols), true);
     }
 
+    /**
+     * Return a new data frame with the default index, rows names will
+     * be reset to the string value of their integer index.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("one", "two");
+     * > df.append("a", Arrays.<Object>asList("alpha", 1));
+     * > df.append("b", Arrays.<Object>asList("bravo", 2));
+     * > df.resetIndex()
+     * >   .index();
+     * [0, 1] }</pre>
+     *
+     * @return a new data frame with the default index.
+     */
     public DataFrame<V> resetIndex() {
         return Index.reset(this);
     }
@@ -399,7 +509,7 @@ implements Iterable<List<V>> {
         return rename(Collections.<String, String>singletonMap(old, name));
     }
 
-    public DataFrame<V> rename(Map<String, String> names) {
+    public DataFrame<V> rename(final Map<String, String> names) {
         columns.rename(names);
         return this;
     }
@@ -446,60 +556,204 @@ implements Iterable<List<V>> {
         return this;
     }
 
+    /**
+     * Reshape a data frame to the specified dimensions.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("0", "1", "2");
+     * > df.append("0", Arrays.<Object>asList(10, 20, 30));
+     * > df.append("1", Arrays.<Object>asList(40, 50, 60));
+     * > df.reshape(3, 2)
+     * >   .length();
+     * 3 }</pre>
+     *
+     * @param rows the number of rows the new data frame will contain
+     * @param cols the number of columns the new data frame will contain
+     * @return a new data frame with the specified dimensions
+     */
     public DataFrame<V> reshape(final int rows, final int cols) {
         return Shaping.reshape(this, rows, cols);
     }
 
+    /**
+     * Reshape a data frame to the specified indices.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("0", "1", "2");
+     * > df.append("0", Arrays.<Object>asList(10, 20, 30));
+     * > df.append("1", Arrays.<Object>asList(40, 50, 60));
+     * > df.reshape(Arrays.asList("0", "1", "2"), Arrays.asList("0", "1"))
+     * >   .length();
+     * 3 }</pre>
+     *
+     * @param rows the names of rows the new data frame will contain
+     * @param cols the names of columns the new data frame will contain
+     * @return a new data frame with the specified indices
+     */
     public DataFrame<V> reshape(final Collection<String> rows, final Collection<String> cols) {
         return Shaping.reshape(this, rows, cols);
     }
 
+    /**
+     * Return a new data frame created by performing a left outer join
+     * of this data frame with the argument and using the row indices
+     * as the join key.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> left = new DataFrame<>("a", "b");
+     * > left.append("one", Arrays.<Object>asList(1, 2));
+     * > left.append("two", Arrays.<Object>asList(3, 4));
+     * > left.append("three", Arrays.<Object>asList(5, 6));
+     * > DataFrame<Object> right = new DataFrame<>("c", "d");
+     * > right.append("one", Arrays.<Object>asList(10, 20));
+     * > right.append("two", Arrays.<Object>asList(30, 40));
+     * > right.append("four", Arrays.<Object>asList(50, 60));
+     * > left.join(right)
+     * >     .index();
+     * [one, two, three] }</pre>
+     *
+     * @param other the other data frame
+     * @return the result of the join operation as a new data frame
+     */
     public final DataFrame<V> join(final DataFrame<V> other) {
         return join(other, JoinType.LEFT, null);
     }
 
+    /**
+     * Return a new data frame created by performing a join of this
+     * data frame with the argument using the specified join type and
+     * using the row indices as the join key.
+     *
+     * @param other the other data frame
+     * @param join the join type
+     * @return the result of the join operation as a new data frame
+     */
     public final DataFrame<V> join(final DataFrame<V> other, final JoinType join) {
         return join(other, join, null);
     }
 
+    /**
+     * Return a new data frame created by performing a left outer join of this
+     * data frame with the argument using the specified key function.
+     *
+     * @param other the other data frame
+     * @param on the function to generate the join keys
+     * @return the result of the join operation as a new data frame
+     */
     public final DataFrame<V> join(final DataFrame<V> other, final KeyFunction<V> on) {
         return join(other, JoinType.LEFT, on);
     }
 
+    /**
+     * Return a new data frame created by performing a join of this
+     * data frame with the argument using the specified join type and
+     * the specified key function.
+     *
+     * @param other the other data frame
+     * @param join the join type
+     * @param on the function to generate the join keys
+     * @return the result of the join operation as a new data frame
+     */
     public final DataFrame<V> join(final DataFrame<V> other, final JoinType join, final KeyFunction<V> on) {
         return Combining.join(this, other, join, on);
     }
 
+    /**
+     * Return a new data frame created by performing a left outer join of
+     * this data frame with the argument using the column values as the join key.
+     *
+     * @param other the other data frame
+     * @param cols the indices of the columns to use as the join key
+     * @return the result of the join operation as a new data frame
+     */
     public final DataFrame<V> joinOn(final DataFrame<V> other, final int ... cols) {
         return joinOn(other, JoinType.LEFT, cols);
     }
 
+    /**
+     * Return a new data frame created by performing a join of this
+     * data frame with the argument using the specified join type and
+     * the column values as the join key.
+     *
+     * @param other the other data frame
+     * @param join the join type
+     * @param cols the indices of the columns to use as the join key
+     * @return the result of the join operation as a new data frame
+     */
     public final DataFrame<V> joinOn(final DataFrame<V> other, final JoinType join, final int ... cols) {
         return Combining.joinOn(this, other, join, cols);
     }
 
+    /**
+     * Return a new data frame created by performing a left outer join of
+     * this data frame with the argument using the column values as the join key.
+     *
+     * @param other the other data frame
+     * @param cols the names of the columns to use as the join key
+     * @return the result of the join operation as a new data frame
+     */
     public final DataFrame<V> joinOn(final DataFrame<V> other, final String ... cols) {
         return joinOn(other, JoinType.LEFT, cols);
     }
 
+    /**
+     * Return a new data frame created by performing a join of this
+     * data frame with the argument using the specified join type and
+     * the column values as the join key.
+     *
+     * @param other the other data frame
+     * @param join the join type
+     * @param cols the names of the columns to use as the join key
+     * @return the result of the join operation as a new data frame
+     */
     public final DataFrame<V> joinOn(final DataFrame<V> other, final JoinType join, final String ... cols) {
         return joinOn(other, join, columns.indices(cols));
     }
 
+    /**
+     * Return a new data frame created by performing a left outer join of this
+     * data frame with the argument using the common, non-numeric columns
+     * from each data frame as the join key.
+     *
+     * @param other the other data frame
+     * @return the result of the merge operation as a new data frame
+     */
     public final DataFrame<V> merge(final DataFrame<V> other) {
         return merge(other, JoinType.LEFT);
     }
 
+    /**
+     * Return a new data frame created by performing a join of this
+     * data frame with the argument using the specified join type and
+     * the common, non-numeric columns from each data frame as the join key.
+     *
+     * @param other the other data frame
+     * @return the result of the merge operation as a new data frame
+     */
     public final DataFrame<V> merge(final DataFrame<V> other, final JoinType join) {
         return Combining.merge(this, other, join);
     }
 
+    /**
+     * Update the data frame in place by overwriting the any values
+     * with the non-null values provided by the data frame arguments.
+     *
+     * @param others the other data frames
+     * @return this data frame with the overwritten values
+     */
     @SafeVarargs
     public final DataFrame<V> update(final DataFrame<? extends V> ... others) {
         Combining.update(this, true, others);
         return this;
     }
 
+    /**
+     * Update the data frame in place by overwriting any null values with
+     * any non-null values provided by the data frame arguments.
+     *
+     * @param others the other data frames
+     * @return this data frame with the overwritten values
+     */
     @SafeVarargs
     public final DataFrame<V> coalesce(final DataFrame<? extends V> ... others) {
         Combining.update(this, false, others);
@@ -1246,13 +1500,13 @@ implements Iterable<List<V>> {
      * >         Arrays.asList("name", "value"),
      * >         Arrays.asList(
      * >                 Arrays.<Object>asList("alpha", "alpha", "alpha", "bravo", "bravo", "bravo"),
-     * >                 Arrays.<Object>asList(1, 2, 3, 4, 5, 6)
+     * >                 Arrays.<Object>asList(1, 2, 3, 4, 6, 8)
      * >             )
      * >     );
      * > df.groupBy("name")
      * >   .stddev()
      * >   .col("value");
-     * [1.0, 1.0]} </pre>
+     * [1.0, 2.0]} </pre>
      *
      * @return the new data frame
      */
@@ -1667,6 +1921,9 @@ implements Iterable<List<V>> {
         DESCENDING
     }
 
+    /**
+     * An enumeration of join types for joining data frames together.
+     */
     public enum JoinType {
         INNER,
         OUTER,
@@ -1674,6 +1931,9 @@ implements Iterable<List<V>> {
         RIGHT
     }
 
+    /**
+     * An enumeration of plot types for displaying data frames with charts.
+     */
     public enum PlotType {
         SCATTER,
         LINE,
@@ -1682,6 +1942,20 @@ implements Iterable<List<V>> {
         BAR
     }
 
+    /**
+     * Entry point to joinery as a command line tool.
+     *
+     * The available commands are:
+     * <dl>
+     *   <dt>show</dt><dd>display the specified data frame as a swing table</dd>
+     *   <dt>plot</dt><dd>display the specified data frame as a chart</dd>
+     *   <dt>compare</dt><dd>merge the specified data frames and output the result</dd>
+     *   <dt>shell</dt><dd>launch an interactive javascript shell for exploring data</dd>
+     * </dl>
+     *
+     * @param args file paths or urls of csv input data
+     * @throws IOException if an error occurs reading input
+     */
     public static final void main(final String[] args)
     throws IOException {
         final List<DataFrame<Object>> frames = new ArrayList<>();
