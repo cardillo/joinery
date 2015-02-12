@@ -30,6 +30,24 @@ table.jd-inheritance-table {
   line-height: 1em;
 }
 
+#header {
+  width: 960px;
+  padding: 16px;
+  margin: 0 auto;
+  background: #fff;
+  border-bottom: 4px solid #090;
+}
+
+#headerLeft {
+  padding: 0;
+  bottom: 12px;
+}
+
+#headerRight {
+  right: 32px;
+  bottom: 24px;
+}
+
 #jd-header,
 #jd-header a,
 #jd-header a:hover,
