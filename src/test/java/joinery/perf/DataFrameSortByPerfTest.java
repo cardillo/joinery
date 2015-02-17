@@ -38,7 +38,7 @@ public class DataFrameSortByPerfTest {
     @Category(PerformanceTests.class)
     public void test() {
         final DataFrame<Object> df = PerformanceTestUtils.randomData(0.5);
-        final List<String> columns = new ArrayList<>(df.columns());
+        final List<Object> columns = new ArrayList<>(df.columns());
         for (int i = 0; i < 10; i++) {
             final String key = String.format("%s%s", i % 2 == 0 ? "" : "-", columns.get(i / 2 % columns.size()));
             System.out.printf("sorting %,d rows by %s\n", df.length(), key);

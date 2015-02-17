@@ -43,11 +43,11 @@ public class DataFramePivotTest {
         assertArrayEquals(
                 pivot.index().toArray(),
                 new Object[] {
-                    fmt.parse("2014-01-01").toString(),
-                    fmt.parse("2014-01-02").toString(),
-                    fmt.parse("2014-01-03").toString(),
-                    fmt.parse("2014-01-04").toString(),
-                    fmt.parse("2014-01-05").toString()
+                    fmt.parse("2014-01-01"),
+                    fmt.parse("2014-01-02"),
+                    fmt.parse("2014-01-03"),
+                    fmt.parse("2014-01-04"),
+                    fmt.parse("2014-01-05")
                 }
             );
         assertArrayEquals(
@@ -76,23 +76,23 @@ public class DataFramePivotTest {
         assertArrayEquals(
                 pivot.index().toArray(),
                 new Object[] {
-                    fmt.parse("2014-01-01").toString(),
-                    fmt.parse("2014-01-02").toString(),
-                    fmt.parse("2014-01-03").toString(),
-                    fmt.parse("2014-01-04").toString(),
-                    fmt.parse("2014-01-05").toString()
+                    fmt.parse("2014-01-01"),
+                    fmt.parse("2014-01-02"),
+                    fmt.parse("2014-01-03"),
+                    fmt.parse("2014-01-04"),
+                    fmt.parse("2014-01-05")
                 }
             );
         assertArrayEquals(
                 pivot.columns().toArray(),
                 new Object[] {
                     "date",
-                    Arrays.asList("value1", "alpha").toString(),
-                    Arrays.asList("value2", "alpha").toString(),
-                    Arrays.asList("value1", "bravo").toString(),
-                    Arrays.asList("value2", "bravo").toString(),
-                    Arrays.asList("value1", "charlie").toString(),
-                    Arrays.asList("value2", "charlie").toString(),
+                    Arrays.asList("value1", "alpha"),
+                    Arrays.asList("value2", "alpha"),
+                    Arrays.asList("value1", "bravo"),
+                    Arrays.asList("value2", "bravo"),
+                    Arrays.asList("value1", "charlie"),
+                    Arrays.asList("value2", "charlie")
                 }
             );
         assertArrayEquals(

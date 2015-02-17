@@ -32,8 +32,8 @@ public class DataFrameBasicTest {
     @Before
     public final void setUp() {
         df = new DataFrame<Object>(
-                Arrays.asList("row1", "row2", "row3"),
-                Arrays.asList("category", "name", "value"),
+                Arrays.<Object>asList("row1", "row2", "row3"),
+                Arrays.<Object>asList("category", "name", "value"),
                 Arrays.<List<Object>>asList(
                         Arrays.<Object>asList("test", "test", "test", "beta", "beta", "beta"),
                         Arrays.<Object>asList("one", "two", "three", "one", "two", "three" ),
@@ -44,7 +44,7 @@ public class DataFrameBasicTest {
 
     @Test(expected=IllegalArgumentException.class)
     public final void testDuplicateColumnsInConstructor() {
-        new DataFrame<String>(Arrays.asList("test", "test"));
+        new DataFrame<String>(Arrays.<Object>asList("test", "test"));
     }
 
     @Test
@@ -56,7 +56,7 @@ public class DataFrameBasicTest {
             );
         assertArrayEquals(
                 "row names are correct",
-                new Object[] { "row1", "row2", "row3", "3", "4", "5" },
+                new Object[] { "row1", "row2", "row3", 3, 4, 5 },
                 df.index().toArray()
             );
         assertArrayEquals(
@@ -108,7 +108,7 @@ public class DataFrameBasicTest {
 
     @Test
     public final void testRowByGeneratedName() {
-        final List<Object> row = df.row("5");
+        final List<Object> row = df.row(5);
         assertArrayEquals(
                 "data is correct",
                 new Object[] { "beta", "three", 60 },
@@ -120,7 +120,7 @@ public class DataFrameBasicTest {
     public final void testReindexInt() {
         assertArrayEquals(
                 "index is correct",
-                new Object[] { "10", "20", "30", "40", "50", "60" },
+                new Object[] { 10, 20, 30, 40, 50, 60 },
                 df.reindex(2).index().toArray()
             );
     }
@@ -130,8 +130,12 @@ public class DataFrameBasicTest {
         assertArrayEquals(
                 "index is correct",
                 new Object[] {
-                    "[one, 10]", "[two, 20]", "[three, 30]",
-                    "[one, 40]", "[two, 50]", "[three, 60]"
+                    Arrays.asList("one", 10),
+                    Arrays.asList("two", 20),
+                    Arrays.asList("three", 30),
+                    Arrays.asList("one", 40),
+                    Arrays.asList("two", 50),
+                    Arrays.asList("three", 60)
                 },
                 df.reindex(1, 2).index().toArray()
             );
@@ -146,7 +150,7 @@ public class DataFrameBasicTest {
     public final void testReindexString() {
         assertArrayEquals(
                 "index is correct",
-                new Object[] { "10", "20", "30", "40", "50", "60" },
+                new Object[] { 10, 20, 30, 40, 50, 60 },
                 df.reindex("value").index().toArray()
             );
     }
@@ -156,8 +160,12 @@ public class DataFrameBasicTest {
         assertArrayEquals(
                 "index is correct",
                 new Object[] {
-                    "[one, 10]", "[two, 20]", "[three, 30]",
-                    "[one, 40]", "[two, 50]", "[three, 60]"
+                    Arrays.asList("one", 10),
+                    Arrays.asList("two", 20),
+                    Arrays.asList("three", 30),
+                    Arrays.asList("one", 40),
+                    Arrays.asList("two", 50),
+                    Arrays.asList("three", 60)
                 },
                 df.reindex("name", "value").index().toArray()
             );

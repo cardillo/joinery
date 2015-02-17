@@ -40,7 +40,7 @@ implements Iterable<Map.Entry<Object, BitSet>> {
 
     public Grouping() { }
 
-    public <V> Grouping(final DataFrame<V> df, final KeyFunction<V> function, final int ... columns) {
+    public <V> Grouping(final DataFrame<V> df, final KeyFunction<V> function, final Integer ... columns) {
         final Iterator<List<V>> iter = df.iterator();
         for (int r = 0; iter.hasNext(); r++) {
             final List<V> row = iter.next();
@@ -58,7 +58,7 @@ implements Iterable<Map.Entry<Object, BitSet>> {
         }
     }
 
-    public <V> Grouping(final DataFrame<V> df, final int ... columns) {
+    public <V> Grouping(final DataFrame<V> df, final Integer ... columns) {
         this(
             df,
             columns.length == 1 ?
@@ -86,14 +86,14 @@ implements Iterable<Map.Entry<Object, BitSet>> {
     @SuppressWarnings("unchecked")
     public <V> DataFrame<V> apply(final DataFrame<V> df, final Aggregate<V, ?> function) {
         final List<List<V>> grouped = new ArrayList<>();
-        final List<String> names = new ArrayList<>(df.columns());
-        final List<String> newcols = new ArrayList<>();
-        final List<String> index = new ArrayList<String>();
+        final List<Object> names = new ArrayList<>(df.columns());
+        final List<Object> newcols = new ArrayList<>();
+        final List<Object> index = new ArrayList<>();
 
         // construct new row index
         if (!groups.isEmpty()) {
             for (final Object key : groups.keySet()) {
-                index.add(String.valueOf(key));
+                index.add(key);
             }
         }
 

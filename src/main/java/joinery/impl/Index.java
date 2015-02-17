@@ -33,36 +33,36 @@ import joinery.DataFrame.RowFunction;
 
 
 public class Index {
-    private final Map<String, Integer> index;
+    private final Map<Object, Integer> index;
 
     public Index() {
-        this(Collections.<String>emptyList());
+        this(Collections.<Object>emptyList());
     }
 
-    public Index(final Collection<String> names) {
+    public Index(final Collection<?> names) {
         this(names, names.size());
     }
 
-    public Index(final Collection<String> names, final int size) {
+    public Index(final Collection<?> names, final int size) {
         index = new LinkedHashMap<>(names.size());
-        final Iterator<String> it = names.iterator();
+        final Iterator<?> it = names.iterator();
         for (int i = 0; i < size; i++) {
-            final String name = it.hasNext() ? it.next() : String.valueOf(i);
+            final Object name = it.hasNext() ? it.next() : i;
             add(name, i);
         }
     }
 
-    public void add(final String name, final Integer value) {
+    public void add(final Object name, final Integer value) {
         if (index.put(name, value) != null) {
             throw new IllegalArgumentException("duplicate name '" + name +  "' in index");
         }
     }
 
-    public void set(final String name, final Integer value) {
+    public void set(final Object name, final Integer value) {
         index.put(name, value);
     }
 
-    public Integer get(final String name) {
+    public Integer get(final Object name) {
         final Integer i = index.get(name);
         if (i == null) {
             throw new IllegalArgumentException("name '" + name + "' not in index");
@@ -70,10 +70,10 @@ public class Index {
         return i;
     }
 
-    public void rename(Map<String, String> names) {
-        Map<String, Integer> idx = new LinkedHashMap<>();
-        for (Map.Entry<String, Integer> entry : index.entrySet()) {
-            String col = entry.getKey();
+    public void rename(final Map<Object, Object> names) {
+        final Map<Object, Integer> idx = new LinkedHashMap<>();
+        for (final Map.Entry<Object, Integer> entry : index.entrySet()) {
+            final Object col = entry.getKey();
             if (names.keySet().contains(col)) {
                 idx.put(names.get(col), entry.getValue());
             } else {
@@ -86,47 +86,47 @@ public class Index {
         index.putAll(idx);
     }
 
-    public Set<String> names() {
+    public Set<Object> names() {
         return index.keySet();
     }
 
-    public int[] indices(final String[] names) {
+    public Integer[] indices(final Object[] names) {
         return indices(Arrays.asList(names));
     }
 
-    public int[] indices(final List<String> names) {
+    public Integer[] indices(final List<Object> names) {
         final int size = names.size();
-        final int[] indices = new int[size];
+        final Integer[] indices = new Integer[size];
         for (int i = 0; i < size; i++) {
             indices[i] = get(names.get(i));
         }
         return indices;
     }
 
-    public static <V> DataFrame<V> reindex(final DataFrame<V> df, final int ... cols) {
+    public static <V> DataFrame<V> reindex(final DataFrame<V> df, final Integer ... cols) {
         return new DataFrame<V>(
                 df.transform(
                     cols.length == 1 ?
-                        new RowFunction<V, String>() {
+                        new RowFunction<V, Object>() {
                             @Override
-                            public List<List<String>> apply(final List<V> values) {
-                                return Collections.singletonList(
-                                    Collections.singletonList(
-                                        String.valueOf(values.get(cols[0]))
+                            public List<List<Object>> apply(final List<V> values) {
+                                return Collections.<List<Object>>singletonList(
+                                    Collections.<Object>singletonList(
+                                        values.get(cols[0])
                                     )
                                 );
                             }
                         } :
-                        new RowFunction<V,String>() {
+                        new RowFunction<V, Object>() {
                             @Override
-                            public List<List<String>> apply(final List<V> values) {
-                                final List<String> key = new ArrayList<>(cols.length);
+                            public List<List<Object>> apply(final List<V> values) {
+                                final List<Object> key = new ArrayList<>(cols.length);
                                 for (final int c : cols) {
-                                    key.add(String.valueOf(values.get(c)));
+                                    key.add(values.get(c));
                                 }
-                                return Collections.singletonList(
-                                    Collections.singletonList(
-                                        String.valueOf(key)
+                                return Collections.<List<Object>>singletonList(
+                                    Collections.<Object>singletonList(
+                                        Collections.unmodifiableList(key)
                                     )
                                 );
                             }
@@ -138,9 +138,9 @@ public class Index {
     }
 
     public static <V> DataFrame<V> reset(final DataFrame<V> df) {
-        List<String> index = new ArrayList<>(df.length());
+        final List<Object> index = new ArrayList<>(df.length());
         for (int i = 0; i < df.length(); i++) {
-            index.add(String.valueOf(i));
+            index.add(i);
         }
 
         return new DataFrame<V>(

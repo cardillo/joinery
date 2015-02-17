@@ -35,8 +35,8 @@ public class DataFrameConversionTest {
     public void setUp()
     throws Exception {
         df = new DataFrame<>(
-                Arrays.<String>asList("row1", "row2", "row3", "row4", "row5", "row6"),
-                Arrays.<String>asList("string", "long", "double", "date", "bool", "null"),
+                Arrays.<Object>asList("row1", "row2", "row3", "row4", "row5", "row6"),
+                Arrays.<Object>asList("string", "long", "double", "date", "bool", "null"),
                 Arrays.<List<Object>>asList(
                         Arrays.<Object>asList("one", "two", "three", "four", "five", "six"),
                         Arrays.<Object>asList("1", "2", "3", "4", "5", "6"),
@@ -99,8 +99,8 @@ public class DataFrameConversionTest {
     @Test(expected=ClassCastException.class)
     public void testConvertFails() {
         final DataFrame<String> bad = new DataFrame<>(
-                Arrays.<String>asList("row1", "row2", "row3", "row4", "row5", "row6"),
-                Arrays.<String>asList("string", "long", "double", "date"),
+                Arrays.<Object>asList("row1", "row2", "row3", "row4", "row5", "row6"),
+                Arrays.<Object>asList("string", "long", "double", "date"),
                 Arrays.<List<String>>asList(
                         Arrays.<String>asList("one", "two", "three", "four", "five", "six"),
                         Arrays.<String>asList("1", "2", "3", "4", "5", "6"),

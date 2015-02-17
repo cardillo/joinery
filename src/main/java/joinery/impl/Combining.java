@@ -33,13 +33,13 @@ import joinery.DataFrame.KeyFunction;
 
 public class Combining {
     public static <V> DataFrame<V> join(final DataFrame<V> left, final DataFrame<V> right, final JoinType how, final KeyFunction<V> on) {
-        final Iterator<String> leftIt = left.index().iterator();
-        final Iterator<String> rightIt = right.index().iterator();
+        final Iterator<Object> leftIt = left.index().iterator();
+        final Iterator<Object> rightIt = right.index().iterator();
         final Map<Object, List<V>> leftMap = new LinkedHashMap<>();
         final Map<Object, List<V>> rightMap = new LinkedHashMap<>();
 
         for (final List<V> row : left) {
-            final String name = leftIt.next();
+            final Object name = leftIt.next();
             final Object key = on == null ? name : on.apply(row);
             if (leftMap.put(key, row) != null) {
                 throw new IllegalArgumentException("generated key not unique");
@@ -47,15 +47,15 @@ public class Combining {
         }
 
         for (final List<V> row : right) {
-            final String name = rightIt.next();
+            final Object name = rightIt.next();
             final Object key = on == null ? name : on.apply(row);
             if (rightMap.put(key, row) != null) {
                 throw new IllegalArgumentException("generated key not unique");
             }
         }
 
-        final List<String> columns = new ArrayList<>(left.columns());
-        for (String column : right.columns()) {
+        final List<Object> columns = new ArrayList<>(left.columns());
+        for (Object column : right.columns()) {
             final int index = columns.indexOf(column);
             if (index >= 0) {
                 columns.set(index, String.format("%s_left", columns.get(index)));
@@ -70,7 +70,7 @@ public class Combining {
             final List<V> row = how != JoinType.RIGHT ? rightMap.get(entry.getKey()) : leftMap.get(entry.getKey());
             if (row != null || how != JoinType.INNER) {
                 tmp.addAll(row != null ? row : Collections.<V>nCopies(right.columns().size(), null));
-                df.append(String.valueOf(entry.getKey()), tmp);
+                df.append(entry.getKey(), tmp);
             }
         }
 
@@ -80,7 +80,7 @@ public class Combining {
                 if (row == null) {
                     final List<V> tmp = new ArrayList<>(Collections.<V>nCopies(right.columns().size(), null));
                     tmp.addAll(entry.getValue());
-                    df.append(String.valueOf(entry.getKey()), tmp);
+                    df.append(entry.getKey(), tmp);
                 }
             }
         }
@@ -88,7 +88,7 @@ public class Combining {
         return df;
     }
 
-    public static <V> DataFrame<V> joinOn(final DataFrame<V> left, final DataFrame<V> right, final JoinType how, final int ... cols) {
+    public static <V> DataFrame<V> joinOn(final DataFrame<V> left, final DataFrame<V> right, final JoinType how, final Integer ... cols) {
 	    return join(left, right, how, new KeyFunction<V>() {
             @Override
             public Object apply(final List<V> value) {
@@ -102,9 +102,9 @@ public class Combining {
     }
 
     public static <V> DataFrame<V> merge(final DataFrame<V> left, final DataFrame<V> right, final JoinType how) {
-        final Set<String> intersection = new HashSet<>(left.nonnumeric().columns());
+        final Set<Object> intersection = new HashSet<>(left.nonnumeric().columns());
         intersection.retainAll(right.nonnumeric().columns());
-        final String[] columns = intersection.toArray(new String[intersection.size()]);
+        final Object[] columns = intersection.toArray(new Object[intersection.size()]);
         return join(left.reindex(columns), right.reindex(columns), how, null);
     }
 

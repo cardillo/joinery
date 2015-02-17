@@ -8,7 +8,7 @@ import joinery.DataFrame;
 public class FizzBuzz {
     public static void main(final String[] args) {
         // generate data frame with numbers 1-100
-        final DataFrame<Integer> input = new DataFrame<>("number");
+        final DataFrame<Integer> input = new DataFrame<Integer>().add("number");
         for (int i = 1; i <= 100; i++) {
             input.append(Arrays.asList(i));
         }

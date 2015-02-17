@@ -37,8 +37,8 @@ public class DataFrameSelectionTest {
     public void setUp()
     throws Exception {
         final List<List<Object>> data = new ArrayList<>();
-        final Collection<String> rows = new ArrayList<>();
-        final Collection<String> cols = Arrays.<String>asList("name", "value");
+        final Collection<Object> rows = new ArrayList<>();
+        final Collection<Object> cols = Arrays.<Object>asList("name", "value");
         final List<Object> names = new ArrayList<>();
         final List<Object> values = new ArrayList<>();
         for (int i = 0; i < 200; i += 10) {

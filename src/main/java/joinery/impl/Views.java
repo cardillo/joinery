@@ -76,7 +76,7 @@ public class Views {
     }
 
     public static class MapView<V>
-    extends AbstractList<Map<String, V>> {
+    extends AbstractList<Map<Object, V>> {
         private final DataFrame<V> df;
         private final boolean transpose;
 
@@ -86,7 +86,7 @@ public class Views {
         }
 
         @Override
-        public Map<String, V> get(final int index) {
+        public Map<Object, V> get(final int index) {
             return new SeriesMapView<>(df, index, !transpose);
         }
 
@@ -97,7 +97,7 @@ public class Views {
     }
 
     public static class SeriesMapView<V>
-    extends AbstractMap<String, V> {
+    extends AbstractMap<Object, V> {
         private final DataFrame<V> df;
         private final int index;
         private final boolean transpose;
@@ -109,14 +109,14 @@ public class Views {
         }
 
         @Override
-        public Set<Map.Entry<String, V>> entrySet() {
-            return new AbstractSet<Map.Entry<String, V>>() {
+        public Set<Map.Entry<Object, V>> entrySet() {
+            return new AbstractSet<Map.Entry<Object, V>>() {
                 @Override
-                public Iterator<Map.Entry<String, V>> iterator() {
-                    final Set<String> names = transpose ? df.index() : df.columns();
-                    final Iterator<String> it = names.iterator();
+                public Iterator<Map.Entry<Object, V>> iterator() {
+                    final Set<Object> names = transpose ? df.index() : df.columns();
+                    final Iterator<Object> it = names.iterator();
 
-                    return new Iterator<Map.Entry<String, V>>() {
+                    return new Iterator<Map.Entry<Object, V>>() {
                         int value = 0;
 
                         @Override
@@ -125,12 +125,12 @@ public class Views {
                         }
 
                         @Override
-                        public Map.Entry<String, V> next() {
-                            final String key = it.next();
+                        public Map.Entry<Object, V> next() {
+                            final Object key = it.next();
                             final int value = this.value++;
-                            return new Map.Entry<String, V>() {
+                            return new Map.Entry<Object, V>() {
                                 @Override
-                                public String getKey() {
+                                public Object getKey() {
                                     return key;
                                 }
 

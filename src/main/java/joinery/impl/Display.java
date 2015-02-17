@@ -61,8 +61,8 @@ public class Display {
             xdata.add(i);
         }
 
-        for (final String col : numeric.columns()) {
-            chart.addSeries(col, xdata, numeric.col(col));
+        for (final Object col : numeric.columns()) {
+            chart.addSeries(String.valueOf(col), xdata, numeric.col(col));
         }
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -78,7 +78,7 @@ public class Display {
     }
 
     public static <V> void show(final DataFrame<V> df) {
-        final List<String> columns = new ArrayList<>(df.columns());
+        final List<Object> columns = new ArrayList<>(df.columns());
         final List<Class<?>> types = df.types();
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -105,7 +105,7 @@ public class Display {
 
                             @Override
                             public String getColumnName(final int col) {
-                                return columns.get(col);
+                                return String.valueOf(columns.get(col));
                             }
 
                             @Override

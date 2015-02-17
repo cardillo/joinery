@@ -95,19 +95,19 @@ import com.codahale.metrics.annotation.Timed;
  * <p>Taking each step in turn:
  *   <ol>
  *     <li>{@link #readCsv(String)} reads csv data from files and urls</li>
- *     <li>{@link #retain(String...)} is used to
+ *     <li>{@link #retain(Object...)} is used to
  *         eliminate columns that are not needed</li>
  *     <li>{@link #groupBy(KeyFunction)} with a key function
  *         is used to group the rows by month</li>
  *     <li>{@link #mean()} calculates the average close for each month</li>
- *     <li>{@link #sortBy(String...)} orders the rows according
+ *     <li>{@link #sortBy(Object...)} orders the rows according
  *         to average closing price</li>
  *     <li>{@link #tail(int)} returns the last three rows
  *         (alternatively, sort in descending order and use head)</li>
  *     <li>{@link #transform(Function)} is used to convert the
  *         closing prices to integers (this is purely to ease
  *         comparisons for verifying the results</li>
- *     <li>finally, {@link #col(String)} is used to
+ *     <li>finally, {@link #col(Object)} is used to
  *         extract the values as a list</li>
  *   </ol>
  * </p>
@@ -130,7 +130,7 @@ implements Iterable<List<V>> {
      * true }</pre>
      */
     public DataFrame() {
-        this(Collections.<String>emptyList());
+        this(Collections.<List<V>>emptyList());
     }
 
     /**
@@ -144,7 +144,7 @@ implements Iterable<List<V>> {
      * @param columns the data frame column names.
      */
     public DataFrame(final String ... columns) {
-        this(Arrays.asList(columns));
+        this(Arrays.asList((Object[])columns));
     }
 
     /**
@@ -160,8 +160,8 @@ implements Iterable<List<V>> {
      *
      * @param columns the data frame column names.
      */
-    public DataFrame(final Collection<String> columns) {
-        this(Collections.<String>emptyList(), columns, Collections.<List<V>>emptyList());
+    public DataFrame(final Collection<?> columns) {
+        this(Collections.emptyList(), columns, Collections.<List<V>>emptyList());
     }
 
     /**
@@ -177,7 +177,7 @@ implements Iterable<List<V>> {
      * @param index the row names
      * @param columns the column names
      */
-    public DataFrame(final Collection<String> index, final Collection<String> columns) {
+    public DataFrame(final Collection<?> index, final Collection<?> columns) {
         this(index, columns, Collections.<List<V>>emptyList());
     }
 
@@ -195,8 +195,8 @@ implements Iterable<List<V>> {
      *
      * @param data a list of columns containing the data elements.
      */
-    public DataFrame(final List<List<V>> data) {
-        this(Collections.<String>emptyList(), Collections.<String>emptyList(), data);
+    public DataFrame(final List<? extends List<? extends V>> data) {
+        this(Collections.emptyList(), Collections.emptyList(), data);
     }
 
     /**
@@ -206,8 +206,9 @@ implements Iterable<List<V>> {
      * @param columns the column names
      * @param data the data
      */
-    public DataFrame(final Collection<String> index, final Collection<String> columns, final List<List<V>> data) {
-        final BlockManager<V> mgr = new BlockManager<>(data);
+    public DataFrame(final Collection<?> index, final Collection<?> columns,
+            final List<? extends List<? extends V>> data) {
+        final BlockManager<V> mgr = new BlockManager<V>(data);
         mgr.reshape(
                 Math.max(mgr.size(), columns.size()),
                 Math.max(mgr.length(), index.size())
@@ -240,8 +241,8 @@ implements Iterable<List<V>> {
      * @param columns the new column names
      * @return the data frame with the columns added
      */
-    public DataFrame<V> add(final String ... columns) {
-        for (final String column : columns) {
+    public DataFrame<V> add(final Object ... columns) {
+        for (final Object column : columns) {
             final List<V> values = new ArrayList<V>(length());
             for (int r = 0; r < values.size(); r++) {
                 values.add(null);
@@ -267,7 +268,7 @@ implements Iterable<List<V>> {
      * @param values the new column values
      * @return the data frame with the column added
      */
-    public DataFrame<V> add(final String column, final List<V> values) {
+    public DataFrame<V> add(final Object column, final List<V> values) {
         columns.add(column, data.size());
         data.add(values);
         return this;
@@ -284,7 +285,7 @@ implements Iterable<List<V>> {
      * @param cols the names of columns to be removed
      * @return a shallow copy of the data frame with the columns removed
      */
-    public DataFrame<V> drop(final String ... cols) {
+    public DataFrame<V> drop(final Object ... cols) {
         return drop(columns.indices(cols));
     }
 
@@ -299,16 +300,16 @@ implements Iterable<List<V>> {
      * @param cols the indices of the columns to be removed
      * @return a shallow copy of the data frame with the columns removed
      */
-    public DataFrame<V> drop(final int ... cols) {
-        final List<String> colnames = new ArrayList<>(columns.names());
-        final List<String> todrop = new ArrayList<>(cols.length);
+    public DataFrame<V> drop(final Integer ... cols) {
+        final List<Object> colnames = new ArrayList<>(columns.names());
+        final List<Object> todrop = new ArrayList<>(cols.length);
         for (final int col : cols) {
             todrop.add(colnames.get(col));
         }
         colnames.removeAll(todrop);
 
         final List<List<V>> keep = new ArrayList<>(colnames.size());
-        for (final String col : colnames) {
+        for (final Object col : colnames) {
             keep.add(col(col));
         }
 
@@ -330,15 +331,15 @@ implements Iterable<List<V>> {
      * @param cols the columns to include in the new data frame
      * @return a new data frame containing only the specified columns
      */
-    public DataFrame<V> retain(final String ... cols) {
-        final Set<String> keep = new HashSet<String>(Arrays.asList(cols));
-        final Set<String> todrop = new HashSet<String>();
-        for (final String col : columns()) {
+    public DataFrame<V> retain(final Object ... cols) {
+        final Set<Object> keep = new HashSet<>(Arrays.asList(cols));
+        final Set<Object> todrop = new HashSet<>();
+        for (final Object col : columns()) {
             if (!keep.contains(col)) {
                 todrop.add(col);
             }
         }
-        return drop(todrop.toArray(new String[todrop.size()]));
+        return drop(todrop.toArray(new Object[todrop.size()]));
     }
 
     /**
@@ -352,7 +353,7 @@ implements Iterable<List<V>> {
      * @param cols the columns to include in the new data frame
      * @return a new data frame containing only the specified columns
      */
-    public DataFrame<V> retain(final int ... cols) {
+    public DataFrame<V> retain(final Integer ... cols) {
         final Set<Integer> keep = new HashSet<Integer>();
         for (final int c : cols) keep.add(c);
         final int[] todrop = new int[size() - keep.size()];
@@ -371,8 +372,8 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>("one", "two");
-     * > df.append("a", Arrays.<Object>asList("alpha", 1));
-     * > df.append("b", Arrays.<Object>asList("bravo", 2));
+     * > df.append("a", Arrays.asList("alpha", 1));
+     * > df.append("b", Arrays.asList("bravo", 2));
      * > df.reindex(0, true)
      * >   .index();
      * [alpha, bravo] }</pre>
@@ -381,7 +382,7 @@ implements Iterable<List<V>> {
      * @param drop true to remove the index column from the data, false otherwise
      * @return a new data frame with index specified
      */
-    public DataFrame<V> reindex(final int col, final boolean drop) {
+    public DataFrame<V> reindex(final Integer col, final boolean drop) {
         final DataFrame<V> df = Index.reindex(this, col);
         return drop ? df.drop(col) : df;
     }
@@ -392,9 +393,9 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>("one", "two", "three");
-     * > df.append("a", Arrays.<Object>asList("alpha", 1, 10));
-     * > df.append("b", Arrays.<Object>asList("bravo", 2, 20));
-     * > df.reindex(new int[] { 0, 1 }, true)
+     * > df.append("a", Arrays.asList("alpha", 1, 10));
+     * > df.append("b", Arrays.asList("bravo", 2, 20));
+     * > df.reindex(new Integer[] { 0, 1 }, true)
      * >   .index();
      * [[alpha, 1], [bravo, 2]] }</pre>
      *
@@ -402,7 +403,7 @@ implements Iterable<List<V>> {
      * @param drop true to remove the index column from the data, false otherwise
      * @return a new data frame with index specified
      */
-    public DataFrame<V> reindex(final int[] cols, final boolean drop) {
+    public DataFrame<V> reindex(final Integer[] cols, final boolean drop) {
         final DataFrame<V> df = Index.reindex(this, cols);
         return drop ? df.drop(cols) : df;
     }
@@ -413,8 +414,8 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>("one", "two");
-     * > df.append("a", Arrays.<Object>asList("alpha", 1));
-     * > df.append("b", Arrays.<Object>asList("bravo", 2));
+     * > df.append("a", Arrays.asList("alpha", 1));
+     * > df.append("b", Arrays.asList("bravo", 2));
      * > df.reindex(0)
      * >   .index();
      * [alpha, bravo] }</pre>
@@ -422,7 +423,7 @@ implements Iterable<List<V>> {
      * @param cols the column to use as the new index
      * @return a new data frame with index specified
      */
-    public DataFrame<V> reindex(final int ... cols) {
+    public DataFrame<V> reindex(final Integer ... cols) {
         return reindex(cols, true);
     }
 
@@ -432,8 +433,8 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>("one", "two");
-     * > df.append("a", Arrays.<Object>asList("alpha", 1));
-     * > df.append("b", Arrays.<Object>asList("bravo", 2));
+     * > df.append("a", Arrays.asList("alpha", 1));
+     * > df.append("b", Arrays.asList("bravo", 2));
      * > df.reindex("one", true)
      * >   .index();
      * [alpha, bravo] }</pre>
@@ -442,7 +443,7 @@ implements Iterable<List<V>> {
      * @param drop true to remove the index column from the data, false otherwise
      * @return a new data frame with index specified
      */
-    public DataFrame<V> reindex(final String col, final boolean drop) {
+    public DataFrame<V> reindex(final Object col, final boolean drop) {
         return reindex(columns.get(col), drop);
     }
 
@@ -452,8 +453,8 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>("one", "two", "three");
-     * > df.append("a", Arrays.<Object>asList("alpha", 1, 10));
-     * > df.append("b", Arrays.<Object>asList("bravo", 2, 20));
+     * > df.append("a", Arrays.asList("alpha", 1, 10));
+     * > df.append("b", Arrays.asList("bravo", 2, 20));
      * > df.reindex(new String[] { "one", "two" }, true)
      * >   .index();
      * [[alpha, 1], [bravo, 2]] }</pre>
@@ -462,7 +463,7 @@ implements Iterable<List<V>> {
      * @param drop true to remove the index column from the data, false otherwise
      * @return a new data frame with index specified
      */
-    public DataFrame<V> reindex(final String[] cols, final boolean drop) {
+    public DataFrame<V> reindex(final Object[] cols, final boolean drop) {
         return reindex(columns.indices(cols), drop);
     }
 
@@ -472,8 +473,8 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>("one", "two");
-     * > df.append("a", Arrays.<Object>asList("alpha", 1));
-     * > df.append("b", Arrays.<Object>asList("bravo", 2));
+     * > df.append("a", Arrays.asList("alpha", 1));
+     * > df.append("b", Arrays.asList("bravo", 2));
      * > df.reindex("one", true)
      * >   .index();
      * [alpha, bravo] }</pre>
@@ -481,7 +482,7 @@ implements Iterable<List<V>> {
      * @param cols the column to use as the new index
      * @return a new data frame with index specified
      */
-    public DataFrame<V> reindex(final String ... cols) {
+    public DataFrame<V> reindex(final Object ... cols) {
         return reindex(columns.indices(cols), true);
     }
 
@@ -491,8 +492,8 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>("one", "two");
-     * > df.append("a", Arrays.<Object>asList("alpha", 1));
-     * > df.append("b", Arrays.<Object>asList("bravo", 2));
+     * > df.append("a", Arrays.asList("alpha", 1));
+     * > df.append("b", Arrays.asList("bravo", 2));
      * > df.resetIndex()
      * >   .index();
      * [0, 1] }</pre>
@@ -503,11 +504,11 @@ implements Iterable<List<V>> {
         return Index.reset(this);
     }
 
-    public DataFrame<V> rename(final String old, final String name) {
-        return rename(Collections.<String, String>singletonMap(old, name));
+    public DataFrame<V> rename(final Object old, final Object name) {
+        return rename(Collections.singletonMap(old, name));
     }
 
-    public DataFrame<V> rename(final Map<String, String> names) {
+    public DataFrame<V> rename(final Map<Object, Object> names) {
         columns.rename(names);
         return this;
     }
@@ -517,16 +518,16 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>("name", "value");
-     * > df.append(Arrays.<Object>asList("alpha", 1));
-     * > df.append(Arrays.<Object>asList("bravo", 2));
+     * > df.append(Arrays.asList("alpha", 1));
+     * > df.append(Arrays.asList("bravo", 2));
      * > df.length();
      * 2 }</pre>
      *
      * @param row the row to append
      * @return the data frame with the new data appended
      */
-    public DataFrame<V> append(final List<V> row) {
-        return append(String.valueOf(length()), row);
+    public DataFrame<V> append(final List<? extends V> row) {
+        return append(length(), row);
     }
 
     /**
@@ -534,8 +535,8 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>("name", "value");
-     * > df.append("row1", Arrays.<Object>asList("alpha", 1));
-     * > df.append("row2", Arrays.<Object>asList("bravo", 2));
+     * > df.append("row1", Arrays.asList("alpha", 1));
+     * > df.append("row2", Arrays.asList("bravo", 2));
      * > df.index();
      * [row1, row2] }</pre>
      *
@@ -544,7 +545,7 @@ implements Iterable<List<V>> {
      * @return the data frame with the new data appended
      */
     @Timed
-    public DataFrame<V> append(final String name, final List<V> row) {
+    public DataFrame<V> append(final Object name, final List<? extends V> row) {
         final int len = length();
         index.add(name, len);
         data.reshape(data.size(), len + 1);
@@ -559,8 +560,8 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>("0", "1", "2");
-     * > df.append("0", Arrays.<Object>asList(10, 20, 30));
-     * > df.append("1", Arrays.<Object>asList(40, 50, 60));
+     * > df.append("0", Arrays.asList(10, 20, 30));
+     * > df.append("1", Arrays.asList(40, 50, 60));
      * > df.reshape(3, 2)
      * >   .length();
      * 3 }</pre>
@@ -569,7 +570,7 @@ implements Iterable<List<V>> {
      * @param cols the number of columns the new data frame will contain
      * @return a new data frame with the specified dimensions
      */
-    public DataFrame<V> reshape(final int rows, final int cols) {
+    public DataFrame<V> reshape(final Integer rows, final Integer cols) {
         return Shaping.reshape(this, rows, cols);
     }
 
@@ -578,8 +579,8 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>("0", "1", "2");
-     * > df.append("0", Arrays.<Object>asList(10, 20, 30));
-     * > df.append("1", Arrays.<Object>asList(40, 50, 60));
+     * > df.append("0", Arrays.asList(10, 20, 30));
+     * > df.append("1", Arrays.asList(40, 50, 60));
      * > df.reshape(Arrays.asList("0", "1", "2"), Arrays.asList("0", "1"))
      * >   .length();
      * 3 }</pre>
@@ -588,7 +589,7 @@ implements Iterable<List<V>> {
      * @param cols the names of columns the new data frame will contain
      * @return a new data frame with the specified indices
      */
-    public DataFrame<V> reshape(final Collection<String> rows, final Collection<String> cols) {
+    public DataFrame<V> reshape(final Collection<?> rows, final Collection<?> cols) {
         return Shaping.reshape(this, rows, cols);
     }
 
@@ -599,13 +600,13 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> left = new DataFrame<>("a", "b");
-     * > left.append("one", Arrays.<Object>asList(1, 2));
-     * > left.append("two", Arrays.<Object>asList(3, 4));
-     * > left.append("three", Arrays.<Object>asList(5, 6));
+     * > left.append("one", Arrays.asList(1, 2));
+     * > left.append("two", Arrays.asList(3, 4));
+     * > left.append("three", Arrays.asList(5, 6));
      * > DataFrame<Object> right = new DataFrame<>("c", "d");
-     * > right.append("one", Arrays.<Object>asList(10, 20));
-     * > right.append("two", Arrays.<Object>asList(30, 40));
-     * > right.append("four", Arrays.<Object>asList(50, 60));
+     * > right.append("one", Arrays.asList(10, 20));
+     * > right.append("two", Arrays.asList(30, 40));
+     * > right.append("four", Arrays.asList(50, 60));
      * > left.join(right)
      * >     .index();
      * [one, two, three] }</pre>
@@ -664,7 +665,7 @@ implements Iterable<List<V>> {
      * @param cols the indices of the columns to use as the join key
      * @return the result of the join operation as a new data frame
      */
-    public final DataFrame<V> joinOn(final DataFrame<V> other, final int ... cols) {
+    public final DataFrame<V> joinOn(final DataFrame<V> other, final Integer ... cols) {
         return joinOn(other, JoinType.LEFT, cols);
     }
 
@@ -678,7 +679,7 @@ implements Iterable<List<V>> {
      * @param cols the indices of the columns to use as the join key
      * @return the result of the join operation as a new data frame
      */
-    public final DataFrame<V> joinOn(final DataFrame<V> other, final JoinType join, final int ... cols) {
+    public final DataFrame<V> joinOn(final DataFrame<V> other, final JoinType join, final Integer ... cols) {
         return Combining.joinOn(this, other, join, cols);
     }
 
@@ -690,7 +691,7 @@ implements Iterable<List<V>> {
      * @param cols the names of the columns to use as the join key
      * @return the result of the join operation as a new data frame
      */
-    public final DataFrame<V> joinOn(final DataFrame<V> other, final String ... cols) {
+    public final DataFrame<V> joinOn(final DataFrame<V> other, final Object ... cols) {
         return joinOn(other, JoinType.LEFT, cols);
     }
 
@@ -704,7 +705,7 @@ implements Iterable<List<V>> {
      * @param cols the names of the columns to use as the join key
      * @return the result of the join operation as a new data frame
      */
-    public final DataFrame<V> joinOn(final DataFrame<V> other, final JoinType join, final String ... cols) {
+    public final DataFrame<V> joinOn(final DataFrame<V> other, final JoinType join, final Object ... cols) {
         return joinOn(other, join, columns.indices(cols));
     }
 
@@ -777,9 +778,9 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>("name", "value");
-     * > df.append(Arrays.<Object>asList("alpha", 1));
-     * > df.append(Arrays.<Object>asList("bravo", 2));
-     * > df.append(Arrays.<Object>asList("charlie", 3));
+     * > df.append(Arrays.asList("alpha", 1));
+     * > df.append(Arrays.asList("bravo", 2));
+     * > df.append(Arrays.asList("charlie", 3));
      * > df.length();
      * 3 }</pre>
      *
@@ -808,13 +809,13 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>("name", "value");
-     * > df.append("row1", Arrays.<Object>asList("one", 1));
+     * > df.append("row1", Arrays.asList("one", 1));
      * > df.index();
      * [row1] }</pre>
      *
      * @return the index names
      */
-    public Set<String> index() {
+    public Set<Object> index() {
         return index.names();
     }
 
@@ -828,7 +829,7 @@ implements Iterable<List<V>> {
      *
      * @return the column names
      */
-    public Set<String> columns() {
+    public Set<Object> columns() {
         return columns.names();
     }
 
@@ -840,8 +841,8 @@ implements Iterable<List<V>> {
      * >     Arrays.asList("row1", "row2", "row3"),
      * >     Arrays.asList("name", "value"),
      * >     Arrays.asList(
-     * >         Arrays.<Object>asList("alpha", "bravo", "charlie"),
-     * >         Arrays.<Object>asList(10, 20, 30)
+     * >         Arrays.asList("alpha", "bravo", "charlie"),
+     * >         Arrays.asList(10, 20, 30)
      * >     )
      * > );
      * > df.get("row2", "name");
@@ -851,7 +852,7 @@ implements Iterable<List<V>> {
      * @param col the column name
      * @return the value
      */
-    public V get(final String row, final String col) {
+    public V get(final Object row, final Object col) {
         return get(index.get(row), columns.get(col));
     }
 
@@ -860,11 +861,11 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<Object>(
-     * >     Collections.<String>emptyList(),
+     * >     Collections.emptyList(),
      * >     Arrays.asList("name", "value"),
      * >     Arrays.asList(
-     * >         Arrays.<Object>asList("alpha", "bravo", "charlie"),
-     * >         Arrays.<Object>asList(10, 20, 30)
+     * >         Arrays.asList("alpha", "bravo", "charlie"),
+     * >         Arrays.asList(10, 20, 30)
      * >     )
      * > );
      * > df.get(1, 0);
@@ -874,7 +875,7 @@ implements Iterable<List<V>> {
      * @param col the column index
      * @return the value
      */
-    public V get(final int row, final int col) {
+    public V get(final Integer row, final Integer col) {
         return data.get(col, row);
     }
 
@@ -894,7 +895,7 @@ implements Iterable<List<V>> {
      * @param col the column name
      * @param value the new value
      */
-    public void set(final String row, final String col, final V value) {
+    public void set(final Object row, final Object col, final V value) {
         set(index.get(row), columns.get(col), value);
     }
 
@@ -914,7 +915,7 @@ implements Iterable<List<V>> {
      * @param col the column index
      * @param value the new value
      */
-    public void set(final int row, final int col, final V value) {
+    public void set(final Integer row, final Integer col, final V value) {
         data.set(value, col, row);
     }
 
@@ -923,7 +924,7 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>(
-     * >         Collections.<String>emptyList(),
+     * >         Collections.emptyList(),
      * >         Arrays.asList("name", "value"),
      * >         Arrays.asList(
      * >             Arrays.<Object>asList("alpha", "bravo", "charlie"),
@@ -936,7 +937,7 @@ implements Iterable<List<V>> {
      * @param column the column name
      * @return the list of values
      */
-    public List<V> col(final String column) {
+    public List<V> col(final Object column) {
         return col(columns.get(column));
     }
 
@@ -945,7 +946,7 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>(
-     * >         Collections.<String>emptyList(),
+     * >         Collections.emptyList(),
      * >         Arrays.asList("name", "value"),
      * >         Arrays.asList(
      * >             Arrays.<Object>asList("alpha", "bravo", "charlie"),
@@ -958,7 +959,7 @@ implements Iterable<List<V>> {
      * @param column the column index
      * @return the list of values
      */
-    public List<V> col(final int column) {
+    public List<V> col(final Integer column) {
         return new Views.SeriesListView<>(this, column, true);
     }
 
@@ -968,7 +969,7 @@ implements Iterable<List<V>> {
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>(
      * >         Arrays.asList("row1", "row2", "row3"),
-     * >         Collections.<String>emptyList(),
+     * >         Collections.emptyList(),
      * >         Arrays.asList(
      * >             Arrays.<Object>asList("alpha", "bravo", "charlie"),
      * >             Arrays.<Object>asList(1, 2, 3)
@@ -980,7 +981,7 @@ implements Iterable<List<V>> {
      * @param row the row name
      * @return the list of values
      */
-    public List<V> row(final String row) {
+    public List<V> row(final Object row) {
         return row(index.get(row));
     }
 
@@ -989,8 +990,8 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>(
-     * >         Collections.<String>emptyList(),
-     * >         Collections.<String>emptyList(),
+     * >         Collections.emptyList(),
+     * >         Collections.emptyList(),
      * >         Arrays.asList(
      * >             Arrays.<Object>asList("alpha", "bravo", "charlie"),
      * >             Arrays.<Object>asList(1, 2, 3)
@@ -1002,7 +1003,7 @@ implements Iterable<List<V>> {
      * @param row the row index
      * @return the list of values
      */
-    public List<V> row(final int row) {
+    public List<V> row(final Integer row) {
         return new Views.SeriesListView<>(this, row, false);
     }
 
@@ -1012,7 +1013,7 @@ implements Iterable<List<V>> {
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>("name", "value");
      * > for (int i = 0; i < 10; i++)
-     * >     df.append(Arrays.<Object>asList("name" + i, i));
+     * >     df.append(Arrays.asList("name" + i, i));
      * > df.select(new Predicate<Object>() {
      * >         @Override
      * >         public Boolean apply(List<Object> values) {
@@ -1222,7 +1223,7 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>("name", "value", "date");
-     * > df.append(Arrays.<Object>asList("one", "1", new Date()));
+     * > df.append(Arrays.asList("one", "1", new Date()));
      * > df.convert();
      * > df.types();
      * [class java.lang.String, class java.lang.Long, class java.util.Date] }</pre>
@@ -1242,8 +1243,8 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>("a", "b", "c");
-     * > df.append(Arrays.<Object>asList("one", 1, 1.0));
-     * > df.append(Arrays.<Object>asList("two", 2, 2.0));
+     * > df.append(Arrays.asList("one", 1, 1.0));
+     * > df.append(Arrays.asList("two", 2, 2.0));
      * > df.convert(
      * >     null,         // leave column "a" as is
      * >     Long.class,   // convert column "b" to Long
@@ -1269,8 +1270,8 @@ implements Iterable<List<V>> {
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<Object>(
      * >     Arrays.asList(
-     * >         Arrays.<Object>asList("alpha", "bravo", null),
-     * >         Arrays.<Object>asList(null, 2, 3)
+     * >         Arrays.asList("alpha", "bravo", null),
+     * >         Arrays.asList(null, 2, 3)
      * >     )
      * > );
      * > df.isnull().row(0);
@@ -1334,7 +1335,7 @@ implements Iterable<List<V>> {
      * @return the grouped data frame
      */
     @Timed
-    public DataFrame<V> groupBy(final String ... cols) {
+    public DataFrame<V> groupBy(final Object ... cols) {
         return groupBy(columns.indices(cols));
     }
 
@@ -1345,7 +1346,7 @@ implements Iterable<List<V>> {
      * @return the grouped data frame
      */
     @Timed
-    public DataFrame<V> groupBy(final int ... cols) {
+    public DataFrame<V> groupBy(final Integer ... cols) {
         return new DataFrame<>(
                 index,
                 columns,
@@ -1424,7 +1425,7 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>(
-     * >         Collections.<String>emptyList(),
+     * >         Collections.emptyList(),
      * >         Arrays.asList("name", "value"),
      * >         Arrays.asList(
      * >                 Arrays.<Object>asList("alpha", "alpha", "alpha", "bravo", "bravo"),
@@ -1449,7 +1450,7 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>(
-     * >         Collections.<String>emptyList(),
+     * >         Collections.emptyList(),
      * >         Arrays.asList("name", "value"),
      * >         Arrays.asList(
      * >                 Arrays.<Object>asList("alpha", "alpha", "alpha", "bravo", "bravo"),
@@ -1494,7 +1495,7 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>(
-     * >         Collections.<String>emptyList(),
+     * >         Collections.emptyList(),
      * >         Arrays.asList("name", "value"),
      * >         Arrays.asList(
      * >                 Arrays.<Object>asList("alpha", "alpha", "alpha", "bravo", "bravo", "bravo"),
@@ -1543,20 +1544,20 @@ implements Iterable<List<V>> {
         return groups.apply(this, new Aggregation.Median<V>());
     }
 
-    public DataFrame<V> pivot(final String row, final String col, final String ... values) {
+    public DataFrame<V> pivot(final Object row, final Object col, final Object ... values) {
         return pivot(Collections.singletonList(row), Collections.singletonList(col), Arrays.asList(values));
     }
 
-    public DataFrame<V> pivot(final List<String> rows, final List<String> cols, final List<String> values) {
+    public DataFrame<V> pivot(final List<Object> rows, final List<Object> cols, final List<Object> values) {
         return pivot(columns.indices(rows), columns.indices(cols), columns.indices(values));
     }
 
-    public DataFrame<V> pivot(final int row, final int col, final int ... values) {
-        return pivot(new int[] { row }, new int[] { col }, values);
+    public DataFrame<V> pivot(final Integer row, final Integer col, final Integer ... values) {
+        return pivot(new Integer[] { row }, new Integer[] { col }, values);
     }
 
     @Timed
-    public DataFrame<V> pivot(final int[] rows, final int[] cols, final int[] values) {
+    public DataFrame<V> pivot(final Integer[] rows, final Integer[] cols, final Integer[] values) {
         return Pivoting.pivot(this, rows, cols, values);
     }
 
@@ -1565,20 +1566,20 @@ implements Iterable<List<V>> {
         return Pivoting.pivot(this, rows, cols, values);
     }
 
-    public DataFrame<V> sortBy(final String ... cols) {
+    public DataFrame<V> sortBy(final Object ... cols) {
         final Map<Integer, SortDirection> sortCols = new LinkedHashMap<>();
-        for (final String col : cols) {
-            final SortDirection dir = col.startsWith("-") ?
+        for (final Object col : cols) {
+            final String str = col instanceof String ? String.class.cast(col) : "";
+            final SortDirection dir = str.startsWith("-") ?
                     SortDirection.DESCENDING : SortDirection.ASCENDING;
-            final int c = columns.get(
-                    col.startsWith("-") ? col.substring(1) : col);
+            final int c = columns.get(str.startsWith("-") ? str.substring(1) : col);
             sortCols.put(c, dir);
         }
         return Sorting.sort(this, sortCols);
     }
 
     @Timed
-    public DataFrame<V> sortBy(final int ... cols) {
+    public DataFrame<V> sortBy(final Integer ... cols) {
         final Map<Integer, SortDirection> sortCols = new LinkedHashMap<>();
         for (final int c : cols) {
             final SortDirection dir = c < 0 ?
@@ -1602,8 +1603,8 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>("name", "value");
-     * > df.append(Arrays.<Object>asList("one", 1));
-     * > df.append(Arrays.<Object>asList("two", 2));
+     * > df.append(Arrays.asList("one", 1));
+     * > df.append(Arrays.asList("two", 2));
      * > df.numeric().columns();
      * [value] }</pre>
      *
@@ -1611,8 +1612,8 @@ implements Iterable<List<V>> {
      */
     public DataFrame<Number> numeric() {
         final BitSet numeric = Inspection.numeric(this);
-        final Set<String> keep = Selection.select(columns, numeric).names();
-        return retain(keep.toArray(new String[keep.size()]))
+        final Set<Object> keep = Selection.select(columns, numeric).names();
+        return retain(keep.toArray(new Object[keep.size()]))
                 .cast(Number.class);
     }
 
@@ -1621,8 +1622,8 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>("name", "value");
-     * > df.append(Arrays.<Object>asList("one", 1));
-     * > df.append(Arrays.<Object>asList("two", 2));
+     * > df.append(Arrays.asList("one", 1));
+     * > df.append(Arrays.asList("two", 2));
      * > df.nonnumeric().columns();
      * [name] }</pre>
      *
@@ -1630,8 +1631,8 @@ implements Iterable<List<V>> {
      */
     public DataFrame<V> nonnumeric() {
         final BitSet nonnumeric = Inspection.nonnumeric(this);
-        final Set<String> keep = Selection.select(columns, nonnumeric).names();
-        return retain(keep.toArray(new String[keep.size()]));
+        final Set<Object> keep = Selection.select(columns, nonnumeric).names();
+        return retain(keep.toArray(new Object[keep.size()]));
     }
 
     /**
@@ -1666,7 +1667,7 @@ implements Iterable<List<V>> {
         return new Views.ListView<>(this, false).listIterator();
     }
 
-    public ListIterator<Map<String, V>> itermap() {
+    public ListIterator<Map<Object, V>> itermap() {
         return new Views.MapView<>(this, true).listIterator();
     }
 
@@ -1679,7 +1680,7 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>("name", "value");
-     * > df.append(Arrays.<Object>asList("one", "1"));
+     * > df.append(Arrays.asList("one", "1"));
      * > DataFrame<String> dfs = df.cast(String.class);
      * > dfs.get(0, 0).getClass().getName();
      * java.lang.String }</pre>
@@ -1704,24 +1705,24 @@ implements Iterable<List<V>> {
      *
      * @return a map of index names to rows.
      */
-    public Map<String, List<V>> map() {
-        final Map<String, List<V>> m = new LinkedHashMap<String, List<V>>();
+    public Map<Object, List<V>> map() {
+        final Map<Object, List<V>> m = new LinkedHashMap<Object, List<V>>();
 
         final int len = length();
-        final Iterator<String> names = index.names().iterator();
+        final Iterator<Object> names = index.names().iterator();
         for (int r = 0; r < len; r++) {
-            final String name = names.hasNext() ? names.next() : String.valueOf(r);
+            final Object name = names.hasNext() ? names.next() : r;
             m.put(name, row(r));
         }
 
         return m;
     }
 
-    public Map<V, List<V>> map(final String key, final String value) {
+    public Map<V, List<V>> map(final Object key, final Object value) {
         return map(columns.get(key), columns.get(value));
     }
 
-    public Map<V, List<V>> map(final int key, final int value) {
+    public Map<V, List<V>> map(final Integer key, final Integer value) {
         final Map<V, List<V>> m = new LinkedHashMap<V, List<V>>();
 
         final int len = length();
@@ -1738,15 +1739,11 @@ implements Iterable<List<V>> {
         return m;
     }
 
-    public DataFrame<V> unique(final String ... cols) {
-        final int[] indices = new int[cols.length];
-        for (int c = 0; c < cols.length; c++) {
-            indices[c] = columns.get(cols[c]);
-        }
-        return unique(indices);
+    public DataFrame<V> unique(final Object ... cols) {
+        return unique(columns.indices(cols));
     }
 
-    public DataFrame<V> unique(final int ... cols) {
+    public DataFrame<V> unique(final Integer ... cols) {
         final DataFrame<V> unique = new DataFrame<V>(columns.names());
         final Set<List<V>> seen = new HashSet<List<V>>();
 
@@ -1772,11 +1769,11 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<Object>(
-     * >     Collections.<String>emptyList(),
+     * >     Collections.emptyList(),
      * >     Arrays.asList("name", "value"),
      * >     Arrays.asList(
-     * >         Arrays.<Object>asList("alpha", "bravo", "charlie"),
-     * >         Arrays.<Object>asList(10, 20, 30)
+     * >         Arrays.asList("alpha", "bravo", "charlie"),
+     * >         Arrays.asList(10, 20, 30)
      * >     )
      * > );
      * > df.plot();
@@ -1793,11 +1790,11 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<Object>(
-     * >     Collections.<String>emptyList(),
+     * >     Collections.emptyList(),
      * >     Arrays.asList("name", "value"),
      * >     Arrays.asList(
-     * >         Arrays.<Object>asList("alpha", "bravo", "charlie"),
-     * >         Arrays.<Object>asList(10, 20, 30)
+     * >         Arrays.asList("alpha", "bravo", "charlie"),
+     * >         Arrays.asList(10, 20, 30)
      * >     )
      * > );
      * > df.plot(PlotType.AREA);

@@ -52,10 +52,10 @@ public class Selection {
     }
 
     public static Index select(final Index index, final BitSet selected) {
-        final List<String> names = new ArrayList<>(index.names());
+        final List<Object> names = new ArrayList<>(index.names());
         final Index newidx = new Index();
         for (int r = selected.nextSetBit(0); r >= 0; r = selected.nextSetBit(r + 1)) {
-            final String name = names.get(r);
+            final Object name = names.get(r);
             newidx.add(name, index.get(name));
         }
         return newidx;

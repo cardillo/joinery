@@ -44,15 +44,15 @@ public class Serialization {
         final int len = df.length();
         final StringBuilder sb = new StringBuilder();
 
-        for (final String column : df.columns()) {
+        for (final Object column : df.columns()) {
             sb.append("\t");
-            sb.append(column);
+            sb.append(String.valueOf(column));
         }
         sb.append("\n");
 
-        final Iterator<String> names = df.index().iterator();
+        final Iterator<Object> names = df.index().iterator();
         for (int r = 0; r < len; r++) {
-            sb.append(names.hasNext() ? names.next() : String.valueOf(r));
+            sb.append(String.valueOf(names.hasNext() ? names.next() : r));
             for (int c = 0; c < df.size(); c++) {
                 sb.append("\t");
                 sb.append(String.valueOf(df.get(r, c)));
@@ -85,7 +85,7 @@ public class Serialization {
     throws IOException {
         try (CsvListReader reader = new CsvListReader(
                 new InputStreamReader(input), CsvPreference.STANDARD_PREFERENCE)) {
-            final List<String> header = Arrays.asList(reader.getHeader(true));
+            final List<Object> header = Arrays.<Object>asList((Object[])reader.getHeader(true));
             final CellProcessor[] procs = new CellProcessor[header.size()];
             final DataFrame<Object> df = new DataFrame<>(header);
             for (List<Object> row = reader.read(procs); row != null; row = reader.read(procs)) {
