@@ -177,6 +177,8 @@ public class Conversion {
                 new SimpleDateFormat("y/M/d HH:mm:ss"),
                 new SimpleDateFormat("y/M/d hh:mm a"),
                 new SimpleDateFormat("y/M/d HH:mm"),
+                new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a"),
+                new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSSSSSSSS a"),
                 new SimpleDateFormat("y/M/d"),
                 new SimpleDateFormat("M/d/y hh:mm:ss a"),
                 new SimpleDateFormat("M/d/y HH:mm:ss"),
