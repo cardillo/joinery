@@ -1426,7 +1426,8 @@ implements Iterable<List<V>> {
 
     /**
      * Return a map of group names to data frame for grouped
-     * data frames.
+     * data frames. Observe that for this method to have any
+     * effect a {@code groupBy} call must have been done before.
      *
      * @return a map of group names to data frames
      */
