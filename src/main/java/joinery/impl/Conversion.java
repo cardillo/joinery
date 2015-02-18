@@ -165,6 +165,8 @@ public class Conversion {
                 new SimpleDateFormat("y-M-d h:m a"),
                 new SimpleDateFormat("y-M-d H:m"),
                 new SimpleDateFormat("y-M-d h:m:s a"),
+				new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a"),
+				new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSSSSSSSS a"),
                 new SimpleDateFormat("y-M-d H:m:s"),
                 new SimpleDateFormat("y/M/d h:m:s a"),
                 new SimpleDateFormat("y/M/d H:m:s"),
