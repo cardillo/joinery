@@ -1233,6 +1233,12 @@ implements Iterable<List<V>> {
         Conversion.convert(this);
         return this;
     }
+    
+    public DataFrame<V> convert(NumberDefault numDefault) {
+        Conversion.convert(this,numDefault);
+        return this;
+    }
+
 
     /**
      * Convert columns based on the requested types.
@@ -1827,6 +1833,27 @@ implements Iterable<List<V>> {
         return Serialization.readCsv(input);
     }
 
+    public static final DataFrame<Object> readCsv(final String file, final String separator)
+    throws IOException {
+        return Serialization.readCsv(file, separator, NumberDefault.LONG_DEFAULT);
+    }
+
+    public static final DataFrame<Object> readCsv(final InputStream input, final String separator)
+    throws IOException {
+        return Serialization.readCsv(input, separator, NumberDefault.LONG_DEFAULT);
+    }
+
+    public static final DataFrame<Object> readCsv(final String file, final String separator, NumberDefault longDefault)
+    throws IOException {
+        return Serialization.readCsv(file, separator, longDefault);
+    }
+
+    public static final DataFrame<Object> readCsv(final InputStream input, final String separator, NumberDefault longDefault)
+    throws IOException {
+        return Serialization.readCsv(input, separator, longDefault);
+    }
+
+    
     public final void writeCsv(final String file)
     throws IOException {
         Serialization.writeCsv(this, new FileOutputStream(file));
@@ -1837,6 +1864,10 @@ implements Iterable<List<V>> {
         Serialization.writeCsv(this, output);
     }
 
+    public final String toString(final int limit, final int colLimit) {
+        return Serialization.toString(this, limit, colLimit, true);
+    }
+    
     public final String toString(final int limit) {
         return Serialization.toString(this, limit);
     }
@@ -1940,6 +1971,11 @@ implements Iterable<List<V>> {
         AREA,
         BAR
     }
+    
+    public static enum NumberDefault { 
+    	LONG_DEFAULT, 
+    	DOUBLE_DEFAULT 
+    };
 
     /**
      * Entry point to joinery as a command line tool.

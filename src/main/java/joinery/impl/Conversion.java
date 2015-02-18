@@ -29,170 +29,189 @@ import java.util.Map;
 
 import joinery.DataFrame;
 import joinery.DataFrame.Function;
+import joinery.DataFrame.NumberDefault;
 
 public class Conversion {
-    public static <V> void convert(final DataFrame<V> df) {
-        final Map<Integer, Function<V, ?>> conversions = new HashMap<>();
-        final List<Function<V, ?>> converters = Arrays.<Function<V, ?>>asList(
-                new LongConversion<V>(),
-                new DoubleConversion<V>(),
-                new BooleanConversion<V>(),
-                new DateTimeConversion<V>()
-            );
-        final int rows = df.length();
-        final int cols = df.size();
+	public static <V> void convert(final DataFrame<V> df) {
+		convert(df,NumberDefault.LONG_DEFAULT);
+	}
+	
+	public static <V> void convert(final DataFrame<V> df, NumberDefault numDefault) {
+		final Map<Integer, Function<V, ?>> conversions = new HashMap<>();
+		final List<Function<V, ?>> converters;
+		final int rows = df.length();
+		final int cols = df.size();
 
-        // find conversions
-        for (int c = 0; 0 < rows && c < cols; c++) {
-            for (final Function<V, ?> conv : converters) {
-                if (conv.apply(df.get(0, c)) != null) {
-                    conversions.put(c, conv);
-                    break;
-                }
-            }
-        }
+		switch (numDefault) {
+		case LONG_DEFAULT:
+			converters = Arrays.<Function<V, ?>>asList(
+					new LongConversion<V>(),
+					new DoubleConversion<V>(),
+					new BooleanConversion<V>(),
+					new DateTimeConversion<V>()); 
+			break;
+		case DOUBLE_DEFAULT:
+			converters = Arrays.<Function<V, ?>>asList(
+					new DoubleConversion<V>(),
+					new LongConversion<V>(),
+					new BooleanConversion<V>(),
+					new DateTimeConversion<V>());
+			break;
+		default:
+			throw new IllegalArgumentException("Number default contains an Illegal value");
+		}
 
-        // apply conversions
-        convert(df, conversions);
-    }
+		// find conversions
+		for (int c = 0; 0 < rows && c < cols; c++) {
+			for (final Function<V, ?> conv : converters) {
+				if (conv.apply(df.get(0, c)) != null) {
+					conversions.put(c, conv);
+					break;
+				}
+			}
+		}
 
-    @SafeVarargs
-    public static <V> void convert(final DataFrame<V> df, final Class<? extends V> ... columnTypes) {
-        final Map<Integer, Function<V, ?>> conversions = new HashMap<>();
-        for (int i = 0; i < columnTypes.length; i++) {
-            final Class<? extends V> cls = columnTypes[i];
-            if (cls != null) {
-                Function<V, ?> conv = null;
-                if (Date.class.isAssignableFrom(cls)) {
-                    conv = new DateTimeConversion<V>();
-                } else if (Boolean.class.isAssignableFrom(cls)) {
-                    conv = new BooleanConversion<V>();
-                } else if (Long.class.isAssignableFrom(cls)) {
-                    conv = new LongConversion<V>();
-                } else if (Number.class.isAssignableFrom(cls)) {
-                    conv =  new DoubleConversion<V>();
-                } else if (String.class.isAssignableFrom(cls)) {
-                    conv = new StringConversion<V>();
-                }
-                conversions.put(i, conv);
-            }
-        }
-        convert(df, conversions);
-    }
+		// apply conversions
+		convert(df, conversions);
+	}
 
-    @SuppressWarnings("unchecked")
-    public static <V> void convert(final DataFrame<V> df, final Map<Integer, Function<V, ?>> conversions) {
-        final int rows = df.length();
-        final int cols = df.size();
-        for (int c = 0; c < cols; c++) {
-            final Function<V, ?> conv = conversions.get(c);
-            if (conv != null) {
-                for (int r = 0; r < rows; r++) {
-                    df.set(r, c, (V)conv.apply(df.get(r, c)));
-                }
-            }
-        }
-    }
+	@SafeVarargs
+	public static <V> void convert(final DataFrame<V> df, final Class<? extends V> ... columnTypes) {
+		final Map<Integer, Function<V, ?>> conversions = new HashMap<>();
+		for (int i = 0; i < columnTypes.length; i++) {
+			final Class<? extends V> cls = columnTypes[i];
+			if (cls != null) {
+				Function<V, ?> conv = null;
+				if (Date.class.isAssignableFrom(cls)) {
+					conv = new DateTimeConversion<V>();
+				} else if (Boolean.class.isAssignableFrom(cls)) {
+					conv = new BooleanConversion<V>();
+				} else if (Long.class.isAssignableFrom(cls)) {
+					conv = new LongConversion<V>();
+				} else if (Number.class.isAssignableFrom(cls)) {
+					conv =  new DoubleConversion<V>();
+				} else if (String.class.isAssignableFrom(cls)) {
+					conv = new StringConversion<V>();
+				}
+				conversions.put(i, conv);
+			}
+		}
+		convert(df, conversions);
+	}
 
-    public static <V> DataFrame<Boolean> isnull(final DataFrame<V> df) {
-        return df.transform(new Function<V, Boolean>() {
-                @Override
-                public Boolean apply(final V value) {
-                    return value == null;
-                }
-            });
-    }
+	@SuppressWarnings("unchecked")
+	public static <V> void convert(final DataFrame<V> df, final Map<Integer, Function<V, ?>> conversions) {
+		final int rows = df.length();
+		final int cols = df.size();
+		for (int c = 0; c < cols; c++) {
+			final Function<V, ?> conv = conversions.get(c);
+			if (conv != null) {
+				for (int r = 0; r < rows; r++) {
+					df.set(r, c, (V)conv.apply(df.get(r, c)));
+				}
+			}
+		}
+	}
 
-    public static <V> DataFrame<Boolean> notnull(final DataFrame<V> df) {
-        return df.transform(new Function<V, Boolean>() {
-                @Override
-                public Boolean apply(final V value) {
-                    return value != null;
-                }
-            });
-    }
+	public static <V> DataFrame<Boolean> isnull(final DataFrame<V> df) {
+		return df.transform(new Function<V, Boolean>() {
+			@Override
+			public Boolean apply(final V value) {
+				return value == null;
+			}
+		});
+	}
 
-    private static final class StringConversion<V>
-    implements Function<V, String> {
-        @Override
-        public String apply(final V value) {
-            return String.valueOf(value);
-        }
-    }
+	public static <V> DataFrame<Boolean> notnull(final DataFrame<V> df) {
+		return df.transform(new Function<V, Boolean>() {
+			@Override
+			public Boolean apply(final V value) {
+				return value != null;
+			}
+		});
+	}
 
-    private static final class LongConversion<V>
-    implements Function<V, Long> {
-        @Override
-        public Long apply(final V value) {
-            try {
-                return new Long(String.valueOf(value));
-            } catch (final NumberFormatException ignored) { }
-            return null;
-        }
-    }
+	private static final class StringConversion<V>
+	implements Function<V, String> {
+		@Override
+		public String apply(final V value) {
+			return String.valueOf(value);
+		}
+	}
 
-    private static final class DoubleConversion<V>
-    implements Function<V, Double> {
-        @Override
-        public Double apply(final V value) {
-            try {
-                return new Double(String.valueOf(value));
-            } catch (final NumberFormatException ignored) { }
-            return null;
-        }
-    }
+	private static final class LongConversion<V>
+	implements Function<V, Long> {
+		@Override
+		public Long apply(final V value) {
+			try {
+				return new Long(String.valueOf(value));
+			} catch (final NumberFormatException ignored) { }
+			return null;
+		}
+	}
 
-    private static final class BooleanConversion<V>
-    implements Function<V, Boolean> {
-        @Override
-        public Boolean apply(final V value) {
-            final String str = String.valueOf(value);
-            if (str.matches("t(r(u(e)?)?)?|y(e(s)?)?")) {
-                return new Boolean(true);
-            } else if (str.matches("f(a(l(s(e)?)?)?)?|n(o)?")) {
-                return new Boolean(false);
-            }
-            return null;
-        }
-    }
+	private static final class DoubleConversion<V>
+	implements Function<V, Double> {
+		@Override
+		public Double apply(final V value) {
+			try {
+				return new Double(String.valueOf(value));
+			} catch (final NumberFormatException ignored) { }
+			return null;
+		}
+	}
 
-    private static final class DateTimeConversion<V>
-    implements Function<V, Date> {
-        private final List<DateFormat> formats = Arrays.<DateFormat>asList(
-                new SimpleDateFormat("y-M-d'T'H:m:sX"),
-                new SimpleDateFormat("y-M-d'T'H:m:sZ"),
-                new SimpleDateFormat("y-M-d"),
-                new SimpleDateFormat("y-M-d h:m a"),
-                new SimpleDateFormat("y-M-d H:m"),
-                new SimpleDateFormat("y-M-d h:m:s a"),
+	private static final class BooleanConversion<V>
+	implements Function<V, Boolean> {
+		@Override
+		public Boolean apply(final V value) {
+			final String str = String.valueOf(value);
+			if (str.matches("t(r(u(e)?)?)?|y(e(s)?)?")) {
+				return new Boolean(true);
+			} else if (str.matches("f(a(l(s(e)?)?)?)?|n(o)?")) {
+				return new Boolean(false);
+			}
+			return null;
+		}
+	}
+
+	private static final class DateTimeConversion<V>
+	implements Function<V, Date> {
+		private final List<DateFormat> formats = Arrays.<DateFormat>asList(
+				new SimpleDateFormat("y-M-d'T'H:m:sX"),
+				new SimpleDateFormat("y-M-d'T'H:m:sZ"),
+				new SimpleDateFormat("y-M-d"),
+				new SimpleDateFormat("y-M-d h:m a"),
+				new SimpleDateFormat("y-M-d H:m"),
+				new SimpleDateFormat("y-M-d h:m:s a"),
 				new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSS a"),
 				new SimpleDateFormat("dd-MMM-yy hh.mm.ss.SSSSSSSSS a"),
-                new SimpleDateFormat("y-M-d H:m:s"),
-                new SimpleDateFormat("y/M/d h:m:s a"),
-                new SimpleDateFormat("y/M/d H:m:s"),
-                new SimpleDateFormat("y/M/d h:m a"),
-                new SimpleDateFormat("y/M/d H:m"),
-                new SimpleDateFormat("y/M/d"),
-                new SimpleDateFormat("M/d/y h:m:s a"),
-                new SimpleDateFormat("M/d/y H:m:s"),
-                new SimpleDateFormat("M/d/y h:m a"),
-                new SimpleDateFormat("M/d/y H:m"),
-                new SimpleDateFormat("M/d/y")
-            );
+				new SimpleDateFormat("y-M-d H:m:s"),
+				new SimpleDateFormat("y/M/d h:m:s a"),
+				new SimpleDateFormat("y/M/d H:m:s"),
+				new SimpleDateFormat("y/M/d h:m a"),
+				new SimpleDateFormat("y/M/d H:m"),
+				new SimpleDateFormat("y/M/d"),
+				new SimpleDateFormat("M/d/y h:m:s a"),
+				new SimpleDateFormat("M/d/y H:m:s"),
+				new SimpleDateFormat("M/d/y h:m a"),
+				new SimpleDateFormat("M/d/y H:m"),
+				new SimpleDateFormat("M/d/y")
+				);
 
-        @Override
-        public Date apply(final V value) {
-            final String source = String.valueOf(value);
-            final ParsePosition pp = new ParsePosition(0);
-            for (final DateFormat format : formats) {
-                final Date dt = format.parse(source, pp);
-                if (pp.getIndex() == source.length()) {
-                    return dt;
-                }
-                pp.setIndex(0);
-                pp.setErrorIndex(-1);
-            }
-            return null;
-        }
-    }
+		@Override
+		public Date apply(final V value) {
+			final String source = String.valueOf(value);
+			final ParsePosition pp = new ParsePosition(0);
+			for (final DateFormat format : formats) {
+				final Date dt = format.parse(source, pp);
+				if (pp.getIndex() == source.length()) {
+					return dt;
+				}
+				pp.setIndex(0);
+				pp.setErrorIndex(-1);
+			}
+			return null;
+		}
+	}
 }
