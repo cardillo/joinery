@@ -65,8 +65,13 @@ public class Shell {
             }
 
             try {
-                final Object result = engine.eval(buffer.toString());
+                String expr = buffer.toString().trim();
+                if (engine.get("_") != null && expr.startsWith(".")) {
+                    expr = "_" + expr;
+                }
+                final Object result = engine.eval(expr);
                 if (result != null) {
+                    engine.put("_", result);
                     System.out.println(result);
                 }
             } catch (final Exception ex) {
