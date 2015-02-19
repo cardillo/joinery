@@ -21,7 +21,10 @@ package joinery.impl;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
 import java.util.List;
+import java.util.Stack;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
@@ -37,7 +40,8 @@ public class Shell {
         final ScriptEngine engine = new ScriptEngineManager().getEngineByName("js");
         final ScriptEngineFactory factory = engine.getFactory();
         final Console console = console();
-        String expr;
+        final StringBuilder buffer = new StringBuilder();
+        String line;
 
         System.out.printf("%s-%s: %s %s\n",
                 factory.getLanguageName(), factory.getLanguageVersion(),
@@ -53,14 +57,20 @@ public class Shell {
             engine.put("frames", frames.toArray());
         }
 
-        while ((expr = console.readLine()) != null) {
+        while ((line = console.readLine("> ")) != null) {
+            buffer.setLength(0);
+            buffer.append(line);
+            while (!complete(buffer.toString()) && (line = console.readLine("  ")) != null) {
+                buffer.append(line);
+            }
+
             try {
-                final Object result = engine.eval(expr);
+                final Object result = engine.eval(buffer.toString());
                 if (result != null) {
                     System.out.println(result);
                 }
-            } catch (final ScriptException se) {
-                se.printStackTrace();
+            } catch (final Exception ex) {
+                ex.printStackTrace();
             }
         }
     }
@@ -75,7 +85,6 @@ public class Shell {
     }
 
     private static class Console {
-        public static final String PROMPT = "> ";
         private final BufferedReader reader;
 
         private Console()
@@ -83,9 +92,9 @@ public class Shell {
             reader = new BufferedReader(new InputStreamReader(System.in));
         }
 
-        public String readLine()
+        public String readLine(final String prompt)
         throws IOException {
-            System.out.print(PROMPT);
+            System.out.print(prompt);
             return reader.readLine();
         }
     }
@@ -98,13 +107,13 @@ public class Shell {
         private JLineConsole()
         throws IOException {
             console = new ConsoleReader();
-            console.setPrompt(PROMPT);
             Runtime.getRuntime().addShutdownHook(new Thread(this));
         }
 
         @Override
-        public String readLine()
+        public String readLine(final String prompt)
         throws IOException {
+            console.setPrompt(prompt);
             return console.readLine();
         }
 
@@ -114,5 +123,45 @@ public class Shell {
                 console.getTerminal().restore();
             } catch (final Exception ignored) { }
         }
+    }
+
+    /**
+     * This is a crude way to detect partial expressions, it is
+     * pretty inefficient, but it is unlikely anyone can type fast
+     * enough to care.
+     *
+     * @param expr the script expression
+     * @return true if the expression appears to be complete
+     */
+    private static boolean complete(final String expr) {
+        final Stack<Character> s = new Stack<>();
+        final StringCharacterIterator it = new StringCharacterIterator(expr);
+        for (char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
+            switch (c) {
+                case '(': case '[': case '{':
+                    s.push(c);
+                    break;
+                case ')': case ']': case '}':
+                    if (s.isEmpty()) return true;
+                    s.pop();
+                    break;
+                case '"': case '\'':
+                    final char top = s.isEmpty() ? '\0' : s.peek();
+                    switch (top) {
+                        case '"': case '\'':
+                            if (s.isEmpty()) return true;
+                            s.pop();
+                            break;
+                        default:
+                            s.push(c);
+                            break;
+                    }
+                    break;
+                case '\\':
+                    it.next();
+                    break;
+            }
+        }
+        return s.isEmpty();
     }
 }
