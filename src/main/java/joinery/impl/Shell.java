@@ -37,17 +37,21 @@ import jline.console.completer.Completer;
 import joinery.DataFrame;
 
 public class Shell {
-    public static void repl(final List<DataFrame<Object>> frames)
+    public static Object repl(final List<DataFrame<Object>> frames)
     throws IOException {
+        final boolean interactive = System.console() != null;
         final ScriptEngine engine = new ScriptEngineManager().getEngineByName("js");
         final ScriptEngineFactory factory = engine.getFactory();
-        final Console console = console(engine);
+        final Console console = console(interactive, engine);
         final StringBuilder buffer = new StringBuilder();
+        Object result = null;
         String line;
 
-        System.out.printf("%s-%s: %s %s\n",
-                factory.getLanguageName(), factory.getLanguageVersion(),
-                factory.getEngineName(), factory.getEngineVersion());
+        if (interactive) {
+            System.out.printf("%s-%s: %s %s\n",
+                    factory.getLanguageName(), factory.getLanguageVersion(),
+                    factory.getEngineName(), factory.getEngineVersion());
+        }
 
         try {
             engine.eval("var DataFrame = Packages.joinery.DataFrame");
@@ -71,37 +75,49 @@ public class Shell {
                 if (engine.get("_") != null && expr.startsWith(".")) {
                     expr = "_" + expr;
                 }
-                final Object result = engine.eval(expr);
+                result = engine.eval(expr);
                 if (result != null) {
                     engine.put("_", result);
-                    System.out.println(result);
+                    if (interactive) {
+                        System.out.println(result);
+                    }
                 }
             } catch (final Exception ex) {
-                ex.printStackTrace();
+                if (interactive) {
+                    ex.printStackTrace();
+                }
+                result = ex;
             }
         }
+
+        return result;
     }
 
-    private static Console console(final ScriptEngine engine)
+    private static Console console(final boolean interactive, final ScriptEngine engine)
     throws IOException {
-        try {
-            return new JLineConsole(engine);
-        } catch (final NoClassDefFoundError ncd) {
-            return new Console();
+        if (interactive) {
+            try {
+                return new JLineConsole(engine);
+            } catch (final NoClassDefFoundError ignored) { }
         }
+        return new Console(interactive);
     }
 
     private static class Console {
+        private final boolean interactive;
         private final BufferedReader reader;
 
-        private Console()
+        private Console(final boolean interactive)
         throws IOException {
+            this.interactive = interactive;
             reader = new BufferedReader(new InputStreamReader(System.in));
         }
 
         public String readLine(final String prompt)
         throws IOException {
-            System.out.print(prompt);
+            if (interactive) {
+                System.out.print(prompt);
+            }
             return reader.readLine();
         }
     }
@@ -114,6 +130,7 @@ public class Shell {
 
         private JLineConsole(final ScriptEngine engine)
         throws IOException {
+            super(true);
             this.engine = engine;
             console = new ConsoleReader();
             console.addCompleter(this);
