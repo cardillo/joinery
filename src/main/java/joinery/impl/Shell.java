@@ -21,6 +21,7 @@ package joinery.impl;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.util.List;
@@ -32,6 +33,7 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import jline.console.ConsoleReader;
+import jline.console.completer.Completer;
 import joinery.DataFrame;
 
 public class Shell {
@@ -39,7 +41,7 @@ public class Shell {
     throws IOException {
         final ScriptEngine engine = new ScriptEngineManager().getEngineByName("js");
         final ScriptEngineFactory factory = engine.getFactory();
-        final Console console = console();
+        final Console console = console(engine);
         final StringBuilder buffer = new StringBuilder();
         String line;
 
@@ -80,10 +82,10 @@ public class Shell {
         }
     }
 
-    private static Console console()
+    private static Console console(final ScriptEngine engine)
     throws IOException {
         try {
-            return new JLineConsole();
+            return new JLineConsole(engine);
         } catch (final NoClassDefFoundError ncd) {
             return new Console();
         }
@@ -106,12 +108,15 @@ public class Shell {
 
     private static class JLineConsole
     extends Console
-    implements Runnable {
+    implements Runnable, Completer {
+        private final ScriptEngine engine;
         private final ConsoleReader console;
 
-        private JLineConsole()
+        private JLineConsole(final ScriptEngine engine)
         throws IOException {
+            this.engine = engine;
             console = new ConsoleReader();
+            console.addCompleter(this);
             Runtime.getRuntime().addShutdownHook(new Thread(this));
         }
 
@@ -127,6 +132,27 @@ public class Shell {
             try {
                 console.getTerminal().restore();
             } catch (final Exception ignored) { }
+        }
+
+        @Override
+        public int complete(final String buffer, final int cursor, final List<CharSequence> candidates) {
+            final String value = buffer.substring(buffer.lastIndexOf(' ') + 1);
+            final int dot = value.lastIndexOf('.') + 1;
+            if (dot > 1) {
+                final String name = value.substring(0, dot - 1);
+                final String prefix = value.substring(dot);
+                final Object var = engine.get(name);
+                if (var != null) {
+                    final Class<?> cls = var.getClass();
+                    for (final Method m : cls.getDeclaredMethods()) {
+                        if (m.getName().startsWith(prefix)) {
+                            candidates.add(m.getName());
+                        }
+                    }
+                }
+                return dot;
+            }
+            return buffer.length();
         }
     }
 
