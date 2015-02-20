@@ -27,8 +27,12 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.math.BigInteger;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -69,7 +73,7 @@ public class Serialization {
             width.put(INDEX_KEY, clamp(
                     width.get(INDEX_KEY),
                     MAX_COLUMN_WIDTH,
-                    String.valueOf(row).length()));
+                    fmt(row.getClass(), row).length()));
         }
 
         // determine column widths
@@ -98,7 +102,8 @@ public class Serialization {
         for (int r = 0; r < len; r++) {
             // output row name
             int w = width.get(INDEX_KEY);
-            sb.append(truncate(lpad(names.hasNext() ? names.next() : r, w), w));
+            final Object row = names.hasNext() ? names.next() : r;
+            sb.append(truncate(lpad(fmt(row.getClass(), row), w), w));
 
             // output rows
             for (int c = 0; c < df.size(); c++) {
@@ -182,6 +187,17 @@ public class Serialization {
             } else {
                 s = String.format("%.8f", Number.class.cast(o).doubleValue());
             }
+        } else if (o instanceof Date) {
+            final Date dt = Date.class.cast(o);
+            final Calendar cal = Calendar.getInstance();
+            cal.setTime(dt);
+            final DateFormat fmt = new SimpleDateFormat(
+                    cal.get(Calendar.HOUR_OF_DAY) == 0 &&
+                        cal.get(Calendar.MINUTE) == 0 &&
+                        cal.get(Calendar.SECOND) == 0 ?
+                    "yyyy-MM-dd" : "yyyy-MM-dd'T'HH:mm:ssXXX"
+                );
+            s = fmt.format(dt);
         } else {
             s = String.valueOf(o);
         }
