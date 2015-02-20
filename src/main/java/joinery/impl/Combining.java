@@ -89,7 +89,7 @@ public class Combining {
     }
 
     public static <V> DataFrame<V> joinOn(final DataFrame<V> left, final DataFrame<V> right, final JoinType how, final Integer ... cols) {
-	    return join(left, right, how, new KeyFunction<V>() {
+        return join(left, right, how, new KeyFunction<V>() {
             @Override
             public Object apply(final List<V> value) {
                 final List<V> key = new ArrayList<>(cols.length);
@@ -98,7 +98,7 @@ public class Combining {
                 }
                 return Collections.unmodifiableList(key);
             }
-	    });
+        });
     }
 
     public static <V> DataFrame<V> merge(final DataFrame<V> left, final DataFrame<V> right, final JoinType how) {
