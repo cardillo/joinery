@@ -112,6 +112,10 @@ import com.codahale.metrics.annotation.Timed;
  *   </ol>
  * </p>
  *
+ * <p>Find more details on the
+ * <a href="http://github.com/cardillo/joinery">github</a>
+ * project page.</p>
+ *
  * @param <V> the type of values in this data frame
  */
 public class DataFrame<V>
