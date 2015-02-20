@@ -23,11 +23,15 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -77,6 +81,20 @@ public class DataFrameSerializationTest {
         final File tmp = File.createTempFile(getClass().getName(), ".csv");
         tmp.deleteOnExit();
         df.writeCsv(new FileOutputStream(tmp));
+    }
+
+    @Test
+    public void testReadWriteCsvTypes()
+    throws IOException {
+        final File tmp = File.createTempFile(getClass().getName(), ".csv");
+        tmp.deleteOnExit();
+        final DataFrame<Object> original = new DataFrame<>("date", "long", "double", "bool", "string");
+        original.append(Arrays.asList(new Date(), 1L, 1.0, true, "test"));
+        original.writeCsv(tmp.getPath());
+        assertArrayEquals(
+                original.types().toArray(),
+                DataFrame.readCsv(tmp.getPath()).types().toArray()
+            );
     }
 
     @Test

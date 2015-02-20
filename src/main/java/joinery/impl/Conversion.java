@@ -159,22 +159,22 @@ public class Conversion {
     private static final class DateTimeConversion<V>
     implements Function<V, Date> {
         private final List<DateFormat> formats = Arrays.<DateFormat>asList(
-                new SimpleDateFormat("y-M-d'T'H:m:sX"),
-                new SimpleDateFormat("y-M-d'T'H:m:sZ"),
+                new SimpleDateFormat("y-M-d'T'HH:mm:ssXXX"),
+                new SimpleDateFormat("y-M-d'T'HH:mm:ssZZZ"),
                 new SimpleDateFormat("y-M-d"),
-                new SimpleDateFormat("y-M-d h:m a"),
-                new SimpleDateFormat("y-M-d H:m"),
-                new SimpleDateFormat("y-M-d h:m:s a"),
-                new SimpleDateFormat("y-M-d H:m:s"),
-                new SimpleDateFormat("y/M/d h:m:s a"),
-                new SimpleDateFormat("y/M/d H:m:s"),
-                new SimpleDateFormat("y/M/d h:m a"),
-                new SimpleDateFormat("y/M/d H:m"),
+                new SimpleDateFormat("y-M-d hh:mm a"),
+                new SimpleDateFormat("y-M-d HH:mm"),
+                new SimpleDateFormat("y-M-d hh:mm:ss a"),
+                new SimpleDateFormat("y-M-d HH:mm:ss"),
+                new SimpleDateFormat("y/M/d hh:mm:ss a"),
+                new SimpleDateFormat("y/M/d HH:mm:ss"),
+                new SimpleDateFormat("y/M/d hh:mm a"),
+                new SimpleDateFormat("y/M/d HH:mm"),
                 new SimpleDateFormat("y/M/d"),
-                new SimpleDateFormat("M/d/y h:m:s a"),
-                new SimpleDateFormat("M/d/y H:m:s"),
-                new SimpleDateFormat("M/d/y h:m a"),
-                new SimpleDateFormat("M/d/y H:m"),
+                new SimpleDateFormat("M/d/y hh:mm:ss a"),
+                new SimpleDateFormat("M/d/y HH:mm:ss"),
+                new SimpleDateFormat("M/d/y hh:mm a"),
+                new SimpleDateFormat("M/d/y HH:mm"),
                 new SimpleDateFormat("M/d/y")
             );
 
