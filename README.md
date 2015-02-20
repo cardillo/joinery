@@ -19,7 +19,7 @@ quick start
 Remember **FizzBuzz** (of course you do!), well imagine you have just
 solved the puzzle (well done!) and you have written the results to
 a comma-delimited file for further analysis.  Now you want to know
-how many times are the strings `"Fizz"`, `"Buzz"`, and `"FizzBuzz"`
+how many times are the strings `Fizz`, `Buzz`, and `FizzBuzz`
 printed out.
 
 You could answer this question any number of ways, for example you
@@ -43,10 +43,10 @@ df.groupBy("value")
 Printing out the resulting data frame gives us the following table.
 
 ```
-    value   number
-0   Fizz        27
-1   Buzz        14
-2   FizzBuzz    6
+          value            number
+0       Fizz                27
+1       Buzz                14
+2       FizzBuzz             6
 ```
 
 See [FizzBuzz.java](https://github.com/cardillo/joinery/blob/master/src/test/java/examples/FizzBuzz.java)
@@ -61,15 +61,11 @@ instructions on setting up your maven profile to
 use JCenter, visit https://bintray.com/bintray/jcenter.
 
 ```xml
-<dependencies>
-  ...
-  <dependency>
-    <groupId>joinery</groupId>
-    <artifactId>joinery-dataframe</artifactId>
-    <version>1.0</version>
-  </dependency>
-  ...
-</dependencies>
+<dependency>
+  <groupId>joinery</groupId>
+  <artifactId>joinery-dataframe</artifactId>
+  <version>1.2</version>
+</dependency>
 ```
 
 download
