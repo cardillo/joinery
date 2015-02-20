@@ -51,6 +51,7 @@ import joinery.impl.Serialization;
 import joinery.impl.Shaping;
 import joinery.impl.Shell;
 import joinery.impl.Sorting;
+import joinery.impl.Timeseries;
 import joinery.impl.Views;
 
 import com.codahale.metrics.annotation.Timed;
@@ -1765,6 +1766,22 @@ implements Iterable<List<V>> {
         }
 
         return unique;
+    }
+
+    public DataFrame<V> diff() {
+        return diff(1);
+    }
+
+    public DataFrame<V> diff(final int period) {
+        return Timeseries.diff(this, period);
+    }
+
+    public DataFrame<V> percentChange() {
+        return percentChange(1);
+    }
+
+    public DataFrame<V> percentChange(final int period) {
+        return Timeseries.percentChange(this, period);
     }
 
     /**
