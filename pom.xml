@@ -7,7 +7,7 @@
 
   <groupId>joinery</groupId>
   <artifactId>joinery-dataframe</artifactId>
-  <version>1.2-SNAPSHOT</version>
+  <version>1.2</version>
   <packaging>jar</packaging>
 
   <name>Joinery</name>
@@ -32,7 +32,7 @@
     <connection>scm:git:git@github.com:cardillo/joinery.git</connection>
     <developerConnection>scm:git:git@github.com:cardillo/joinery.git</developerConnection>
     <url>git@github.com:cardillo/joinery.git</url>
-    <tag>HEAD</tag>
+    <tag>v1.2</tag>
   </scm>
 
   <properties>
