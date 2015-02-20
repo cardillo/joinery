@@ -40,6 +40,14 @@ import java.util.Map;
 
 import joinery.DataFrame;
 
+import org.apache.poi.hssf.usermodel.HSSFDataFormat;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.supercsv.cellprocessor.ConvertNullTo;
 import org.supercsv.cellprocessor.FmtDate;
 import org.supercsv.cellprocessor.ift.CellProcessor;
@@ -256,4 +264,105 @@ public class Serialization {
         }
     }
 
+    public static DataFrame<Object> readXls(final String file)
+    throws IOException {
+        return readXls(file.contains("://") ?
+                    new URL(file).openStream() : new FileInputStream(file));
+    }
+
+    public static DataFrame<Object> readXls(final InputStream input)
+    throws IOException {
+        final Workbook wb = new HSSFWorkbook(input);
+        final Sheet sheet = wb.getSheetAt(0);
+        final List<Object> columns = new ArrayList<>();
+        final List<List<Object>> data = new ArrayList<>();
+
+        for (final Row row : sheet) {
+            if (row.getRowNum() == 0) {
+                // read header
+                for (final Cell cell : row) {
+                    columns.add(readCell(cell));
+                }
+            } else {
+                // read data values
+                final List<Object> values = new ArrayList<>();
+                for (final Cell cell : row) {
+                    values.add(readCell(cell));
+                }
+                data.add(values);
+            }
+        }
+
+        // create data frame
+        final DataFrame<Object> df = new DataFrame<>(columns);
+        for (final List<Object> row : data) {
+            df.append(row);
+        }
+
+        return df.convert();
+    }
+
+    public static <V> void writeXls(final DataFrame<V> df, final String output)
+    throws IOException {
+        writeXls(df, new FileOutputStream(output));
+    }
+
+    public static <V> void writeXls(final DataFrame<V> df, final OutputStream output)
+    throws IOException {
+        final Workbook wb = new HSSFWorkbook();
+        final Sheet sheet = wb.createSheet();
+
+        // add header
+        Row row = sheet.createRow(0);
+        final Iterator<Object> it = df.columns().iterator();
+        for (int c = 0; c < df.size(); c++) {
+            final Cell cell = row.createCell(c);
+            writeCell(cell, it.hasNext() ? it.next() : c);
+        }
+
+        // add data values
+        for (int r = 0; r < df.length(); r++) {
+            row = sheet.createRow(r + 1);
+            for (int c = 0; c < df.size(); c++) {
+                final Cell cell = row.createCell(c);
+                writeCell(cell, df.get(r, c));
+            }
+        }
+
+        //  write to stream
+        wb.write(output);
+        output.close();
+    }
+
+    private static final Object readCell(final Cell cell) {
+        switch (cell.getCellType()) {
+            case Cell.CELL_TYPE_NUMERIC:
+                if (DateUtil.isCellDateFormatted(cell)) {
+                    return DateUtil.getJavaDate(cell.getNumericCellValue());
+                }
+                return cell.getNumericCellValue();
+            case Cell.CELL_TYPE_BOOLEAN:
+                return cell.getBooleanCellValue();
+            default:
+                return cell.getStringCellValue();
+        }
+    }
+
+    private static final void writeCell(final Cell cell, final Object value) {
+        if (value instanceof Number) {
+            cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+            cell.setCellValue(Number.class.cast(value).doubleValue());
+        } else if (value instanceof Date) {
+            final CellStyle style = cell.getSheet().getWorkbook().createCellStyle();
+            style.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
+            cell.setCellStyle(style);
+            cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+            cell.setCellValue(Date.class.cast(value));
+        } else if (value instanceof Boolean) {
+            cell.setCellType(Cell.CELL_TYPE_BOOLEAN);
+        } else {
+            cell.setCellType(Cell.CELL_TYPE_STRING);
+            cell.setCellValue(value != null ? String.valueOf(value) : "");
+        }
+    }
 }

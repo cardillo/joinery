@@ -1854,6 +1854,26 @@ implements Iterable<List<V>> {
         Serialization.writeCsv(this, output);
     }
 
+    public static final DataFrame<Object> readXls(final String file)
+    throws IOException {
+        return Serialization.readXls(file);
+    }
+
+    public static final DataFrame<Object> readXls(final InputStream input)
+    throws IOException {
+        return Serialization.readXls(input);
+    }
+
+    public final void writeXls(final String file)
+    throws IOException {
+        Serialization.writeXls(this, new FileOutputStream(file));
+    }
+
+    public final void writeXls(final OutputStream output)
+    throws IOException {
+        Serialization.writeXls(this, output);
+    }
+
     public final String toString(final int limit) {
         return Serialization.toString(this, limit);
     }
