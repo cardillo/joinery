@@ -234,9 +234,22 @@ public class Serialization {
     throws IOException {
         try (CsvListWriter writer = new CsvListWriter(
                 new OutputStreamWriter(output), CsvPreference.STANDARD_PREFERENCE)) {
-            writer.writeHeader(df.columns().toArray(new String[df.size()]));
+            final String[] header = new String[df.size()];
+            final Iterator<Object> it = df.columns().iterator();
+            for (int c = 0; c < df.size(); c++) {
+                header[c] = String.valueOf(it.hasNext() ? it.next() : c);
+            }
+            writer.writeHeader(header);
             final CellProcessor[] procs = new CellProcessor[df.size()];
-            Arrays.fill(procs, new ConvertNullTo(""));
+            final List<Class<?>> types = df.types();
+            for (int c = 0; c < df.size(); c++) {
+                final Class<?> cls = types.get(c);
+                if (Date.class.isAssignableFrom(cls)) {
+                    procs[c] = new ConvertNullTo("", new FmtDate("yyyy-MM-dd'T'HH:mm:ssXXX"));
+                } else {
+                    procs[c] = new ConvertNullTo("");
+                }
+            }
             for (final List<V> row : df) {
                 writer.write(row, procs);
             }

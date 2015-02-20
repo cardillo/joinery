@@ -98,6 +98,16 @@ public class DataFrameSerializationTest {
     }
 
     @Test
+    public void testWriteCsvNonStringIndex()
+    throws IOException {
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final DataFrame<Object> df = new DataFrame<>(Arrays.asList(1L, 2L, 3L, 4L));
+        df.append(Arrays.asList(1, 2, 3, 4));
+        df.writeCsv(out);
+        assertTrue("writeCsv does not throw due to non-string indices", true);
+    }
+
+    @Test
     public void testToStringInt() {
         assertThat(
                 df.toString(2),
