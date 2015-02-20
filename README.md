@@ -52,6 +52,32 @@ Printing out the resulting data frame gives us the following table.
 See [FizzBuzz.java](https://github.com/cardillo/joinery/blob/master/src/test/java/examples/FizzBuzz.java)
 for the complete code.
 
+
+next steps
+==========
+
+Get the [executable jar](https://bintray.com/artifact/download/cardillo/maven/joinery/joinery-dataframe/1.2/joinery-dataframe-1.2-jar-with-dependencies.jar)
+and try it for yourself.
+
+```javascript
+$ java -jar joinery-dataframe-1.2-jar-with-dependencies.jar shell
+ECMAScript-ECMA - 262 Edition 5.1: Oracle Nashorn 1.8.0_31
+> df = new DataFrame()
+[empty data frame]
+> df.add("value")
+[empty data frame]
+> [10, 20, 30].forEach(function(val) {
+      df.append([val])
+  })
+> df
+      value
+0          10
+1          20
+2          30
+>
+```
+
+
 maven
 ==========
 
@@ -68,12 +94,119 @@ use JCenter, visit https://bintray.com/bintray/jcenter.
 </dependency>
 ```
 
+
 download
 ==========
 
 JCenter also allows for direct download using the button below.
 
 [![Download](https://api.bintray.com/packages/cardillo/maven/joinery/images/download.svg)](https://bintray.com/cardillo/maven/joinery/_latestVersion)
+
+utilities
+==========
+
+**joinery** includes some tools to make working with data frames easier.
+These tools are available by running `joinery.DataFrame` as an application.
+
+```bash
+$ java joinery.DataFrame
+usage: joinery.DataFrame [compare|plot|show|shell] [csv-file ...]
+```
+
+show
+----------
+Show displays the tabular data of a data frame in a gui window.
+
+```bash
+$ java joinery.DataFrame show my_data.csv
+```
+
+![Screenshot of show window](https://raw.githubusercontent.com/cardillo/joinery/master/src/main/resources/templates/assets/images/joinery-show.png)
+
+plot
+----------
+Plot displays the numeric data of a data frame as a chart.
+
+```bash
+$ java joinery.DataFrame plot my_data.csv
+```
+
+![Screenshot of plot window](https://raw.githubusercontent.com/cardillo/joinery/master/src/main/resources/templates/assets/images/joinery-plot.png)
+
+shell
+----------
+Launches an interactive JavaScript shell for working with data frames.
+
+```javascript
+$ java joinery.DataFrame shell
+> df = DataFrame.readCsv('https://www.quandl.com/api/v1/datasets/GOOG/NASDAQ_AAPL.csv')
+                  Date                Open            High            Low             Close              Volume
+   0    Thu Feb 19 00:00:...    128.48000000    129.03000000    128.33000000    128.45000000     37240444.00000000
+   1    Wed Feb 18 00:00:...    127.62000000    128.78000000    127.45000000    128.72000000     44891737.00000000
+   2    Tue Feb 17 00:00:...    127.49000000    128.88000000    126.92000000    127.83000000     63152405.00000000
+   3    Fri Feb 13 00:00:...    127.28000000    127.28000000    125.65000000    127.08000000     54272219.00000000
+   4    Thu Feb 12 00:00:...    126.06000000    127.48000000    125.57000000    126.46000000     74474466.00000000
+   5    Wed Feb 11 00:00:...    122.77000000    124.92000000    122.50000000    124.88000000     73561797.00000000
+   6    Tue Feb 10 00:00:...    120.17000000    122.15000000    120.16000000    122.02000000     62008506.00000000
+   7    Mon Feb 09 00:00:...    118.55000000    119.84000000    118.43000000    119.72000000     38889797.00000000
+   8    Fri Feb 06 00:00:...    120.02000000    120.25000000    118.45000000    118.93000000     43706567.00000000
+
+... 8628 rows skipped ...
+
+8637    Fri Dec 12 00:00:...      0.00000000      4.12000000      4.11000000      4.11000000     14657300.00000000
+
+> df.types()
+[class java.util.Date, class java.lang.Double, class java.lang.Double, class java.lang.Double, class java.lang.Double, class java.lang.Double]
+> df.sortBy("Date")
+                  Date                Open            High            Low             Close              Volume
+8637    Fri Dec 12 00:00:...      0.00000000      4.12000000      4.11000000      4.11000000     14657300.00000000
+8636    Mon Dec 15 00:00:...      0.00000000      3.91000000      3.89000000      3.89000000      5496400.00000000
+8635    Tue Dec 16 00:00:...      0.00000000      3.62000000      3.61000000      3.61000000      3304000.00000000
+8634    Wed Dec 17 00:00:...      0.00000000      3.71000000      3.70000000      3.70000000      2701300.00000000
+8633    Thu Dec 18 00:00:...      0.00000000      3.82000000      3.80000000      3.80000000      2295300.00000000
+8632    Fri Dec 19 00:00:...      0.00000000      4.05000000      4.04000000      4.04000000      1519700.00000000
+8631    Mon Dec 22 00:00:...      0.00000000      4.25000000      4.23000000      4.23000000      1167600.00000000
+8630    Tue Dec 23 00:00:...      0.00000000      4.43000000      4.41000000      4.41000000      1467200.00000000
+8629    Wed Dec 24 00:00:...      0.00000000      4.66000000      4.64000000      4.64000000      1500100.00000000
+
+... 8628 rows skipped ...
+
+   0    Thu Feb 19 00:00:...    128.48000000    129.03000000    128.33000000    128.45000000     37240444.00000000
+
+> .reindex("Date")
+                              Open            High            Low             Close              Volume
+Fri Dec 12 00:00:...      0.00000000      4.12000000      4.11000000      4.11000000     14657300.00000000
+Mon Dec 15 00:00:...      0.00000000      3.91000000      3.89000000      3.89000000      5496400.00000000
+Tue Dec 16 00:00:...      0.00000000      3.62000000      3.61000000      3.61000000      3304000.00000000
+Wed Dec 17 00:00:...      0.00000000      3.71000000      3.70000000      3.70000000      2701300.00000000
+Thu Dec 18 00:00:...      0.00000000      3.82000000      3.80000000      3.80000000      2295300.00000000
+Fri Dec 19 00:00:...      0.00000000      4.05000000      4.04000000      4.04000000      1519700.00000000
+Mon Dec 22 00:00:...      0.00000000      4.25000000      4.23000000      4.23000000      1167600.00000000
+Tue Dec 23 00:00:...      0.00000000      4.43000000      4.41000000      4.41000000      1467200.00000000
+Wed Dec 24 00:00:...      0.00000000      4.66000000      4.64000000      4.64000000      1500100.00000000
+
+... 8628 rows skipped ...
+
+Thu Feb 19 00:00:...    128.48000000    129.03000000    128.33000000    128.45000000     37240444.00000000
+
+> .retain("Close")
+                              Close
+Fri Dec 12 00:00:...      4.11000000
+Mon Dec 15 00:00:...      3.89000000
+Tue Dec 16 00:00:...      3.61000000
+Wed Dec 17 00:00:...      3.70000000
+Thu Dec 18 00:00:...      3.80000000
+Fri Dec 19 00:00:...      4.04000000
+Mon Dec 22 00:00:...      4.23000000
+Tue Dec 23 00:00:...      4.41000000
+Wed Dec 24 00:00:...      4.64000000
+
+... 8628 rows skipped ...
+
+Thu Feb 19 00:00:...    128.45000000
+
+> .plot()
+```
 
 documentation
 ==========
