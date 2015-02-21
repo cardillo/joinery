@@ -39,6 +39,16 @@ public class Selection {
         return selected;
     }
 
+    public static Index select(final Index index, final BitSet selected) {
+        final List<Object> names = new ArrayList<>(index.names());
+        final Index newidx = new Index();
+        for (int r = selected.nextSetBit(0); r >= 0; r = selected.nextSetBit(r + 1)) {
+            final Object name = names.get(r);
+            newidx.add(name, index.get(name));
+        }
+        return newidx;
+    }
+
     public static <V> BlockManager<V> select(final BlockManager<V> blocks, final BitSet selected) {
         final List<List<V>> data = new LinkedList<List<V>>();
         for (int c = 0; c < blocks.size(); c++) {
@@ -51,13 +61,24 @@ public class Selection {
         return new BlockManager<>(data);
     }
 
-    public static Index select(final Index index, final BitSet selected) {
-        final List<Object> names = new ArrayList<>(index.names());
-        final Index newidx = new Index();
-        for (int r = selected.nextSetBit(0); r >= 0; r = selected.nextSetBit(r + 1)) {
-            final Object name = names.get(r);
-            newidx.add(name, index.get(name));
+    public static <V> BlockManager<V> select(final BlockManager<V> blocks, final BitSet rows, final BitSet cols) {
+        final List<List<V>> data = new LinkedList<List<V>>();
+        for (int c = cols.nextSetBit(0); c >= 0; c = cols.nextSetBit(c + 1)) {
+            final List<V> column = new ArrayList<>(rows.cardinality());
+            for (int r = rows.nextSetBit(0); r >= 0; r = rows.nextSetBit(r + 1)) {
+                column.add(blocks.get(c, r));
+            }
+            data.add(column);
         }
-        return newidx;
+        return new BlockManager<>(data);
+    }
+
+    public static <V> BitSet[] slice(final DataFrame<V> df,
+            final Integer rowStart, final Integer rowEnd, final Integer colStart, final Integer colEnd) {
+        final BitSet rows = new BitSet();
+        final BitSet cols = new BitSet();
+        rows.set(rowStart, rowEnd);
+        cols.set(colStart, colEnd);
+        return new BitSet[] { rows, cols };
     }
 }

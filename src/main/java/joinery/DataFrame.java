@@ -884,6 +884,28 @@ implements Iterable<List<V>> {
         return data.get(col, row);
     }
 
+    public DataFrame<V> slice(final Object rowStart, final Object rowEnd) {
+        return slice(index.get(rowStart), index.get(rowEnd), 0, size());
+    }
+
+    public DataFrame<V> slice(final Object rowStart, final Object rowEnd, final Object colStart, final Object colEnd) {
+        return slice(index.get(rowStart), index.get(rowEnd), columns.get(colStart), columns.get(colEnd));
+    }
+
+    public DataFrame<V> slice(final Integer rowStart, final Integer rowEnd) {
+        return slice(rowStart, rowEnd, 0, size());
+    }
+
+    public DataFrame<V> slice(final Integer rowStart, final Integer rowEnd, final Integer colStart, final Integer colEnd) {
+        final BitSet[] slice = Selection.slice(this, rowStart, rowEnd, colStart, colEnd);
+        return new DataFrame<>(
+                Selection.select(index, slice[0]),
+                Selection.select(columns, slice[1]),
+                Selection.select(data, slice[0], slice[1]),
+                new Grouping()
+            );
+    }
+
     /**
      * Set the value located by the names (row, column).
      *

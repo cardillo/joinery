@@ -90,4 +90,21 @@ public class DataFrameSelectionTest {
                 }).index().toArray()
             );
     }
+
+    @Test
+    public void testSlice() {
+        System.out.println(df.slice(10, 16, 1, 2));
+        assertArrayEquals(
+                new Object[] { 100, 110, 120, 130, 140 },
+                df.slice(10, 15, 1, 2).toArray()
+            );
+    }
+
+    @Test
+    public void testSliceIndex() {
+        assertArrayEquals(
+                new String[] { "row15" },
+                df.slice(15, 16).index().toArray()
+            );
+    }
 }
