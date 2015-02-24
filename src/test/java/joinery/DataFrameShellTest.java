@@ -26,12 +26,11 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 
-import javax.script.ScriptException;
-
 import joinery.impl.Shell;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mozilla.javascript.EvaluatorException;
 
 public class DataFrameShellTest {
     private DataFrame<Object> df;
@@ -84,7 +83,7 @@ public class DataFrameShellTest {
                     "[", "]", "{", "}", "(", ")", "\"", "'")) {
             input(in);
             assertEquals(
-                    ScriptException.class,
+                    EvaluatorException.class,
                     Shell.repl(Collections.<DataFrame<Object>>emptyList()).getClass()
                 );
         }

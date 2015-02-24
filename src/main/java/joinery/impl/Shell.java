@@ -22,194 +22,202 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
-import java.text.CharacterIterator;
-import java.text.StringCharacterIterator;
 import java.util.List;
-import java.util.Stack;
-
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineFactory;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 
 import jline.console.ConsoleReader;
 import jline.console.completer.Completer;
 import joinery.DataFrame;
 
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Function;
+import org.mozilla.javascript.NativeJavaArray;
+import org.mozilla.javascript.NativeJavaClass;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
+
 public class Shell {
     public static Object repl(final List<DataFrame<Object>> frames)
     throws IOException {
-        final boolean interactive = System.console() != null;
-        final ScriptEngine engine = new ScriptEngineManager().getEngineByName("js");
-        final ScriptEngineFactory factory = engine.getFactory();
-        final Console console = console(interactive, engine);
-        final StringBuilder buffer = new StringBuilder();
-        Object result = null;
-        String line;
+        return new Repl(frames).run();
+    }
 
-        if (interactive) {
-            System.out.printf("%s-%s: %s %s\n",
-                    factory.getLanguageName(), factory.getLanguageVersion(),
-                    factory.getEngineName(), factory.getEngineVersion());
+    private static class Repl
+    extends ScriptableObject {
+        private static final long serialVersionUID = 1L;
+        private static final String PROMPT = "> ";
+        private static final String PROMPT_CONTINUE = "  ";
+        private static final String LAST_VALUE_NAME = "_";
+        private static final String FILENAME = "<shell>";
+
+        private final List<DataFrame<Object>> frames;
+        private final boolean interactive = System.console() != null;
+        private transient boolean quit = false;
+        private transient int statement = 1;
+
+        public Repl(final List<DataFrame<Object>> frames) {
+            this.frames = frames;
         }
 
-        try {
-            engine.eval("var DataFrame = Packages.joinery.DataFrame");
-        } catch (final ScriptException se) {
-            throw new RuntimeException(se);
+        @Override
+        public String getClassName() {
+            return "shell";
         }
 
-        if (!frames.isEmpty()) {
-            engine.put("frames", frames.toArray());
-        }
-
-        while ((line = console.readLine("> ")) != null) {
-            buffer.setLength(0);
-            buffer.append(line);
-            while (!complete(buffer.toString()) && (line = console.readLine("  ")) != null) {
-                buffer.append(line);
-            }
-
+        public Object run()
+        throws IOException {
+            Object result = null;
+            final Console console = console();
+            final Context ctx = Context.enter();
             try {
-                String expr = buffer.toString().trim();
-                if (engine.get("_") != null && expr.startsWith(".")) {
-                    expr = "_" + expr;
-                }
-                result = engine.eval(expr);
-                if (result != null) {
-                    engine.put("_", result);
-                    if (interactive) {
-                        System.out.println(result);
+                ctx.initStandardObjects(this);
+                // add functions
+                defineFunctionProperties(new String[] { "print", "quit" }, getClass(), ScriptableObject.DONTENUM);
+                // make data frame easily available
+                put("DataFrame", this, new NativeJavaClass(this, DataFrame.class));
+                // make argument frames available
+                put("frames", this, new NativeJavaArray(this, frames.toArray()));
+
+                String expr = null;
+                while (!quit && (expr = read(console)) != null) {
+                    try {
+                        result = eval(expr);
+                        if (result != Context.getUndefinedValue()) {
+                            // store last value for reference
+                            put(LAST_VALUE_NAME, this, result);
+                            if (interactive) {
+                                System.out.println(Context.toString(result));
+                            }
+                        }
+                    } catch (final Exception ex) {
+                        if (interactive) {
+                            ex.printStackTrace();
+                        }
+                        result = ex;
                     }
                 }
-            } catch (final Exception ex) {
-                if (interactive) {
-                    ex.printStackTrace();
-                }
-                result = ex;
+            } finally {
+                Context.exit();
             }
+            return Context.jsToJava(result, Object.class);
         }
 
-        return result;
-    }
-
-    private static Console console(final boolean interactive, final ScriptEngine engine)
-    throws IOException {
-        if (interactive) {
-            try {
-                return new JLineConsole(engine);
-            } catch (final NoClassDefFoundError ignored) { }
-        }
-        return new Console(interactive);
-    }
-
-    private static class Console {
-        private final boolean interactive;
-        private final BufferedReader reader;
-
-        private Console(final boolean interactive)
+        public String read(final Console console)
         throws IOException {
-            this.interactive = interactive;
-            reader = new BufferedReader(new InputStreamReader(System.in));
+            final Context ctx = Context.getCurrentContext();
+            final StringBuilder buffer = new StringBuilder();
+            String line = null;
+            if ((line = console.readLine(PROMPT)) != null) {
+                // apply continued lines to last value
+                if (line.startsWith(".") && has(LAST_VALUE_NAME, this)) {
+                    buffer.append(LAST_VALUE_NAME);
+                }
+
+                // read lines a complete statement is found or eof
+                buffer.append(line);
+                while (!ctx.stringIsCompilableUnit(buffer.toString()) &&
+                        (line = console.readLine(PROMPT_CONTINUE)) != null) {
+                    buffer.append(line);
+                }
+
+                return buffer.toString();
+            }
+            return null;
         }
 
-        public String readLine(final String prompt)
+        public Object eval(final String source) {
+            final Context ctx = Context.getCurrentContext();
+            return ctx.evaluateString(this, source, FILENAME, statement++, null);
+        }
+
+        @SuppressWarnings("unused")
+        public static void print(final Context ctx, final Scriptable object, final Object[] args, final Function func) {
+            for (int i = 0; i < args.length; i++) {
+                if (i > 0) {
+                    System.out.print(" ");
+                }
+                System.out.print(Context.toString(args[i]));
+            }
+            System.out.println();
+        }
+
+        @SuppressWarnings("unused")
+        public void quit() {
+            quit = true;
+        }
+
+        private Console console()
         throws IOException {
             if (interactive) {
-                System.out.print(prompt);
+                try {
+                    return new JLineConsole();
+                } catch (final NoClassDefFoundError ignored) { }
             }
-            return reader.readLine();
-        }
-    }
-
-    private static class JLineConsole
-    extends Console
-    implements Runnable, Completer {
-        private final ScriptEngine engine;
-        private final ConsoleReader console;
-
-        private JLineConsole(final ScriptEngine engine)
-        throws IOException {
-            super(true);
-            this.engine = engine;
-            console = new ConsoleReader();
-            console.addCompleter(this);
-            Runtime.getRuntime().addShutdownHook(new Thread(this));
+            return new Console();
         }
 
-        @Override
-        public String readLine(final String prompt)
-        throws IOException {
-            console.setPrompt(prompt);
-            return console.readLine();
+        private class Console {
+            private final BufferedReader reader;
+
+            private Console()
+            throws IOException {
+                reader = new BufferedReader(new InputStreamReader(System.in));
+            }
+
+            public String readLine(final String prompt)
+            throws IOException {
+                if (interactive) {
+                    System.out.print(prompt);
+                }
+                return reader.readLine();
+            }
         }
 
-        @Override
-        public void run() {
-            try {
-                console.getTerminal().restore();
-            } catch (final Exception ignored) { }
-        }
+        private class JLineConsole
+        extends Console
+        implements Runnable, Completer {
+            private final ConsoleReader console;
 
-        @Override
-        public int complete(final String buffer, final int cursor, final List<CharSequence> candidates) {
-            final String value = buffer.substring(buffer.lastIndexOf(' ') + 1);
-            final int dot = value.lastIndexOf('.') + 1;
-            if (dot > 1) {
-                final String name = value.substring(0, dot - 1);
-                final String prefix = value.substring(dot);
-                final Object var = engine.get(name);
-                if (var != null) {
-                    final Class<?> cls = var.getClass();
-                    for (final Method m : cls.getDeclaredMethods()) {
-                        if (m.getName().startsWith(prefix)) {
-                            candidates.add(m.getName());
+            private JLineConsole()
+            throws IOException {
+                console = new ConsoleReader();
+                console.addCompleter(this);
+                Runtime.getRuntime().addShutdownHook(new Thread(this));
+            }
+
+            @Override
+            public String readLine(final String prompt)
+            throws IOException {
+                console.setPrompt(prompt);
+                return console.readLine();
+            }
+
+            @Override
+            public void run() {
+                try {
+                    console.getTerminal().restore();
+                } catch (final Exception ignored) { }
+            }
+
+            @Override
+            public int complete(final String buffer, final int cursor, final List<CharSequence> candidates) {
+                final String value = buffer.substring(buffer.lastIndexOf(' ') + 1);
+                final int dot = value.lastIndexOf('.') + 1;
+                if (dot > 1) {
+                    final String name = value.substring(0, dot - 1);
+                    final String prefix = value.substring(dot);
+                    final Object var = get(name, Repl.this);
+                    if (var != Context.getUndefinedValue()) {
+                        final Class<?> cls = Context.jsToJava(var, Object.class).getClass();
+                        for (final Method m : cls.getDeclaredMethods()) {
+                            if (m.getName().startsWith(prefix)) {
+                                candidates.add(m.getName());
+                            }
                         }
                     }
+                    return dot;
                 }
-                return dot;
-            }
-            return buffer.length();
-        }
-    }
-
-    /**
-     * This is a crude way to detect partial expressions, it is
-     * pretty inefficient, but it is unlikely anyone can type fast
-     * enough to care.
-     *
-     * @param expr the script expression
-     * @return true if the expression appears to be complete
-     */
-    private static boolean complete(final String expr) {
-        final Stack<Character> s = new Stack<>();
-        final StringCharacterIterator it = new StringCharacterIterator(expr);
-        for (char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
-            switch (c) {
-                case '(': case '[': case '{':
-                    s.push(c);
-                    break;
-                case ')': case ']': case '}':
-                    if (s.isEmpty()) return true;
-                    s.pop();
-                    break;
-                case '"': case '\'':
-                    final char top = s.isEmpty() ? '\0' : s.peek();
-                    switch (top) {
-                        case '"': case '\'':
-                            if (s.isEmpty()) return true;
-                            s.pop();
-                            break;
-                        default:
-                            s.push(c);
-                            break;
-                    }
-                    break;
-                case '\\':
-                    it.next();
-                    break;
+                return buffer.length();
             }
         }
-        return s.isEmpty();
     }
 }

@@ -510,6 +510,14 @@ implements Iterable<List<V>> {
         return this;
     }
 
+    public DataFrame<V> append(final Object name, final V[] row) {
+        return append(name, Arrays.asList(row));
+    }
+
+    public DataFrame<V> append(final V[] row) {
+        return append(Arrays.asList(row));
+    }
+
     /**
      * Append rows to the data frame.
      *
