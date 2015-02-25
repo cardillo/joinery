@@ -337,14 +337,7 @@ implements Iterable<List<V>> {
      * @return a new data frame containing only the specified columns
      */
     public DataFrame<V> retain(final Object ... cols) {
-        final Set<Object> keep = new HashSet<>(Arrays.asList(cols));
-        final Set<Object> todrop = new HashSet<>();
-        for (final Object col : columns()) {
-            if (!keep.contains(col)) {
-                todrop.add(col);
-            }
-        }
-        return drop(todrop.toArray(new Object[todrop.size()]));
+        return retain(columns.indices(cols));
     }
 
     /**
@@ -359,13 +352,11 @@ implements Iterable<List<V>> {
      * @return a new data frame containing only the specified columns
      */
     public DataFrame<V> retain(final Integer ... cols) {
-        final Set<Integer> keep = new HashSet<Integer>();
-        for (final int c : cols) keep.add(c);
-        final int[] todrop = new int[size() - keep.size()];
-        int i = 0;
-        for (final Integer col : cols) {
-            if (!keep.contains(col)) {
-                todrop[i++] = col;
+        final Set<Integer> keep = new HashSet<Integer>(Arrays.asList(cols));
+        final Integer[] todrop = new Integer[size() - keep.size()];
+        for (int i = 0, c = 0; c < size(); c++) {
+            if (!keep.contains(c)) {
+                todrop[i++] = c;
             }
         }
         return drop(todrop);
