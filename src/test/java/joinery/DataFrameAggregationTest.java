@@ -119,40 +119,4 @@ public class DataFrameAggregationTest {
         df.set(1, 3, null);
         df.median();
     }
-
-    /*
-    @Test
-    public void testApplyVarargs() {
-        assertArrayEquals(
-                new Object[] { 100L, 400L, 900L, 1600L, 2500L, 3600L, 4900L },
-                df.convert()
-                  .apply(null, null, new Function<Object, Long>() {
-                    @Override
-                    public Long apply(final Object value) {
-                        final long x = Long.class.cast(value).longValue();
-                        return x * x;
-                    }
-                  }) .toArray()
-            );
-    }
-
-    @Test
-    public void testApply() {
-        final Map<Integer, Function<Object, Long>> map =
-            Collections.<Integer, Function<Object, Long>>singletonMap(
-                2, new Function<Object, Long>() {
-                    @Override
-                    public Long apply(final Object value) {
-                        final long x = Long.class.cast(value).longValue();
-                        return x * x;
-                    }
-                  }
-            );
-        assertArrayEquals(
-                new Object[] { 100L, 400L, 900L, 1600L, 2500L, 3600L, 4900L },
-                df.convert()
-                  .apply(map).toArray()
-            );
-    }
-     */
 }
