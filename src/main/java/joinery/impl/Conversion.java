@@ -43,9 +43,16 @@ public class Conversion {
         final int cols = df.size();
 
         // find conversions
-        for (int c = 0; 0 < rows && c < cols; c++) {
+        for (int c = 0; c < cols; c++) {
             for (final Function<V, ?> conv : converters) {
-                if (conv.apply(df.get(0, c)) != null) {
+                boolean all = true;
+                for (int r = 0; r < rows; r++) {
+                    if (conv.apply(df.get(r, c)) == null) {
+                        all = false;
+                        break;
+                    }
+                }
+                if (all) {
                     conversions.put(c, conv);
                     break;
                 }
