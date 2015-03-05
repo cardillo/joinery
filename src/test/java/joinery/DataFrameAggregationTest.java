@@ -106,6 +106,20 @@ public class DataFrameAggregationTest {
             );
     }
 
+    @Test
+    public void testStorelessStatisticWithNulls() {
+        df.set(0, 2, null);
+        df.set(1, 3, null);
+        df.mean();
+    }
+
+    @Test
+    public void testStatisticWithNulls() {
+        df.set(0, 2, null);
+        df.set(1, 3, null);
+        df.median();
+    }
+
     /*
     @Test
     public void testApplyVarargs() {

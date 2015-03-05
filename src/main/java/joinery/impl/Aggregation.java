@@ -89,10 +89,12 @@ public class Aggregation {
         public Number apply(final List<V> values) {
             stat.clear();
             for (Object value : values) {
-                if (value instanceof Boolean) {
-                    value = Boolean.class.cast(value) ? 1 : 0;
+                if (value != null) {
+                    if (value instanceof Boolean) {
+                        value = Boolean.class.cast(value) ? 1 : 0;
+                    }
+                    stat.increment(Number.class.cast(value).doubleValue());
                 }
-                stat.increment(Number.class.cast(value).doubleValue());
             }
             return stat.getResult();
         }
@@ -171,11 +173,15 @@ public class Aggregation {
 
         @Override
         public Number apply(final List<V> values) {
+            int count = 0;
             final double[] vals = new double[values.size()];
             for (int i = 0; i < vals.length; i++) {
-                vals[i] = Number.class.cast(values.get(i)).doubleValue();
+                final V val = values.get(i);
+                if (val != null) {
+                    vals[count++] = Number.class.cast(val).doubleValue();
+                }
             }
-            return stat.evaluate(vals);
+            return stat.evaluate(vals, 0, count);
         }
     }
 
