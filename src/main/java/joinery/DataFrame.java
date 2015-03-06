@@ -1309,6 +1309,40 @@ implements Iterable<List<V>> {
         return Conversion.notnull(this);
     }
 
+    /**
+     * returns a double [][] representation of DataFrame, assumes all values in the DataFrame are doubles.
+     * This version of the method will throw a null pointer exception on NA's
+     * @return
+     */
+    public double[][] asDoubleMatrix() {
+    	double [][] matrix = new double[length()][size()];
+    	for (int i = 0; i < matrix.length; i++) {
+			for (int j = 0; j < matrix[0].length; j++) {
+				matrix[i][j] = (Double) get(i,j);
+			}
+		}
+        return matrix;
+    }
+    
+    /**
+     * returns a double [][] representation of DataFrame, assumes all values in the DataFrame are doubles.
+     * This version of the method  replace NA's with {@code naReplaceement} 
+     * @param naReplacement
+     * @return
+     */
+    public double[][] asDoubleMatrix(double naReplacement) {
+    	double [][] matrix = new double[length()][size()];
+    	for (int i = 0; i < matrix.length; i++) {
+			for (int j = 0; j < matrix[0].length; j++) {
+				Double val = (Double) get(i,j);
+				val = val == null ? naReplacement : val; 
+				matrix[i][j] = val;
+			}
+		}
+        return matrix;
+    }
+
+    
     public Object[] toArray() {
         return toArray(new Object[size() * length()]);
     }
