@@ -1958,10 +1958,6 @@ implements Iterable<List<V>> {
         Serialization.writeXls(this, output);
     }
 
-    public final String toString(final int limit, final int colLimit) {
-    	return Serialization.toString(this, limit, colLimit, true);
-    }
-
     public final String toString(final int limit) {
         return Serialization.toString(this, limit);
     }
