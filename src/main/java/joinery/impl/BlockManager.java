@@ -31,9 +31,9 @@ public class BlockManager<V> {
         this(Collections.<List<V>>emptyList());
     }
 
-    public BlockManager(final Collection<? extends Collection<V>> data) {
+    public BlockManager(final Collection<? extends Collection<? extends V>> data) {
         blocks = new LinkedList<>();
-        for (final Collection<V> col : data) {
+        for (final Collection<? extends V> col : data) {
             add(new ArrayList<>(col));
         }
     }

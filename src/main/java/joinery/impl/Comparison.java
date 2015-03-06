@@ -27,10 +27,10 @@ public class Comparison {
     public static final <V> DataFrame<String> compare(final DataFrame<V> df1, final DataFrame<V> df2) {
         // algorithm
         // 1. determine union of rows and columns
-        final Set<String> rows = new LinkedHashSet<>();
+        final Set<Object> rows = new LinkedHashSet<>();
         rows.addAll(df1.index());
         rows.addAll(df2.index());
-        final Set<String> cols = new LinkedHashSet<>();
+        final Set<Object> cols = new LinkedHashSet<>();
         cols.addAll(df1.columns());
         cols.addAll(df2.columns());
 

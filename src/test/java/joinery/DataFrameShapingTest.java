@@ -57,21 +57,21 @@ public class DataFrameShapingTest {
 
     @Test
     public void testReshapeStringAddColumns() {
-        assertEquals(5, df.reshape(df.index(), Arrays.asList("a", "b", "c", "d", "e")).size());
+        assertEquals(5, df.reshape(df.index(), Arrays.<Object>asList("a", "b", "c", "d", "e")).size());
     }
 
     @Test
     public void testReshapeStringTruncateColumns() {
-        assertEquals(2, df.reshape(df.index(), Arrays.asList("a", "b")).size());
+        assertEquals(2, df.reshape(df.index(), Arrays.<Object>asList("a", "b")).size());
     }
 
     @Test
     public void testReshapeStringAddRows() {
-        assertEquals(10, df.reshape(Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9", "10"), df.columns()).length());
+        assertEquals(10, df.reshape(Arrays.<Object>asList("1", "2", "3", "4", "5", "6", "7", "8", "9", "10"), df.columns()).length());
     }
 
     @Test
     public void testReshapeStringTruncateRows() {
-        assertEquals(4, df.reshape(Arrays.asList("1", "2", "3", "4"), df.columns()).length());
+        assertEquals(4, df.reshape(Arrays.<Object>asList("1", "2", "3", "4"), df.columns()).length());
     }
 }

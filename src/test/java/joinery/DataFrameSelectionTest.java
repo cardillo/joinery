@@ -37,8 +37,8 @@ public class DataFrameSelectionTest {
     public void setUp()
     throws Exception {
         final List<List<Object>> data = new ArrayList<>();
-        final Collection<String> rows = new ArrayList<>();
-        final Collection<String> cols = Arrays.<String>asList("name", "value");
+        final Collection<Object> rows = new ArrayList<>();
+        final Collection<Object> cols = Arrays.<Object>asList("name", "value");
         final List<Object> names = new ArrayList<>();
         final List<Object> values = new ArrayList<>();
         for (int i = 0; i < 200; i += 10) {
@@ -88,6 +88,23 @@ public class DataFrameSelectionTest {
                         return new Integer(150).equals(row.get(1));
                     }
                 }).index().toArray()
+            );
+    }
+
+    @Test
+    public void testSlice() {
+        System.out.println(df.slice(10, 16, 1, 2));
+        assertArrayEquals(
+                new Object[] { 100, 110, 120, 130, 140 },
+                df.slice(10, 15, 1, 2).toArray()
+            );
+    }
+
+    @Test
+    public void testSliceIndex() {
+        assertArrayEquals(
+                new String[] { "row15" },
+                df.slice(15, 16).index().toArray()
             );
     }
 }

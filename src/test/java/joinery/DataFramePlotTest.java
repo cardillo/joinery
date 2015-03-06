@@ -29,8 +29,8 @@ public class DataFramePlotTest {
     throws IOException {
         final Random rnd = new Random();
         final DataFrame<Object> df = new DataFrame<>(
-                Arrays.asList("one", "two", "three"),
-                Arrays.asList("name", "value1", "value2"),
+                Arrays.<Object>asList("one", "two", "three"),
+                Arrays.<Object>asList("name", "value1", "value2"),
                 Arrays.asList(
                         Arrays.<Object>asList("alpha", "beta", "delta", "gamma"),
                         Arrays.<Object>asList(

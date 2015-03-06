@@ -32,8 +32,8 @@ import joinery.impl.Aggregation.Unique;
 
 public class Pivoting {
     public static <V> DataFrame<V> pivot(
-            final DataFrame<V> df, final int[] rows,
-            final int[] cols, final int[] values) {
+            final DataFrame<V> df, final Integer[] rows,
+            final Integer[] cols, final Integer[] values) {
         final DataFrame<V> grouped = df.groupBy(rows);
         final Map<Object, DataFrame<V>> exploded = grouped.explode();
         final Map<Integer, Unique<V>> aggregates = new LinkedHashMap<>();
@@ -62,39 +62,39 @@ public class Pivoting {
             final Map<Object, DataFrame<I>> grouped,
             final Map<Integer, ? extends Aggregate<I,O>> values,
             final Set<Integer> columns) {
-        final Set<String> pivotCols = new LinkedHashSet<>();
-        final Map<String, Map<String, List<I>>> pivotData = new LinkedHashMap<>();
-        final Map<String, Aggregate<I, ?>> pivotFunctions = new LinkedHashMap<>();
-        final List<String> colNames = new ArrayList<>(grouped.values().iterator().next().columns());
+        final Set<Object> pivotCols = new LinkedHashSet<>();
+        final Map<Object, Map<Object, List<I>>> pivotData = new LinkedHashMap<>();
+        final Map<Object, Aggregate<I, ?>> pivotFunctions = new LinkedHashMap<>();
+        final List<Object> colNames = new ArrayList<>(grouped.values().iterator().next().columns());
 
         // allocate row -> column -> data maps
         for (final Map.Entry<Object, DataFrame<I>> rowEntry : grouped.entrySet()) {
-            final Map<String, List<I>> rowData = new LinkedHashMap<>();
+            final Map<Object, List<I>> rowData = new LinkedHashMap<>();
             for (final int c : columns) {
-                final String colName = colNames.get(c);
+                final Object colName = colNames.get(c);
                 rowData.put(colName, new ArrayList<I>());
                 pivotCols.add(colName);
             }
             for (final Object colKey : rowEntry.getValue().groups().keys()) {
                 for (final int c : values.keySet()) {
-                    final String colName = name(colKey, colNames.get(c), values);
+                    final Object colName = name(colKey, colNames.get(c), values);
                     rowData.put(colName, new ArrayList<I>());
                     pivotCols.add(colName);
                     pivotFunctions.put(colName, values.get(c));
                 }
             }
-            pivotData.put(String.valueOf(rowEntry.getKey()), rowData);
+            pivotData.put(rowEntry.getKey(), rowData);
         }
 
         // collect data for row and column groups
         for (final Map.Entry<Object, DataFrame<I>> rowEntry : grouped.entrySet()) {
-            final String rowName = String.valueOf(rowEntry.getKey());
-            final Map<String, List<I>> rowData = pivotData.get(rowName);
+            final Object rowName = rowEntry.getKey();
+            final Map<Object, List<I>> rowData = pivotData.get(rowName);
             final Map<Object, DataFrame<I>> byCol = rowEntry.getValue().explode();
             for (final Map.Entry<Object, DataFrame<I>> colEntry : byCol.entrySet()) {
                 // add columns used as pivot rows
                 for (final int c : columns) {
-                    final String colName = colNames.get(c);
+                    final Object colName = colNames.get(c);
                     final List<I> colData = rowData.get(colName);
                     // optimization, only add first value
                     // since the values are all the same (due to grouping)
@@ -103,7 +103,7 @@ public class Pivoting {
 
                 // add values for aggregation
                 for (final int c : values.keySet()) {
-                    final String colName = name(colEntry.getKey(), colNames.get(c), values);
+                    final Object colName = name(colEntry.getKey(), colNames.get(c), values);
                     final List<I> colData = rowData.get(colName);
                     colData.addAll(colEntry.getValue().col(c));
                 }
@@ -112,8 +112,8 @@ public class Pivoting {
 
         // iterate over row, column pairs and apply aggregate functions
         final DataFrame<O> pivot = new DataFrame<>(pivotData.keySet(), pivotCols);
-        for (final String col : pivot.columns()) {
-            for (final String row : pivot.index()) {
+        for (final Object col : pivot.columns()) {
+            for (final Object row : pivot.index()) {
                 final List<I> data = pivotData.get(row).get(col);
                 if (data != null) {
                     final Aggregate<I, ?> func = pivotFunctions.get(col);
@@ -129,8 +129,8 @@ public class Pivoting {
         return pivot;
     }
 
-    private static String name(final Object key, final String name, final Map<?, ?> values) {
-        String colName = String.valueOf(key);
+    private static Object name(final Object key, final Object name, final Map<?, ?> values) {
+        Object colName = key;
 
         // if multiple value columns are requested the
         // value column name must be added to the pivot column name
@@ -144,7 +144,7 @@ public class Pivoting {
             } else {
                 tmp.add(key);
             }
-            colName = String.valueOf(tmp);
+            colName = tmp;
         }
 
         return colName;

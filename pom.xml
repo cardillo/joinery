@@ -4,10 +4,9 @@
     <maven>3.0.0</maven>
   </prerequisites>
 
-
   <groupId>joinery</groupId>
   <artifactId>joinery-dataframe</artifactId>
-  <version>1.2-SNAPSHOT</version>
+  <version>1.4-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Joinery</name>
@@ -42,6 +41,7 @@
     <junit.version>4.11</junit.version>
     <supercsv.version>2.2.0</supercsv.version>
     <commons-math3.version>3.3</commons-math3.version>
+    <poi.version>3.9</poi.version>
     <aspectj.version>1.8.2</aspectj.version>
     <metrics.version>3.1.0</metrics.version>
     <xchart.version>2.4.2</xchart.version>
@@ -67,6 +67,12 @@
     </dependency>
 
     <!-- optional deps for additional functionality -->
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi</artifactId>
+      <version>${poi.version}</version>
+      <optional>true</optional>
+    </dependency>
     <dependency>
       <groupId>com.xeiam.xchart</groupId>
       <artifactId>xchart</artifactId>

@@ -56,9 +56,9 @@ public class Sorting {
         }
         Arrays.sort(rows, cmp);
 
-        final List<String> labels = new ArrayList<>(df.index());
+        final List<Object> labels = new ArrayList<>(df.index());
         for (final Integer r : rows) {
-            final String label = r < labels.size() ? labels.get(r) : String.valueOf(r);
+            final Object label = r < labels.size() ? labels.get(r) : r;
             sorted.append(label, df.row(r));
         }
 

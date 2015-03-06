@@ -37,10 +37,10 @@ public class DataFrameIterationTest {
 
     @Before
     public void setUp() {
-        empty = new DataFrame<>(Arrays.<String>asList());
+        empty = new DataFrame<>(Arrays.asList());
         df = new DataFrame<>(
-                Arrays.<String>asList(),
-                Arrays.<String>asList("name", "value"),
+                Arrays.<Object>asList(),
+                Arrays.<Object>asList("name", "value"),
                 Arrays.asList(
                     Arrays.<Object>asList("alpha", "beta", "alpha", "beta"),
                     Arrays.<Object>asList("1", "2", "3", "4")
@@ -92,9 +92,9 @@ public class DataFrameIterationTest {
     @Test
     public void testIterMap() {
         int i = 0;
-        final ListIterator<Map<String, Object>> it = df.itermap();
+        final ListIterator<Map<Object, Object>> it = df.itermap();
         while (it.hasNext()) {
-            final Map<String, Object> row = it.next();
+            final Map<Object, Object> row = it.next();
             assertEquals(i % 2 == 0 ? "alpha" : "beta", row.get("name"));
             assertEquals(String.valueOf(i + 1), row.get("value"));
             i++;
@@ -102,7 +102,7 @@ public class DataFrameIterationTest {
         assertEquals(df.length() , i);
         while (it.hasPrevious()) {
             i--;
-            final Map<String, Object> row = it.previous();
+            final Map<Object, Object> row = it.previous();
             assertEquals(i % 2 == 0 ? "alpha" : "beta", row.get("name"));
             assertEquals(String.valueOf(i + 1), row.get("value"));
         }

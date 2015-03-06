@@ -88,7 +88,10 @@ public class Aggregation {
         @Override
         public Number apply(final List<V> values) {
             stat.clear();
-            for (final Object value : values) {
+            for (Object value : values) {
+                if (value instanceof Boolean) {
+                    value = Boolean.class.cast(value) ? 1 : 0;
+                }
                 stat.increment(Number.class.cast(value).doubleValue());
             }
             return stat.getResult();

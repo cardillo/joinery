@@ -27,17 +27,17 @@ import joinery.DataFrame;
 public class Shaping {
     public static final <V> DataFrame<V> reshape(final DataFrame<V> df, final int rows, final int cols) {
         final DataFrame<V> reshaped = new DataFrame<>();
-        Iterator<String> it;
+        Iterator<Object> it;
 
         it = df.columns().iterator();
         for (int c = 0; c < cols; c++) {
-            final String name = it.hasNext() ? it.next() : String.valueOf(c);
+            final Object name = it.hasNext() ? it.next() : c;
             reshaped.add(name);
         }
 
         it = df.index().iterator();
         for (int r = 0; r < rows; r++) {
-            final String name = it.hasNext() ? it.next() : String.valueOf(r);
+            final Object name = it.hasNext() ? it.next() : r;
             reshaped.append(name, Collections.<V>emptyList());
         }
 
@@ -52,19 +52,19 @@ public class Shaping {
         return reshaped;
     }
 
-    public static final <V> DataFrame<V> reshape(final DataFrame<V> df, final Collection<String> rows, final Collection<String> cols) {
+    public static final <V> DataFrame<V> reshape(final DataFrame<V> df, final Collection<?> rows, final Collection<?> cols) {
         final DataFrame<V> reshaped = new DataFrame<>();
 
-        for (final String name : cols) {
+        for (final Object name : cols) {
             reshaped.add(name);
         }
 
-        for (final String name: rows) {
+        for (final Object name: rows) {
             reshaped.append(name, Collections.<V>emptyList());
         }
 
-        for (final String c : cols) {
-            for (final String r : rows) {
+        for (final Object c : cols) {
+            for (final Object r : rows) {
                 if (df.columns().contains(c) && df.index().contains(r)) {
                     reshaped.set(r, c, df.get(r, c));
                 }
