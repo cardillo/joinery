@@ -102,7 +102,7 @@ public class Conversion {
     }
 
     public static <V> DataFrame<Boolean> isnull(final DataFrame<V> df) {
-        return df.transform(new Function<V, Boolean>() {
+        return df.apply(new Function<V, Boolean>() {
                 @Override
                 public Boolean apply(final V value) {
                     return value == null;
@@ -111,7 +111,7 @@ public class Conversion {
     }
 
     public static <V> DataFrame<Boolean> notnull(final DataFrame<V> df) {
-        return df.transform(new Function<V, Boolean>() {
+        return df.apply(new Function<V, Boolean>() {
                 @Override
                 public Boolean apply(final V value) {
                     return value != null;

@@ -137,7 +137,7 @@ public class DataFrameGroupByTest {
                     2, 2, 3,
                     2, 2, 3
                 },
-                df.groupBy("b").apply(new Aggregate<Object, Object>() {
+                df.groupBy("b").aggregate(new Aggregate<Object, Object>() {
                     @Override
                     public Integer apply(final List<Object> value) {
                         return value.size();

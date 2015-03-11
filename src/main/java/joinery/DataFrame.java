@@ -85,7 +85,7 @@ import com.codahale.metrics.annotation.Timed;
  * >     .mean()
  * >     .sortBy("Close")
  * >     .tail(3)
- * >     .transform(new Function<Object, Number>() {
+ * >     .apply(new Function<Object, Number>() {
  * >         public Number apply(Object value) {
  * >             return Number.class.cast(value).intValue();
  * >         }
@@ -105,7 +105,7 @@ import com.codahale.metrics.annotation.Timed;
  *         to average closing price</li>
  *     <li>{@link #tail(int)} returns the last three rows
  *         (alternatively, sort in descending order and use head)</li>
- *     <li>{@link #transform(Function)} is used to convert the
+ *     <li>{@link #apply(Function)} is used to convert the
  *         closing prices to integers (this is purely to ease
  *         comparisons for verifying the results</li>
  *     <li>finally, {@link #col(Object)} is used to
@@ -1191,7 +1191,7 @@ implements Iterable<List<V>> {
      * >                 Arrays.<Number>asList(3, 4)
      * >             )
      * >     );
-     * > df = df.transform(new Function<Number, Number>() {
+     * > df = df.apply(new Function<Number, Number>() {
      * >         public Number apply(Number value) {
      * >             return value.intValue() * value.intValue();
      * >         }
@@ -1199,14 +1199,14 @@ implements Iterable<List<V>> {
      * > df.flatten();
      * [1, 4, 9, 16] }</pre>
      *
-     * @param transform the function to apply
+     * @param function the function to apply
      * @return a new data frame with the function results
      */
-    public <U> DataFrame<U> transform(final Function<V, U> transform) {
+    public <U> DataFrame<U> apply(final Function<V, U> function) {
         return new DataFrame<>(
                 index.names(),
                 columns.names(),
-                new Views.TransformedView<V, U>(this, transform, false)
+                new Views.TransformedView<V, U>(this, function, false)
             );
     }
 
@@ -1421,7 +1421,7 @@ implements Iterable<List<V>> {
      * @param function the aggregate function
      * @return the new data frame
      */
-    public <U> DataFrame<V> apply(final Aggregate<V, U> function) {
+    public <U> DataFrame<V> aggregate(final Aggregate<V, U> function) {
         return groups.apply(this, function);
     }
 
@@ -1906,8 +1906,8 @@ implements Iterable<List<V>> {
      *
      * @param <I> the type of the input values
      * @param <O> the type of the output values
-     * @see DataFrame#transform(Function)
-     * @see DataFrame#apply(Aggregate)
+     * @see DataFrame#apply(Function)
+     * @see DataFrame#aggregate(Aggregate)
      */
     public interface Function<I, O> {
         /**
@@ -1948,7 +1948,7 @@ implements Iterable<List<V>> {
      *
      * @param <I> the type of the input values
      * @param <O> the type of the result
-     * @see DataFrame#apply(Aggregate)
+     * @see DataFrame#aggregate(Aggregate)
      */
     public interface Aggregate<I, O>
     extends Function<List<I>, O> { }
