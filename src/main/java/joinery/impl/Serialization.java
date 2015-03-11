@@ -179,9 +179,9 @@ public class Serialization {
         if (o instanceof Number) {
             if (Short.class.equals(cls) || Integer.class.equals(cls) ||
                     Long.class.equals(cls) || BigInteger.class.equals(cls)) {
-                s = String.format("%d", Number.class.cast(o).longValue());
+                s = String.format("% d", Number.class.cast(o).longValue());
             } else {
-                s = String.format("%.8f", Number.class.cast(o).doubleValue());
+                s = String.format("% .8f", Number.class.cast(o).doubleValue());
             }
         } else if (o instanceof Date) {
             final Date dt = Date.class.cast(o);
