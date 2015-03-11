@@ -24,8 +24,8 @@ public class FizzBuzz {
                             Arrays.<Object>asList(
                                 value,
                                 value % 15 == 0 ? "FizzBuzz" :
-                                value %    3 == 0 ? "Fizz        " :
-                                value %    5 == 0 ? "Buzz        " :
+                                value %  3 == 0 ? "Fizz" :
+                                value %  5 == 0 ? "Buzz" :
                                 String.valueOf(value)
                             )
                         );
