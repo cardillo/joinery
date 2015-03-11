@@ -102,7 +102,7 @@ public class Serialization {
         for (int c = 0; c < columns.size(); c++) {
             sb.append(DELIMITER);
             final Object column = columns.get(c);
-            sb.append(center(column, width.get(column)));
+            sb.append(lpad(column, width.get(column)));
         }
         sb.append(NEWLINE);
 
@@ -169,19 +169,6 @@ public class Serialization {
         return sb.toString();
     }
 
-    private static final String center(final Object o, final int w) {
-        final StringBuilder sb = new StringBuilder();
-        final String value = String.valueOf(o);
-        for (int i = 0; i < (w >> 1); i ++) {
-            sb.append(' ');
-        }
-        sb.append(value);
-        for (int i = sb.length(); i < w; i++) {
-            sb.append(' ');
-        }
-        return sb.toString();
-    }
-
     private static final String truncate(final Object o, final int w) {
         final String value = String.valueOf(o);
         return value.length() > w ? value.substring(0, w - 3) + ELLIPSES : value;
@@ -208,7 +195,7 @@ public class Serialization {
                 );
             s = fmt.format(dt);
         } else {
-            s = String.valueOf(o);
+            s = o != null ? String.valueOf(o) : "";
         }
         return s;
     }
