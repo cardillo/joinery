@@ -19,6 +19,7 @@
 package joinery.impl;
 
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
@@ -76,7 +77,10 @@ public class Shell {
             try {
                 ctx.initStandardObjects(this);
                 // add functions
-                defineFunctionProperties(new String[] { "print", "quit" }, getClass(), ScriptableObject.DONTENUM);
+                defineFunctionProperties(
+                        new String[] { "print", "quit", "source" },
+                        getClass(), ScriptableObject.DONTENUM
+                    );
                 // make data frame easily available
                 put("DataFrame", this, new NativeJavaClass(this, DataFrame.class));
                 // make data frame classes available as well
@@ -154,6 +158,27 @@ public class Shell {
             quit = true;
         }
 
+        @SuppressWarnings("unused")
+        public static void source(final Context ctx, final Scriptable object, final Object[] args, final Function func)
+        throws Exception {
+            final Repl repl = Repl.class.cast(object);
+            for (int i = 0; i < args.length; i++) {
+                final String file = Context.toString(args[i]);
+                final SourceReader source = repl.new SourceReader(file);
+                String expr = null;
+                while ((expr = repl.read(source)) != null) {
+                    final Object result = repl.eval(expr);
+                    if (result != Context.getUndefinedValue()) {
+                        // store last value for reference
+                        repl.put(LAST_VALUE_NAME, repl, result);
+                        if (repl.interactive) {
+                            System.out.println(Context.toString(result));
+                        }
+                    }
+                }
+            }
+        }
+
         private Console console()
         throws IOException {
             if (interactive) {
@@ -169,7 +194,12 @@ public class Shell {
 
             private Console()
             throws IOException {
-                reader = new BufferedReader(new InputStreamReader(System.in));
+                this(new BufferedReader(new InputStreamReader(System.in)));
+            }
+
+            protected Console(final BufferedReader reader)
+            throws IOException {
+                this.reader = reader;
             }
 
             public String readLine(final String prompt)
@@ -178,6 +208,26 @@ public class Shell {
                     System.out.print(prompt);
                 }
                 return reader.readLine();
+            }
+        }
+
+        private class SourceReader
+        extends Console {
+            private final String nl = System.getProperty("line.separator");
+
+            private SourceReader(final String file)
+            throws IOException {
+                super(new BufferedReader(new FileReader(file)));
+            }
+
+            @Override
+            public String readLine(final String prompt)
+            throws IOException {
+                final String line = super.readLine("");
+                if (interactive && line != null) {
+                    System.out.printf("%s%s\n", prompt, line, nl);
+                }
+                return line;
             }
         }
 
