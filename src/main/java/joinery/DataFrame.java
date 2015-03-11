@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -1606,6 +1607,10 @@ implements Iterable<List<V>> {
             sortCols.put(Math.abs(c), dir);
         }
         return Sorting.sort(this, sortCols);
+    }
+
+    public DataFrame<V> sortBy(final Comparator<List<V>> comparator) {
+        return Sorting.sort(this, comparator);
     }
 
     /**

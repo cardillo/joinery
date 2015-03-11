@@ -30,16 +30,15 @@ import joinery.DataFrame.SortDirection;
 public class Sorting {
     public static <V> DataFrame<V> sort(
             final DataFrame<V> df, final Map<Integer, SortDirection> cols) {
-        final DataFrame<V> sorted = new DataFrame<V>(df.columns());
-        final Comparator<Integer> cmp = new Comparator<Integer>() {
+        final Comparator<List<V>> comparator = new Comparator<List<V>>() {
             @Override
             @SuppressWarnings("unchecked")
-            public int compare(final Integer r1, final Integer r2) {
+            public int compare(final List<V> r1, final List<V> r2) {
                 int result = 0;
                 for (final Map.Entry<Integer, SortDirection> col : cols.entrySet()) {
                     final int c = col.getKey();
-                    final Comparable<V> v1 = Comparable.class.cast(df.get(r1, c));
-                    final V v2 = df.get(r2, c);
+                    final Comparable<V> v1 = Comparable.class.cast(r1.get(c));
+                    final V v2 = r2.get(c);
                     result = v1.compareTo(v2);
                     result *= col.getValue() == SortDirection.DESCENDING ? -1 : 1;
                     if (result != 0) {
@@ -47,6 +46,18 @@ public class Sorting {
                     }
                 }
                 return result;
+            }
+        };
+        return sort(df, comparator);
+    }
+
+    public static <V> DataFrame<V> sort(
+            final DataFrame<V> df, final Comparator<List<V>> comparator) {
+        final DataFrame<V> sorted = new DataFrame<V>(df.columns());
+        final Comparator<Integer> cmp = new Comparator<Integer>() {
+            @Override
+            public int compare(final Integer r1, final Integer r2) {
+                return comparator.compare(df.row(r1),  df.row(r2));
             }
         };
 
