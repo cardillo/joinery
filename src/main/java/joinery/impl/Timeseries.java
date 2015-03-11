@@ -32,7 +32,7 @@ public class Timeseries {
     public static <V> DataFrame<V> diff(final DataFrame<V> df, final int period) {
         final DataFrame<V> nonnumeric = df.nonnumeric();
         final DataFrame<V> diff = (DataFrame<V>)
-                df.numeric() .transform(new DiscreteDifferenceTransform(period));
+                df.numeric().transform(new DiscreteDifferenceTransform(period));
         return nonnumeric.isEmpty() ? diff : nonnumeric.join(diff);
     }
 

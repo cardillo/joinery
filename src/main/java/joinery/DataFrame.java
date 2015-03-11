@@ -1212,9 +1212,10 @@ implements Iterable<List<V>> {
 
     public <U> DataFrame<U> transform(final RowFunction<V, U> transform) {
         final DataFrame<U> transformed = new DataFrame<>(columns.names());
+        final Iterator<Object> it = index().iterator();
         for (final List<V> row : this) {
             for (final List<U> trans : transform.apply(row)) {
-                transformed.append(trans);
+                transformed.append(it.next(), trans);
             }
         }
         return transformed;
