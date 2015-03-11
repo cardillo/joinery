@@ -30,7 +30,7 @@ public class DataFramePlotTest {
         final Random rnd = new Random();
         final DataFrame<Object> df = new DataFrame<>(
                 Arrays.<Object>asList("one", "two", "three"),
-                Arrays.<Object>asList("name", "value1", "value2"),
+                Arrays.<Object>asList("name", "value1", "value2", "value3", "value4"),
                 Arrays.asList(
                         Arrays.<Object>asList("alpha", "beta", "delta", "gamma"),
                         Arrays.<Object>asList(
@@ -38,6 +38,18 @@ public class DataFramePlotTest {
                                 rnd.nextInt(100),
                                 rnd.nextInt(100),
                                 rnd.nextInt(100)
+                            ),
+                        Arrays.<Object>asList(
+                                rnd.nextInt(50),
+                                rnd.nextInt(50),
+                                rnd.nextInt(50),
+                                rnd.nextInt(50)
+                            ),
+                        Arrays.<Object>asList(
+                                rnd.nextInt(25),
+                                rnd.nextInt(25),
+                                rnd.nextInt(25),
+                                rnd.nextInt(25)
                             ),
                         Arrays.<Object>asList(
                                 rnd.nextInt(10),
@@ -53,5 +65,6 @@ public class DataFramePlotTest {
         df.plot(PlotType.AREA);
         df.plot(PlotType.BAR);
         df.plot(PlotType.LINE_AND_POINTS);
+        df.plot(PlotType.GRID);
     }
 }

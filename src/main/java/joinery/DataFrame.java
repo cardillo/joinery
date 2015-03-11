@@ -1988,7 +1988,8 @@ implements Iterable<List<V>> {
         LINE,
         LINE_AND_POINTS,
         AREA,
-        BAR
+        BAR,
+        GRID
     }
 
     /**

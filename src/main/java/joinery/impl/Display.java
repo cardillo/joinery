@@ -18,7 +18,9 @@
 
 package joinery.impl;
 
+import java.awt.GridLayout;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -40,29 +42,50 @@ public class Display {
         switch (type) {
             case AREA:      return ChartType.Area;
             case BAR:       return ChartType.Bar;
+            case GRID:
             case SCATTER:   return ChartType.Scatter;
             default:        return ChartType.Line;
         }
     }
 
     public static <V> void plot(final DataFrame<V> df, final PlotType type) {
-        final Chart chart = new ChartBuilder()
-            .chartType(chartType(type))
-            .build();
-
-        switch (type) {
-            case SCATTER: case LINE_AND_POINTS: break;
-            default: chart.getStyleManager().setMarkerSize(0); break;
-        }
-
+        final List<XChartPanel> panels = new LinkedList<>();
         final DataFrame<Number> numeric = df.numeric();
+        final int rows = (int)Math.ceil(Math.sqrt(numeric.size()));
+        final int cols = numeric.size() / rows + 1;
+
         final List<Number> xdata = new ArrayList<>(df.length());
         for (int i = 0; i < df.length(); i++) {
             xdata.add(i);
         }
 
-        for (final Object col : numeric.columns()) {
-            chart.addSeries(String.valueOf(col), xdata, numeric.col(col));
+        if (type == PlotType.GRID) {
+            for (final Object col : numeric.columns()) {
+                final Chart chart = new ChartBuilder()
+                    .chartType(chartType(type))
+                    .width(800 / cols)
+                    .height(800 / cols)
+                    .title(String.valueOf(col))
+                    .build();
+                chart.addSeries(String.valueOf(col), xdata, numeric.col(col));
+                chart.getStyleManager().setLegendVisible(false);
+                panels.add(new XChartPanel(chart));
+            }
+        } else {
+            final Chart chart = new ChartBuilder()
+                .chartType(chartType(type))
+                .build();
+
+            switch (type) {
+                case SCATTER: case LINE_AND_POINTS: break;
+                default: chart.getStyleManager().setMarkerSize(0); break;
+            }
+
+            for (final Object col : numeric.columns()) {
+                chart.addSeries(String.valueOf(col), xdata, numeric.col(col));
+            }
+
+            panels.add(new XChartPanel(chart));
         }
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -70,7 +93,12 @@ public class Display {
             public void run() {
                 final JFrame frame = new JFrame(title(df));
                 frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                frame.add(new XChartPanel(chart));
+                if (panels.size() > 1) {
+                    frame.setLayout(new GridLayout(rows, cols));
+                }
+                for (final XChartPanel p : panels) {
+                    frame.add(p);
+                }
                 frame.pack();
                 frame.setVisible(true);
             }
