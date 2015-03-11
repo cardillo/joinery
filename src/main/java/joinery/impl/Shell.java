@@ -68,12 +68,21 @@ public class Shell {
             Object result = null;
             final Console console = console();
             final Context ctx = Context.enter();
+
+            if (interactive) {
+                System.out.println(ctx.getImplementationVersion());
+            }
+
             try {
                 ctx.initStandardObjects(this);
                 // add functions
                 defineFunctionProperties(new String[] { "print", "quit" }, getClass(), ScriptableObject.DONTENUM);
                 // make data frame easily available
                 put("DataFrame", this, new NativeJavaClass(this, DataFrame.class));
+                // make data frame classes available as well
+                for (final Class<?> cls : DataFrame.class.getDeclaredClasses()) {
+                    put(cls.getSimpleName(), this, new NativeJavaClass(this, cls));
+                }
                 // make argument frames available
                 put("frames", this, new NativeJavaArray(this, frames.toArray()));
 
