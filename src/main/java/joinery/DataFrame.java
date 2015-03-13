@@ -280,6 +280,7 @@ implements Iterable<List<V>> {
      */
     public DataFrame<V> add(final Object column, final List<V> values) {
         columns.add(column, data.size());
+        index.extend(values.size());
         data.add(values);
         return this;
     }

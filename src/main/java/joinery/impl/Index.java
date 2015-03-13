@@ -58,6 +58,12 @@ public class Index {
         }
     }
 
+    public void extend(final Integer size) {
+        for (int i = index.size(); i < size; i++) {
+            add(i, i);
+        }
+    }
+
     public void set(final Object name, final Integer value) {
         index.put(name, value);
     }
