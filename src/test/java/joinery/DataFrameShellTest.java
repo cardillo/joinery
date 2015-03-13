@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import joinery.impl.Shell;
+import joinery.impl.js.DataFrameAdapter;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -53,7 +54,7 @@ public class DataFrameShellTest {
     throws IOException {
         input("new DataFrame()");
         assertEquals(
-                DataFrame.class,
+                DataFrameAdapter.class,
                 Shell.repl(Collections.<DataFrame<Object>>emptyList()).getClass()
             );
     }
@@ -71,7 +72,7 @@ public class DataFrameShellTest {
           .append("])");
         input(sb.toString());
         assertEquals(
-                DataFrame.class,
+                DataFrameAdapter.class,
                 Shell.repl(Collections.<DataFrame<Object>>emptyList()).getClass()
             );
     }
@@ -98,7 +99,7 @@ public class DataFrameShellTest {
           .append("})");
         input(sb.toString());
         assertEquals(
-                DataFrame.class,
+                DataFrameAdapter.class,
                 Shell.repl(Arrays.asList(df)).getClass()
             );
     }
@@ -108,7 +109,7 @@ public class DataFrameShellTest {
     throws IOException {
         input("frames[0]");
         assertEquals(
-                DataFrame.class,
+                DataFrameAdapter.class,
                 Shell.repl(Arrays.asList(df)).getClass()
             );
     }
@@ -118,7 +119,7 @@ public class DataFrameShellTest {
     throws IOException {
         input("frames[0]\n_");
         assertEquals(
-                DataFrame.class,
+                DataFrameAdapter.class,
                 Shell.repl(Arrays.asList(df)).getClass()
             );
     }
