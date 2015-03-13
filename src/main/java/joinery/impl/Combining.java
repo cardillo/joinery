@@ -20,9 +20,9 @@ package joinery.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,12 +54,21 @@ public class Combining {
             }
         }
 
-        final List<Object> columns = new ArrayList<>(left.columns());
-        for (Object column : right.columns()) {
+        final List<Object> columns = new ArrayList<>(how != JoinType.RIGHT ? left.columns() : right.columns());
+        for (Object column : how != JoinType.RIGHT ? right.columns() : left.columns()) {
             final int index = columns.indexOf(column);
             if (index >= 0) {
-                columns.set(index, String.format("%s_left", columns.get(index)));
-                column = String.format("%s_right", column);
+                if (column instanceof List) {
+                    @SuppressWarnings("unchecked")
+                    final List<Object> l1 = List.class.cast(columns.get(index));
+                    l1.add(how != JoinType.RIGHT ? "left" : "right");
+                    @SuppressWarnings("unchecked")
+                    final List<Object> l2= List.class.cast(column);
+                    l2.add(how != JoinType.RIGHT ? "right" : "left");
+                } else {
+                    columns.set(index, String.format("%s_%s", columns.get(index), how != JoinType.RIGHT ? "left" : "right"));
+                    column = String.format("%s_%s", column, how != JoinType.RIGHT ? "right" : "left");
+                }
             }
             columns.add(column);
         }
@@ -78,7 +87,8 @@ public class Combining {
             for (final Map.Entry<Object, List<V>> entry : how != JoinType.RIGHT ? rightMap.entrySet() : leftMap.entrySet()) {
                 final List<V> row = how != JoinType.RIGHT ? leftMap.get(entry.getKey()) : rightMap.get(entry.getKey());
                 if (row == null) {
-                    final List<V> tmp = new ArrayList<>(Collections.<V>nCopies(right.columns().size(), null));
+                    final List<V> tmp = new ArrayList<>(Collections.<V>nCopies(
+                        how != JoinType.RIGHT ? left.columns().size() : right.columns().size(), null));
                     tmp.addAll(entry.getValue());
                     df.append(entry.getKey(), tmp);
                 }
@@ -102,7 +112,7 @@ public class Combining {
     }
 
     public static <V> DataFrame<V> merge(final DataFrame<V> left, final DataFrame<V> right, final JoinType how) {
-        final Set<Object> intersection = new HashSet<>(left.nonnumeric().columns());
+        final Set<Object> intersection = new LinkedHashSet<>(left.nonnumeric().columns());
         intersection.retainAll(right.nonnumeric().columns());
         final Object[] columns = intersection.toArray(new Object[intersection.size()]);
         return join(left.reindex(columns), right.reindex(columns), how, null);
