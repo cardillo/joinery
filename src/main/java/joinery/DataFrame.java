@@ -258,6 +258,10 @@ implements Iterable<List<V>> {
         return this;
     }
 
+    public DataFrame<V> add(final List<V> values) {
+        return add(length(), values);
+    }
+
     /**
      * Add a new column to the data frame containing the value provided.
      *
@@ -512,10 +516,6 @@ implements Iterable<List<V>> {
 
     public DataFrame<V> append(final Object name, final V[] row) {
         return append(name, Arrays.asList(row));
-    }
-
-    public DataFrame<V> append(final V[] row) {
-        return append(Arrays.asList(row));
     }
 
     /**
@@ -1096,7 +1096,7 @@ implements Iterable<List<V>> {
      */
     public DataFrame<V> head(final int limit) {
         final BitSet selected = new BitSet();
-        selected.set(0, limit);
+        selected.set(0, Math.min(limit, length()));
         return new DataFrame<>(
                 Selection.select(index, selected),
                 columns,
@@ -1139,7 +1139,7 @@ implements Iterable<List<V>> {
     public DataFrame<V> tail(final int limit) {
         final BitSet selected = new BitSet();
         final int len = length();
-        selected.set(len - limit, len);
+        selected.set(Math.max(len - limit, 0), len);
         return new DataFrame<>(
                 Selection.select(index, selected),
                 columns,
