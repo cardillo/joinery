@@ -1224,7 +1224,7 @@ implements Iterable<List<V>> {
         final Iterator<Object> it = index().iterator();
         for (final List<V> row : this) {
             for (final List<U> trans : transform.apply(row)) {
-                transformed.append(it.next(), trans);
+                transformed.append(it.hasNext() ? it.next() : transformed.length(), trans);
             }
         }
         return transformed;
