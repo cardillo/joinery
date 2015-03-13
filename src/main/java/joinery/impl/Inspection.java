@@ -47,7 +47,7 @@ public class Inspection {
 
     public static BitSet nonnumeric(final DataFrame<?> df) {
         final BitSet nonnumeric = numeric(df);
-        nonnumeric.flip(0, nonnumeric.length());
+        nonnumeric.flip(0, df.size());
         return nonnumeric;
     }
 }
