@@ -171,7 +171,7 @@ public class Serialization {
 
     private static final String truncate(final Object o, final int w) {
         final String value = String.valueOf(o);
-        return value.length() > w ? value.substring(0, w - 3) + ELLIPSES : value;
+        return value.length() - ELLIPSES.length() > w ? value.substring(0, w - ELLIPSES.length()) + ELLIPSES : value;
     }
 
     private static final String fmt(final Class<?> cls, final Object o) {
