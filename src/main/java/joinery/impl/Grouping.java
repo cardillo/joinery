@@ -85,6 +85,10 @@ implements Iterable<Map.Entry<Object, BitSet>> {
 
     @SuppressWarnings("unchecked")
     public <V> DataFrame<V> apply(final DataFrame<V> df, final Aggregate<V, ?> function) {
+        if (df.isEmpty()) {
+            return df;
+        }
+
         final List<List<V>> grouped = new ArrayList<>();
         final List<Object> names = new ArrayList<>(df.columns());
         final List<Object> newcols = new ArrayList<>();
