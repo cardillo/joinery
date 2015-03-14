@@ -1,0 +1,1917 @@
+<api>
+<package name="joinery"
+>
+<class name="DataFrame"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<implements name="java.lang.Iterable">
+</implements>
+<constructor name="DataFrame"
+ type="joinery.DataFrame"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</constructor>
+<constructor name="DataFrame"
+ type="joinery.DataFrame"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="columns" type="java.lang.String...">
+</parameter>
+</constructor>
+<constructor name="DataFrame"
+ type="joinery.DataFrame"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="columns" type="java.util.Collection&lt;?&gt;">
+</parameter>
+</constructor>
+<constructor name="DataFrame"
+ type="joinery.DataFrame"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="index" type="java.util.Collection&lt;?&gt;">
+</parameter>
+<parameter name="columns" type="java.util.Collection&lt;?&gt;">
+</parameter>
+</constructor>
+<constructor name="DataFrame"
+ type="joinery.DataFrame"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="data" type="java.util.List&lt;? extends java.util.List&lt;? extends V&gt;&gt;">
+</parameter>
+</constructor>
+<constructor name="DataFrame"
+ type="joinery.DataFrame"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="index" type="java.util.Collection&lt;?&gt;">
+</parameter>
+<parameter name="columns" type="java.util.Collection&lt;?&gt;">
+</parameter>
+<parameter name="data" type="java.util.List&lt;? extends java.util.List&lt;? extends V&gt;&gt;">
+</parameter>
+</constructor>
+<method name="add"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="columns" type="java.lang.Object...">
+</parameter>
+</method>
+<method name="add"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="values" type="java.util.List&lt;V&gt;">
+</parameter>
+</method>
+<method name="add"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="column" type="java.lang.Object">
+</parameter>
+<parameter name="values" type="java.util.List&lt;V&gt;">
+</parameter>
+</method>
+<method name="aggregate"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="function" type="joinery.DataFrame.Aggregate&lt;V, U&gt;">
+</parameter>
+</method>
+<method name="append"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="name" type="java.lang.Object">
+</parameter>
+<parameter name="row" type="V[]">
+</parameter>
+</method>
+<method name="append"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="row" type="java.util.List&lt;? extends V&gt;">
+</parameter>
+</method>
+<method name="append"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="name" type="java.lang.Object">
+</parameter>
+<parameter name="row" type="java.util.List&lt;? extends V&gt;">
+</parameter>
+</method>
+<method name="apply"
+ return="joinery.DataFrame&lt;U&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="function" type="joinery.DataFrame.Function&lt;V, U&gt;">
+</parameter>
+</method>
+<method name="cast"
+ return="joinery.DataFrame&lt;T&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="cls" type="java.lang.Class&lt;T&gt;">
+</parameter>
+</method>
+<method name="coalesce"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="others" type="joinery.DataFrame&lt;? extends V&gt;...">
+</parameter>
+</method>
+<method name="col"
+ return="java.util.List&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="column" type="java.lang.Object">
+</parameter>
+</method>
+<method name="col"
+ return="java.util.List&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="column" type="java.lang.Integer">
+</parameter>
+</method>
+<method name="collapse"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="columns"
+ return="java.util.Set&lt;java.lang.Object&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="compare"
+ return="joinery.DataFrame&lt;java.lang.String&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="df1" type="joinery.DataFrame&lt;V&gt;">
+</parameter>
+<parameter name="df2" type="joinery.DataFrame&lt;V&gt;">
+</parameter>
+</method>
+<method name="convert"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="convert"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="columnTypes" type="java.lang.Class&lt;? extends V&gt;...">
+</parameter>
+</method>
+<method name="count"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="describe"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="diff"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="diff"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="period" type="int">
+</parameter>
+</method>
+<method name="drop"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="cols" type="java.lang.Object...">
+</parameter>
+</method>
+<method name="drop"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="cols" type="java.lang.Integer...">
+</parameter>
+</method>
+<method name="explode"
+ return="java.util.Map&lt;java.lang.Object, joinery.DataFrame&lt;V&gt;&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="flatten"
+ return="java.util.List&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="get"
+ return="V"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="row" type="java.lang.Object">
+</parameter>
+<parameter name="col" type="java.lang.Object">
+</parameter>
+</method>
+<method name="get"
+ return="V"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="row" type="java.lang.Integer">
+</parameter>
+<parameter name="col" type="java.lang.Integer">
+</parameter>
+</method>
+<method name="groupBy"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="cols" type="java.lang.Object...">
+</parameter>
+</method>
+<method name="groupBy"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="cols" type="java.lang.Integer...">
+</parameter>
+</method>
+<method name="groupBy"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="function" type="joinery.DataFrame.KeyFunction&lt;V&gt;">
+</parameter>
+</method>
+<method name="groups"
+ return="joinery.impl.Grouping"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="head"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="head"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="limit" type="int">
+</parameter>
+</method>
+<method name="index"
+ return="java.util.Set&lt;java.lang.Object&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="isEmpty"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="isnull"
+ return="joinery.DataFrame&lt;java.lang.Boolean&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="iterator"
+ return="java.util.ListIterator&lt;java.util.List&lt;V&gt;&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="itercols"
+ return="java.util.ListIterator&lt;java.util.List&lt;V&gt;&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="itermap"
+ return="java.util.ListIterator&lt;java.util.Map&lt;java.lang.Object, V&gt;&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="iterrows"
+ return="java.util.ListIterator&lt;java.util.List&lt;V&gt;&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="itervalues"
+ return="java.util.ListIterator&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="join"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="other" type="joinery.DataFrame&lt;V&gt;">
+</parameter>
+</method>
+<method name="join"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="other" type="joinery.DataFrame&lt;V&gt;">
+</parameter>
+<parameter name="join" type="joinery.DataFrame.JoinType">
+</parameter>
+</method>
+<method name="join"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="other" type="joinery.DataFrame&lt;V&gt;">
+</parameter>
+<parameter name="on" type="joinery.DataFrame.KeyFunction&lt;V&gt;">
+</parameter>
+</method>
+<method name="join"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="other" type="joinery.DataFrame&lt;V&gt;">
+</parameter>
+<parameter name="join" type="joinery.DataFrame.JoinType">
+</parameter>
+<parameter name="on" type="joinery.DataFrame.KeyFunction&lt;V&gt;">
+</parameter>
+</method>
+<method name="joinOn"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="other" type="joinery.DataFrame&lt;V&gt;">
+</parameter>
+<parameter name="cols" type="java.lang.Integer...">
+</parameter>
+</method>
+<method name="joinOn"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="other" type="joinery.DataFrame&lt;V&gt;">
+</parameter>
+<parameter name="join" type="joinery.DataFrame.JoinType">
+</parameter>
+<parameter name="cols" type="java.lang.Integer...">
+</parameter>
+</method>
+<method name="joinOn"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="other" type="joinery.DataFrame&lt;V&gt;">
+</parameter>
+<parameter name="cols" type="java.lang.Object...">
+</parameter>
+</method>
+<method name="joinOn"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="other" type="joinery.DataFrame&lt;V&gt;">
+</parameter>
+<parameter name="join" type="joinery.DataFrame.JoinType">
+</parameter>
+<parameter name="cols" type="java.lang.Object...">
+</parameter>
+</method>
+<method name="kurt"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="length"
+ return="int"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="main"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="args" type="java.lang.String[]">
+</parameter>
+<exception name="IOException" type="java.io.IOException">
+</exception>
+</method>
+<method name="map"
+ return="java.util.Map&lt;java.lang.Object, java.util.List&lt;V&gt;&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="map"
+ return="java.util.Map&lt;V, java.util.List&lt;V&gt;&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="key" type="java.lang.Object">
+</parameter>
+<parameter name="value" type="java.lang.Object">
+</parameter>
+</method>
+<method name="map"
+ return="java.util.Map&lt;V, java.util.List&lt;V&gt;&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="key" type="java.lang.Integer">
+</parameter>
+<parameter name="value" type="java.lang.Integer">
+</parameter>
+</method>
+<method name="max"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="mean"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="median"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="merge"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="other" type="joinery.DataFrame&lt;V&gt;">
+</parameter>
+</method>
+<method name="merge"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="other" type="joinery.DataFrame&lt;V&gt;">
+</parameter>
+<parameter name="join" type="joinery.DataFrame.JoinType">
+</parameter>
+</method>
+<method name="min"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="nonnumeric"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="notnull"
+ return="joinery.DataFrame&lt;java.lang.Boolean&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="numeric"
+ return="joinery.DataFrame&lt;java.lang.Number&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="percentChange"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="percentChange"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="period" type="int">
+</parameter>
+</method>
+<method name="pivot"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="row" type="java.lang.Object">
+</parameter>
+<parameter name="col" type="java.lang.Object">
+</parameter>
+<parameter name="values" type="java.lang.Object...">
+</parameter>
+</method>
+<method name="pivot"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="rows" type="java.util.List&lt;java.lang.Object&gt;">
+</parameter>
+<parameter name="cols" type="java.util.List&lt;java.lang.Object&gt;">
+</parameter>
+<parameter name="values" type="java.util.List&lt;java.lang.Object&gt;">
+</parameter>
+</method>
+<method name="pivot"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="row" type="java.lang.Integer">
+</parameter>
+<parameter name="col" type="java.lang.Integer">
+</parameter>
+<parameter name="values" type="java.lang.Integer...">
+</parameter>
+</method>
+<method name="pivot"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="rows" type="java.lang.Integer[]">
+</parameter>
+<parameter name="cols" type="java.lang.Integer[]">
+</parameter>
+<parameter name="values" type="java.lang.Integer[]">
+</parameter>
+</method>
+<method name="pivot"
+ return="joinery.DataFrame&lt;U&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="rows" type="joinery.DataFrame.KeyFunction&lt;V&gt;">
+</parameter>
+<parameter name="cols" type="joinery.DataFrame.KeyFunction&lt;V&gt;">
+</parameter>
+<parameter name="values" type="java.util.Map&lt;java.lang.Integer, joinery.DataFrame.Aggregate&lt;V, U&gt;&gt;">
+</parameter>
+</method>
+<method name="plot"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="plot"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="type" type="joinery.DataFrame.PlotType">
+</parameter>
+</method>
+<method name="prod"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="readCsv"
+ return="joinery.DataFrame&lt;java.lang.Object&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="file" type="java.lang.String">
+</parameter>
+<exception name="IOException" type="java.io.IOException">
+</exception>
+</method>
+<method name="readCsv"
+ return="joinery.DataFrame&lt;java.lang.Object&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="input" type="java.io.InputStream">
+</parameter>
+<exception name="IOException" type="java.io.IOException">
+</exception>
+</method>
+<method name="readXls"
+ return="joinery.DataFrame&lt;java.lang.Object&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="file" type="java.lang.String">
+</parameter>
+<exception name="IOException" type="java.io.IOException">
+</exception>
+</method>
+<method name="readXls"
+ return="joinery.DataFrame&lt;java.lang.Object&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="input" type="java.io.InputStream">
+</parameter>
+<exception name="IOException" type="java.io.IOException">
+</exception>
+</method>
+<method name="reindex"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="col" type="java.lang.Integer">
+</parameter>
+<parameter name="drop" type="boolean">
+</parameter>
+</method>
+<method name="reindex"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="cols" type="java.lang.Integer[]">
+</parameter>
+<parameter name="drop" type="boolean">
+</parameter>
+</method>
+<method name="reindex"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="cols" type="java.lang.Integer...">
+</parameter>
+</method>
+<method name="reindex"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="col" type="java.lang.Object">
+</parameter>
+<parameter name="drop" type="boolean">
+</parameter>
+</method>
+<method name="reindex"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="cols" type="java.lang.Object[]">
+</parameter>
+<parameter name="drop" type="boolean">
+</parameter>
+</method>
+<method name="reindex"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="cols" type="java.lang.Object...">
+</parameter>
+</method>
+<method name="rename"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="old" type="java.lang.Object">
+</parameter>
+<parameter name="name" type="java.lang.Object">
+</parameter>
+</method>
+<method name="rename"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="names" type="java.util.Map&lt;java.lang.Object, java.lang.Object&gt;">
+</parameter>
+</method>
+<method name="resetIndex"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="reshape"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="rows" type="java.lang.Integer">
+</parameter>
+<parameter name="cols" type="java.lang.Integer">
+</parameter>
+</method>
+<method name="reshape"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="rows" type="java.util.Collection&lt;?&gt;">
+</parameter>
+<parameter name="cols" type="java.util.Collection&lt;?&gt;">
+</parameter>
+</method>
+<method name="retain"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="cols" type="java.lang.Object...">
+</parameter>
+</method>
+<method name="retain"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="cols" type="java.lang.Integer...">
+</parameter>
+</method>
+<method name="row"
+ return="java.util.List&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="row" type="java.lang.Object">
+</parameter>
+</method>
+<method name="row"
+ return="java.util.List&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="row" type="java.lang.Integer">
+</parameter>
+</method>
+<method name="select"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="predicate" type="joinery.DataFrame.Predicate&lt;V&gt;">
+</parameter>
+</method>
+<method name="set"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="row" type="java.lang.Object">
+</parameter>
+<parameter name="col" type="java.lang.Object">
+</parameter>
+<parameter name="value" type="V">
+</parameter>
+</method>
+<method name="set"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="row" type="java.lang.Integer">
+</parameter>
+<parameter name="col" type="java.lang.Integer">
+</parameter>
+<parameter name="value" type="V">
+</parameter>
+</method>
+<method name="show"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="size"
+ return="int"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="skew"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="slice"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="rowStart" type="java.lang.Object">
+</parameter>
+<parameter name="rowEnd" type="java.lang.Object">
+</parameter>
+</method>
+<method name="slice"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="rowStart" type="java.lang.Object">
+</parameter>
+<parameter name="rowEnd" type="java.lang.Object">
+</parameter>
+<parameter name="colStart" type="java.lang.Object">
+</parameter>
+<parameter name="colEnd" type="java.lang.Object">
+</parameter>
+</method>
+<method name="slice"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="rowStart" type="java.lang.Integer">
+</parameter>
+<parameter name="rowEnd" type="java.lang.Integer">
+</parameter>
+</method>
+<method name="slice"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="rowStart" type="java.lang.Integer">
+</parameter>
+<parameter name="rowEnd" type="java.lang.Integer">
+</parameter>
+<parameter name="colStart" type="java.lang.Integer">
+</parameter>
+<parameter name="colEnd" type="java.lang.Integer">
+</parameter>
+</method>
+<method name="sortBy"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="cols" type="java.lang.Object...">
+</parameter>
+</method>
+<method name="sortBy"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="cols" type="java.lang.Integer...">
+</parameter>
+</method>
+<method name="sortBy"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="comparator" type="java.util.Comparator&lt;java.util.List&lt;V&gt;&gt;">
+</parameter>
+</method>
+<method name="stddev"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="sum"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="tail"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="tail"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="limit" type="int">
+</parameter>
+</method>
+<method name="toArray"
+ return="java.lang.Object[]"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="toArray"
+ return="U[]"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="array" type="U[]">
+</parameter>
+</method>
+<method name="toArray"
+ return="java.lang.Object"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="cls" type="java.lang.Class&lt;?&gt;">
+</parameter>
+</method>
+<method name="toString"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="limit" type="int">
+</parameter>
+</method>
+<method name="transform"
+ return="joinery.DataFrame&lt;U&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="transform" type="joinery.DataFrame.RowFunction&lt;V, U&gt;">
+</parameter>
+</method>
+<method name="transpose"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="types"
+ return="java.util.List&lt;java.lang.Class&lt;?&gt;&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="unique"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="unique"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="cols" type="java.lang.Object...">
+</parameter>
+</method>
+<method name="unique"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="cols" type="java.lang.Integer...">
+</parameter>
+</method>
+<method name="update"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="others" type="joinery.DataFrame&lt;? extends V&gt;...">
+</parameter>
+</method>
+<method name="var"
+ return="joinery.DataFrame&lt;V&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="writeCsv"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="file" type="java.lang.String">
+</parameter>
+<exception name="IOException" type="java.io.IOException">
+</exception>
+</method>
+<method name="writeCsv"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="output" type="java.io.OutputStream">
+</parameter>
+<exception name="IOException" type="java.io.IOException">
+</exception>
+</method>
+<method name="writeXls"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="file" type="java.lang.String">
+</parameter>
+<exception name="IOException" type="java.io.IOException">
+</exception>
+</method>
+<method name="writeXls"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="output" type="java.io.OutputStream">
+</parameter>
+<exception name="IOException" type="java.io.IOException">
+</exception>
+</method>
+</class>
+<interface name="DataFrame.Aggregate"
+ abstract="true"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<implements name="joinery.DataFrame.Function">
+</implements>
+</interface>
+<interface name="DataFrame.Function"
+ abstract="true"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="apply"
+ return="O"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="value" type="I">
+</parameter>
+</method>
+</interface>
+<class name="DataFrame.JoinType"
+ extends="java.lang.Enum"
+ abstract="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="valueOf"
+ return="joinery.DataFrame.JoinType"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="name" type="java.lang.String">
+</parameter>
+</method>
+<method name="values"
+ return="joinery.DataFrame.JoinType[]"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</class>
+<interface name="DataFrame.KeyFunction"
+ abstract="true"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<implements name="joinery.DataFrame.Function">
+</implements>
+</interface>
+<class name="DataFrame.PlotType"
+ extends="java.lang.Enum"
+ abstract="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="valueOf"
+ return="joinery.DataFrame.PlotType"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="name" type="java.lang.String">
+</parameter>
+</method>
+<method name="values"
+ return="joinery.DataFrame.PlotType[]"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</class>
+<interface name="DataFrame.Predicate"
+ abstract="true"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<implements name="joinery.DataFrame.Function">
+</implements>
+</interface>
+<interface name="DataFrame.RowFunction"
+ abstract="true"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="apply"
+ return="java.util.List&lt;java.util.List&lt;O&gt;&gt;"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="values" type="java.util.List&lt;I&gt;">
+</parameter>
+</method>
+</interface>
+<class name="DataFrame.SortDirection"
+ extends="java.lang.Enum"
+ abstract="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="valueOf"
+ return="joinery.DataFrame.SortDirection"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="name" type="java.lang.String">
+</parameter>
+</method>
+<method name="values"
+ return="joinery.DataFrame.SortDirection[]"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</class>
+</package>
+</api>
