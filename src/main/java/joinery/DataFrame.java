@@ -554,7 +554,8 @@ implements Iterable<List<V>> {
     public DataFrame<V> append(final Object name, final List<? extends V> row) {
         final int len = length();
         index.add(name, len);
-        data.reshape(data.size(), len + 1);
+        columns.extend(row.size());
+        data.reshape(columns.names().size(), len + 1);
         for (int c = 0; c < data.size(); c++) {
             data.set(c < row.size() ? row.get(c) : null, c, len);
         }
