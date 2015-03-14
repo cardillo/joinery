@@ -175,11 +175,38 @@
             <additionalparam>
               -quiet
               -hdf project.name "${project.name}"
-              -d ${project.build.directory}/site/api
+              -d ${project.build.directory}/apidocs
               -templatedir ${basedir}/src/main/resources/templates
             </additionalparam>
             <useStandardDocletOptions>false</useStandardDocletOptions>
             <excludePackageNames>joinery.impl</excludePackageNames>
+          </configuration>
+        </plugin>
+
+        <!-- configure build number -->
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>buildnumber-maven-plugin</artifactId>
+          <version>1.3</version>
+          <configuration>
+            <shortRevisionLength>7</shortRevisionLength>
+          </configuration>
+        </plugin>
+
+        <!-- configure jar manifest -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>2.5</version>
+          <configuration>
+            <archive>
+              <manifestEntries>
+                <Name>${project.groupId}/</Name>
+                <Specification-Title>${project.description}</Specification-Title>
+                <Specification-Version>${project.version}</Specification-Version>
+                <Implementation-Version>${buildNumber}</Implementation-Version>
+              </manifestEntries>
+            </archive>
           </configuration>
         </plugin>
 
@@ -196,6 +223,13 @@
               <manifest>
                 <mainClass>joinery.DataFrame</mainClass>
               </manifest>
+              <manifestEntries>
+                <Name>${project.groupId}/</Name>
+                <Specification-Title>${project.name}</Specification-Title>
+                <Specification-Version>${project.version}</Specification-Version>
+                <Implementation-Title>${project.description}</Implementation-Title>
+                <Implementation-Version>${buildNumber}</Implementation-Version>
+              </manifestEntries>
             </archive>
           </configuration>
         </plugin>
@@ -232,12 +266,6 @@
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-jar-plugin</artifactId>
-          <version>2.5</version>
-        </plugin>
-
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-resources-plugin</artifactId>
           <version>2.7</version>
         </plugin>
@@ -262,6 +290,19 @@
     </pluginManagement>
 
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>validate</phase>
+            <goals>
+              <goal>create</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
       <!-- run integration tests as part of verify goal -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
