@@ -19,6 +19,7 @@
 package joinery;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -107,6 +108,34 @@ public class DataFrameAggregationTest {
     }
 
     @Test
+    public void testDescribe() {
+        assertArrayAlmostEquals(
+                new Double[] {
+                        7.0, 40.0, 21.6024, 466.6667, 70.0, 10.0,
+                        7.0, 40.0, 21.6024, 466.6667, 70.0, 10.0
+                    },
+                df.describe().toArray(new Double[0]),
+                0.0001
+            );
+    }
+
+    @Test
+    public void testDescribeGrouped() {
+        assertArrayAlmostEquals(
+                new Double[] {
+                        2.00000000, 15.00000000, 7.07106781, 50.00000000, 20.00000000, 10.00000000,
+                        2.00000000, 35.00000000, 7.07106781, 50.00000000, 40.00000000, 30.00000000,
+                        3.00000000, 60.00000000, 10.00000000, 100.00000000, 70.00000000, 50.00000000,
+                        2.00000000, 15.00000000, 7.07106781, 50.00000000, 20.00000000, 10.00000000,
+                        2.00000000, 35.00000000, 7.07106781, 50.00000000, 40.00000000, 30.00000000,
+                        3.00000000, 60.00000000, 10.00000000, 100.00000000, 70.00000000, 50.00000000
+                    },
+                df.groupBy("b").describe().toArray(new Double[0]),
+                0.0001
+            );
+    }
+
+    @Test
     public void testStorelessStatisticWithNulls() {
         df.set(0, 2, null);
         df.set(1, 3, null);
@@ -118,5 +147,21 @@ public class DataFrameAggregationTest {
         df.set(0, 2, null);
         df.set(1, 3, null);
         df.median();
+    }
+
+    public void assertArrayAlmostEquals(final Double[] expected, final Double[] actual, final double epsilon) {
+        assertEquals(
+            String.format("array lengths are different; expected:<%d> but was <%d>", expected.length, actual.length),
+            expected.length,
+            actual.length
+        );
+        for (int i = 0; i < expected.length; i++) {
+            assertEquals(
+                String.format("arrays differ at element %d; expected:<%f> but was <%f>", i, expected[i], actual[i]),
+                expected[i],
+                actual[i],
+                epsilon
+            );
+        }
     }
 }

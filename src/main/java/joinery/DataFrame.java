@@ -1574,6 +1574,12 @@ implements Iterable<List<V>> {
         return groups.apply(this, new Aggregation.Median<V>());
     }
 
+    @Timed
+    public DataFrame<V> describe() {
+        return Aggregation.describe(
+            groups.apply(this, new Aggregation.Describe<V>()));
+    }
+
     public DataFrame<V> pivot(final Object row, final Object col, final Object ... values) {
         return pivot(Collections.singletonList(row), Collections.singletonList(col), Arrays.asList(values));
     }

@@ -399,6 +399,10 @@ extends ScriptableObject {
         return new DataFrameAdapter(this, df.median());
     }
 
+    public DataFrameAdapter jsFunction_describe() {
+        return new DataFrameAdapter(this, df.describe());
+    }
+
     public static Scriptable jsFunction_pivot(final Context ctx, final Scriptable object, final Object[] args, final Function func) {
         final Object row = Context.jsToJava(args[0], Object.class);
         final Object col = Context.jsToJava(args[0], Object.class);

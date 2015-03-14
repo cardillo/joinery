@@ -18,13 +18,18 @@
 
 package joinery.impl;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import joinery.DataFrame;
 import joinery.DataFrame.Aggregate;
 
+import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 import org.apache.commons.math3.stat.descriptive.StorelessUnivariateStatistic;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.stat.descriptive.UnivariateStatistic;
 
 public class Aggregation {
@@ -190,5 +195,61 @@ public class Aggregation {
         public Median() {
             super(new org.apache.commons.math3.stat.descriptive.rank.Median());
         }
+    }
+
+    public static class Describe<V>
+    implements Aggregate<V, StatisticalSummary> {
+        private final SummaryStatistics stat = new SummaryStatistics();
+
+        @Override
+        public StatisticalSummary apply(final List<V> values) {
+            stat.clear();
+            for (Object value : values) {
+                if (value != null) {
+                    if (value instanceof Boolean) {
+                        value = Boolean.class.cast(value) ? 1 : 0;
+                    }
+                    stat.addValue(Number.class.cast(value).doubleValue());
+                }
+            }
+            return stat.getSummary();
+        }
+    }
+
+    private static final Object name(final DataFrame<?> df, final Object row, final Object stat) {
+        // df index size > 1 only happens if the aggregate describes a grouped data frame
+        return df.index().size() > 1 ? Arrays.asList(row, stat) : stat;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <V> DataFrame<V> describe(final DataFrame<V> df) {
+        final DataFrame<V> desc = new DataFrame<>();
+        for (final Object col : df.columns()) {
+            for (final Object row : df.index()) {
+                final V value = df.get(row, col);
+                if (value instanceof StatisticalSummary) {
+                    if (!desc.columns().contains(col)) {
+                        desc.add(col);
+                        if (desc.isEmpty()) {
+                            for (final Object r : df.index()) {
+                                for (final Object stat : Arrays.asList("count", "mean", "std", "var", "max", "min")) {
+                                    final Object name = name(df, r, stat);
+                                    desc.append(name, Collections.<V>emptyList());
+                                }
+                            }
+                        }
+                    }
+
+                    final StatisticalSummary summary = StatisticalSummary.class.cast(value);
+                    desc.set(name(df, row, "count"), col, (V)new Double(summary.getN()));
+                    desc.set(name(df, row, "mean"),  col, (V)new Double(summary.getMean()));
+                    desc.set(name(df, row, "std"),   col, (V)new Double(summary.getStandardDeviation()));
+                    desc.set(name(df, row, "var"),   col, (V)new Double(summary.getVariance()));
+                    desc.set(name(df, row, "max"),   col, (V)new Double(summary.getMax()));
+                    desc.set(name(df, row, "min"),   col, (V)new Double(summary.getMin()));
+                }
+            }
+        }
+        return desc;
     }
 }
