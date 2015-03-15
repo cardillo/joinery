@@ -235,7 +235,7 @@ public class Serialization {
     		throws IOException {
     	CsvPreference csvPreference;
     	switch (separator) {
-    	case "\t":
+    	case "\\t":
     		csvPreference = CsvPreference.TAB_PREFERENCE;
     		break;
     	case ",":
