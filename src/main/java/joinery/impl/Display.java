@@ -53,7 +53,7 @@ public class Display {
 
     public static <V> void plot(final DataFrame<V> df, final PlotType type) {
         final List<XChartPanel> panels = new LinkedList<>();
-        final DataFrame<Number> numeric = df.numeric();
+        final DataFrame<Number> numeric = df.numeric().fillna(0);
         final int rows = (int)Math.ceil(Math.sqrt(numeric.size()));
         final int cols = numeric.size() / rows + 1;
 
