@@ -331,6 +331,25 @@ implements Iterable<List<V>> {
             );
     }
 
+    public DataFrame<V> dropna() {
+        return dropna(Axis.ROWS);
+    }
+
+    public DataFrame<V> dropna(final Axis direction) {
+        switch (direction) {
+            case ROWS:
+                return select(new Selection.DropNaPredicate<V>());
+            default:
+                return transpose()
+                       .select(new Selection.DropNaPredicate<V>())
+                       .transpose();
+        }
+    }
+
+    public DataFrame<V> fillna(final V fill) {
+        return apply(new Views.FillNaFunction<V>(fill));
+    }
+
     /**
      * Create a new data frame containing only the specified columns.
      *
@@ -2032,6 +2051,14 @@ implements Iterable<List<V>> {
         AREA,
         BAR,
         GRID
+    }
+
+    /**
+     * An enumeration of data frame axes.
+     */
+    public enum Axis {
+        ROWS,
+        COLUMNS
     }
 
     /**

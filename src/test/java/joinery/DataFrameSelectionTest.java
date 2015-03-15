@@ -27,6 +27,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import joinery.DataFrame.Axis;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -105,6 +107,30 @@ public class DataFrameSelectionTest {
         assertArrayEquals(
                 new String[] { "row15" },
                 df.slice(15, 16).index().toArray()
+            );
+    }
+
+    @Test
+    public void testDropNaRows() {
+        df = new DataFrame<Object>()
+                    .add("one", "two", "three")
+                    .append(Arrays.asList("a", null, "c"))
+                    .append(Arrays.asList("aa", "bb", "cc"));
+        assertArrayEquals(
+                new Object[] { "aa", "bb", "cc" },
+                df.dropna().toArray()
+            );
+    }
+
+    @Test
+    public void testDropNaColumns() {
+        df = new DataFrame<Object>()
+                    .add("one", "two", "three")
+                    .append(Arrays.asList("a", null, "c"))
+                    .append(Arrays.asList("aa", "bb", "cc"));
+        assertArrayEquals(
+                new Object[] { "a", "aa", "c", "cc" },
+                df.dropna(Axis.COLUMNS).toArray()
             );
     }
 }

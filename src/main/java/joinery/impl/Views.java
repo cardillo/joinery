@@ -165,9 +165,9 @@ public class Views {
 
     public static class TransformedView<V, U>
     extends AbstractList<List<U>> {
-        private final DataFrame<V> df;
-        private final Function<V, U> transform;
-        private final boolean transpose;
+        protected final DataFrame<V> df;
+        protected final Function<V, U> transform;
+        protected final boolean transpose;
 
         public TransformedView(final DataFrame<V> df, final Function<V, U> transform, final boolean transpose) {
             this.df = df;
@@ -188,10 +188,10 @@ public class Views {
 
     public static class TransformedSeriesView<V, U>
     extends AbstractList<U> {
-        private final DataFrame<V> df;
-        private final int index;
-        private final boolean transpose;
-        private final Function<V, U> transform;
+        protected final DataFrame<V> df;
+        protected final int index;
+        protected final boolean transpose;
+        protected final Function<V, U> transform;
 
         public TransformedSeriesView(final DataFrame<V> df, final Function<V, U> transform, final int index, final boolean transpose) {
             this.df = df;
@@ -228,6 +228,20 @@ public class Views {
         @Override
         public int size() {
             return df.size() * df.length();
+        }
+    }
+
+    public static class FillNaFunction<V>
+    implements Function<V, V> {
+        private final V fill;
+
+        public FillNaFunction(final V fill) {
+            this.fill = fill;
+        }
+
+        @Override
+        public V apply(final V value) {
+            return value == null ? fill : value;
         }
     }
 }

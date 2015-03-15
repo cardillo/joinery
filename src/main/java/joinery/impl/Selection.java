@@ -81,4 +81,17 @@ public class Selection {
         cols.set(colStart, colEnd);
         return new BitSet[] { rows, cols };
     }
+
+    public static class DropNaPredicate<V>
+    implements Predicate<V> {
+        @Override
+        public Boolean apply(final List<V> values) {
+            for (final V value : values) {
+                if (value == null) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
 }
