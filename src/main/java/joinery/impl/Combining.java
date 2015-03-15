@@ -42,7 +42,7 @@ public class Combining {
             final Object name = leftIt.next();
             final Object key = on == null ? name : on.apply(row);
             if (leftMap.put(key, row) != null) {
-                throw new IllegalArgumentException("generated key not unique");
+                throw new IllegalArgumentException("generated key is not unique: " + key);
             }
         }
 
@@ -50,7 +50,7 @@ public class Combining {
             final Object name = rightIt.next();
             final Object key = on == null ? name : on.apply(row);
             if (rightMap.put(key, row) != null) {
-                throw new IllegalArgumentException("generated key not unique");
+                throw new IllegalArgumentException("generated key is not unique: " + key);
             }
         }
 

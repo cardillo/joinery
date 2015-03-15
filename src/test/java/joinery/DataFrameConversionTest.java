@@ -21,6 +21,8 @@ package joinery;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -169,6 +171,60 @@ public class DataFrameConversionTest {
         assertEquals(
                 String.class,
                 df.get("row1", "bool").getClass()
+            );
+    }
+
+    @Test
+    public void testTwoDimensionalToArray()
+    throws ParseException {
+        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        assertArrayEquals(
+                df.convert().toArray(new Object[df.length()][df.size()]),
+                new Object[][] {
+                    new Object[] { "one",   1L, 1.1, sdf.parse("2014-01-01"), true,  null },
+                    new Object[] { "two",   2L, 2.2, sdf.parse("2014-01-02"), true,  null },
+                    new Object[] { "three", 3L, 3.3, sdf.parse("2014-01-03"), false, null },
+                    new Object[] { "four",  4L, 4.4, sdf.parse("2014-01-04"), false, null },
+                    new Object[] { "five",  5L, 5.5, sdf.parse("2014-01-05"), true,  null },
+                    new Object[] { "six",   6L, 6.6, sdf.parse("2014-01-06"), false, null }
+                }
+            );
+    }
+
+    @Test
+    public void testToArrayType()
+    throws ParseException {
+        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        assertArrayEquals(
+                df.convert().toArray(Object[][].class),
+                new Object[][] {
+                    new Object[] { "one",   1L, 1.1, sdf.parse("2014-01-01"), true,  null },
+                    new Object[] { "two",   2L, 2.2, sdf.parse("2014-01-02"), true,  null },
+                    new Object[] { "three", 3L, 3.3, sdf.parse("2014-01-03"), false, null },
+                    new Object[] { "four",  4L, 4.4, sdf.parse("2014-01-04"), false, null },
+                    new Object[] { "five",  5L, 5.5, sdf.parse("2014-01-05"), true,  null },
+                    new Object[] { "six",   6L, 6.6, sdf.parse("2014-01-06"), false, null }
+                }
+            );
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void testToArrayTypeInvalid() {
+        df.toArray(Double[][].class);
+    }
+
+    @Test
+    public void testToArrayPrimitiveType() {
+        assertArrayEquals(
+                df.convert().numeric().toArray(double[][].class),
+                new double[][] {
+                    new double[] { 1.0, 1.1 },
+                    new double[] { 2.0, 2.2 },
+                    new double[] { 3.0, 3.3 },
+                    new double[] { 4.0, 4.4 },
+                    new double[] { 5.0, 5.5 },
+                    new double[] { 6.0, 6.6 }
+                }
             );
     }
 }
