@@ -346,6 +346,12 @@ implements Iterable<List<V>> {
         }
     }
 
+    /**
+     * Returns a view of the of data frame with NA's replaced with {@code fill}.
+     *
+     * @param fill the value used to replace missing values
+     * @return the new data frame
+     */
     public DataFrame<V> fillna(final V fill) {
         return apply(new Views.FillNaFunction<V>(fill));
     }
@@ -1360,61 +1366,79 @@ implements Iterable<List<V>> {
     }
 
     /**
-     * returns a double [][] representation of DataFrame, assumes all values in the DataFrame are doubles.
-     * This version of the method will throw a null pointer exception on NA's
-     * @return
+     * Copy the values of contained in the data frame into a
+     * flat array of length {@code #size()} * {@code #length()}.
+     *
+     * @return the array
      */
-    public double[][] asDoubleMatrix() {
-        final double [][] matrix = new double[length()][size()];
-        for (int i = 0; i < matrix.length; i++) {
-            for (int j = 0; j < matrix[0].length; j++) {
-                matrix[i][j] = (Double) get(i,j);
-            }
-        }
-        return matrix;
-    }
-
-    /**
-     * returns a double [][] representation of DataFrame, assumes all values in the DataFrame are doubles.
-     * This version of the method  replace NA's with {@code naReplaceement}
-     * @param naReplacement
-     * @return
-     */
-    public double[][] asDoubleMatrix(final double naReplacement) {
-        final double [][] matrix = new double[length()][size()];
-        for (int i = 0; i < matrix.length; i++) {
-            for (int j = 0; j < matrix[0].length; j++) {
-                Double val = (Double) get(i,j);
-                val = val == null ? naReplacement : val;
-                matrix[i][j] = val;
-            }
-        }
-        return matrix;
-    }
-
-
     public Object[] toArray() {
         return toArray(new Object[size() * length()]);
     }
 
+    /**
+     * Copy the values of contained in the data frame into the
+     * specified array. If the length of the provided array is
+     * less than length {@code #size()} * {@code #length()} a
+     * new array will be created.
+     *
+     * @return the array
+     */
     public <U> U[] toArray(final U[] array) {
         return new Views.FlatView<>(this).toArray(array);
     }
 
-    public Object toArray(final Class<?> cls) {
-        if (cls.getComponentType() == null) {
-            throw new IllegalArgumentException("class must be an array class");
+    @SuppressWarnings("unchecked")
+    public <U> U[][] toArray(final U[][] array) {
+        if (array.length >= size() && array.length > 0 && array[0].length >= length()) {
+            for (int c = 0; c < size(); c++) {
+                for (int r = 0; r < length(); r++) {
+                    array[r][c] = (U)get(r, c);
+                }
+            }
+        }
+        return (U[][])toArray(array.getClass());
+    }
+
+    /**
+     * Copy the values of contained in the data frame into a
+     * array of the specified type.  If the type specified is
+     * a two dimensional array, for example {@code double[][].class},
+     * a row-wise copy will be made.
+     *
+     * @throws IllegalArgumentException if the values are not assignable to the specified component type
+     * @return the array
+     */
+    public <U> U toArray(final Class<U> cls) {
+        int dim = 0;
+        Class<?> type = cls;
+        while (type.getComponentType() != null) {
+            type = type.getComponentType();
+            dim++;
         }
 
         final int size = size();
         final int len = length();
-        final Object a = Array.newInstance(cls.getComponentType(), size * len);
-
-        for (int i = 0; i < size * len; i++) {
-            Array.set(a, i, data.get(i / size, i % len));
+        if (dim == 1) {
+            @SuppressWarnings("unchecked")
+            final U array = (U)Array.newInstance(type, size * len);
+            for (int i = 0; i < size * len; i++) {
+                Array.set(array, i, data.get(i / size, i % len));
+            }
+            return array;
+        } else if (dim == 2) {
+            @SuppressWarnings("unchecked")
+            final U array = (U)Array.newInstance(type, new int[] { len, size });
+            for (int r = 0; r < len; r++) {
+                final Object aa = Array.get(array, r);
+                for (int c = 0; c < size; c++) {
+                    Array.set(aa, c, get(r, c));
+                }
+                Array.set(array, r, aa);
+            }
+            return array;
         }
 
-        return a;
+        throw new IllegalArgumentException("class must be an array class");
     }
 
     /**
@@ -1978,7 +2002,6 @@ implements Iterable<List<V>> {
     throws IOException {
         return Serialization.readCsv(input, separator, longDefault);
     }
-
 
     public final void writeCsv(final String file)
     throws IOException {
