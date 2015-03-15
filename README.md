@@ -43,10 +43,10 @@ df.groupBy("value")
 Printing out the resulting data frame gives us the following table.
 
 ```
-          value            number
-0       Fizz                27
-1       Buzz                14
-2       FizzBuzz             6
+  	   value 	number
+ 0	Fizz    	    27
+ 1	Buzz    	    14
+ 2	FizzBuzz	     6
 ```
 
 See [FizzBuzz.java](https://github.com/cardillo/joinery/blob/master/src/test/java/examples/FizzBuzz.java)
@@ -56,12 +56,13 @@ for the complete code.
 next steps
 ==========
 
-Get the [executable jar](https://bintray.com/artifact/download/cardillo/maven/joinery/joinery-dataframe/1.3/joinery-dataframe-1.3-jar-with-dependencies.jar)
+Get the [executable jar](https://bintray.com/artifact/download/cardillo/maven/joinery/joinery-dataframe/1.4/joinery-dataframe-1.4-jar-with-dependencies.jar)
 and try it for yourself.
 
 ```javascript
-$ java -jar joinery-dataframe-1.3-jar-with-dependencies.jar shell
-ECMAScript-ECMA - 262 Edition 5.1: Oracle Nashorn 1.8.0_31
+$ java -jar joinery-dataframe-1.4-jar-with-dependencies.jar shell
+# Rhino 1.7 release 2 2009 03 22
+# Java HotSpot(TM) 64-Bit Server VM, Oracle Corporation, 1.8.0_31
 > df = new DataFrame()
 [empty data frame]
 > df.add("value")
@@ -70,10 +71,11 @@ ECMAScript-ECMA - 262 Edition 5.1: Oracle Nashorn 1.8.0_31
       df.append([val])
   })
 > df
-      value
-0          10
-1          20
-2          30
+        value
+ 0	   10
+ 1	   20
+ 2	   30
+
 >
 ```
 
@@ -90,7 +92,7 @@ use JCenter, visit https://bintray.com/bintray/jcenter.
 <dependency>
   <groupId>joinery</groupId>
   <artifactId>joinery-dataframe</artifactId>
-  <version>1.3</version>
+  <version>1.4</version>
 </dependency>
 ```
 
@@ -139,6 +141,8 @@ Launches an interactive JavaScript shell for working with data frames.
 
 ```javascript
 $ java joinery.DataFrame shell
+# Rhino 1.7 release 2 2009 03 22
+# Java HotSpot(TM) 64-Bit Server VM, Oracle Corporation, 1.8.0_31
 > df = DataFrame.readCsv('https://www.quandl.com/api/v1/datasets/GOOG/NASDAQ_AAPL.csv')
              Date             Open            High            Low             Close              Volume
    0    2015-02-20      128.62000000    129.50000000    128.05000000    129.50000000     48948419.00000000
