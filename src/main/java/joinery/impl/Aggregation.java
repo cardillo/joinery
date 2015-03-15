@@ -197,6 +197,13 @@ public class Aggregation {
         }
     }
 
+    public static class Percentile<V>
+    extends AbstractStatistic<V> {
+        public Percentile(final double quantile) {
+            super(new org.apache.commons.math3.stat.descriptive.rank.Percentile(quantile));
+        }
+    }
+
     public static class Describe<V>
     implements Aggregate<V, StatisticalSummary> {
         private final SummaryStatistics stat = new SummaryStatistics();

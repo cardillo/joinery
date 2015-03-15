@@ -1520,6 +1520,26 @@ implements Iterable<List<V>> {
     }
 
     /**
+     * Compute the percentile of the numeric columns for each group
+     * or the entire data frame if the data is not grouped.
+     *
+     * <pre> {@code
+     * > DataFrame<Integer> df = new DataFrame<>("value");
+     * > df.append("one", Arrays.asList(1));
+     * > df.append("two", Arrays.asList(5));
+     * > df.append("three", Arrays.asList(3));
+     * > df.append("four",  Arrays.asList(7));
+     * > df.mean().col(0);
+     * [4.0] }</pre>
+     *
+     * @return the new data frame
+     */
+    @Timed
+    public DataFrame<V> percentile(final double quantile) {
+        return groups.apply(this, new Aggregation.Percentile<V>(quantile));
+    }
+
+    /**
      * Compute the standard deviation of the numeric columns for each group
      * or the entire data frame if the data is not grouped.
      *

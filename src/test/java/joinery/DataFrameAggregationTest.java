@@ -21,6 +21,7 @@ package joinery;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -105,6 +106,19 @@ public class DataFrameAggregationTest {
                 new Double[] { 40.0, 40.0 },
                 df.convert().median().toArray()
             );
+    }
+
+    @Test
+    public void testPercentile() {
+        assertArrayEquals(
+                new Double[] { 60.0, 60.0 },
+                df.convert().percentile(75).toArray()
+            );
+    }
+
+    @Test(expected=MathIllegalArgumentException.class)
+    public void testPercentileInvalid() {
+        df.convert().percentile(101);
     }
 
     @Test
