@@ -19,7 +19,10 @@
 package joinery;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.List;
 import java.util.Random;
 
 import joinery.DataFrame.PlotType;
@@ -66,5 +69,15 @@ public class DataFramePlotTest {
         df.plot(PlotType.BAR);
         df.plot(PlotType.LINE_AND_POINTS);
         df.plot(PlotType.GRID);
+
+        final Calendar cal = Calendar.getInstance();
+        cal.clear();
+        cal.set(2014, 11, 15);
+        final List<Object> dates = new ArrayList<>();
+        for (int i = 0; i < df.length(); i++) {
+            dates.add(cal.getTime());
+            cal.add(Calendar.DATE, -1);
+        }
+        df.add("date", dates).reindex("date").plot();
     }
 }

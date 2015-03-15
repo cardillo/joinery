@@ -20,6 +20,9 @@ package joinery.impl;
 
 import java.awt.GridLayout;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -54,9 +57,17 @@ public class Display {
         final int rows = (int)Math.ceil(Math.sqrt(numeric.size()));
         final int cols = numeric.size() / rows + 1;
 
-        final List<Number> xdata = new ArrayList<>(df.length());
+        final List<Object> xdata = new ArrayList<>(df.length());
+        final Iterator<Object> it = df.index().iterator();
         for (int i = 0; i < df.length(); i++) {
-            xdata.add(i);
+            final Object value = it.hasNext() ? it.next(): i;
+            if (value instanceof Number || value instanceof Date) {
+                xdata.add(value);
+            } else if (PlotType.BAR.equals(type)) {
+                xdata.add(String.valueOf(value));
+            } else {
+                xdata.add(i);
+            }
         }
 
         if (type == PlotType.GRID) {
@@ -69,6 +80,7 @@ public class Display {
                     .build();
                 chart.addSeries(String.valueOf(col), xdata, numeric.col(col));
                 chart.getStyleManager().setLegendVisible(false);
+                chart.getStyleManager().setDatePattern(dateFormat(xdata));
                 panels.add(new XChartPanel(chart));
             }
         } else {
@@ -76,6 +88,7 @@ public class Display {
                 .chartType(chartType(type))
                 .build();
 
+            chart.getStyleManager().setDatePattern(dateFormat(xdata));
             switch (type) {
                 case SCATTER: case LINE_AND_POINTS: break;
                 default: chart.getStyleManager().setMarkerSize(0); break;
@@ -158,5 +171,45 @@ public class Display {
                 df.length(),
                 df.size()
             );
+    }
+
+    private static final String dateFormat(final List<Object> xdata) {
+        final int[] fields = new int[] {
+                Calendar.YEAR, Calendar.MONTH, Calendar.DAY_OF_MONTH,
+                Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND
+            };
+        final String[] formats = new String[] {
+                " yyy", "-MMM", "-d", " H", ":mm", ":ss"
+            };
+        final Calendar c1 = Calendar.getInstance(), c2 = Calendar.getInstance();
+
+        if (!xdata.isEmpty() && xdata.get(0) instanceof Date) {
+            String format = "";
+            int first = 0, last = 0;
+            c1.setTime(Date.class.cast(xdata.get(0)));
+            // iterate over all x-axis values comparing dates
+            for (int i = 1; i < xdata.size(); i++) {
+                // early exit for non-date elements
+                if (!(xdata.get(i) instanceof Date)) return formats[0].substring(1);
+                c2.setTime(Date.class.cast(xdata.get(i)));
+
+                // check which components differ, those are the fields to output
+                for (int j = 1; j < fields.length; j++) {
+                    if (c1.get(fields[j]) != c2.get(fields[j])) {
+                        first = Math.max(j - 1, first);
+                        last = Math.max(j, last);
+                    }
+                }
+            }
+
+            // construct a format string for the fields that differ
+            for (int i = first; i <= last && i < formats.length; i++) {
+                format += format.isEmpty() ? formats[i].substring(1) : formats[i];
+            }
+
+            return format;
+        }
+
+        return formats[0].substring(1);
     }
 }
