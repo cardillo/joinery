@@ -54,6 +54,13 @@ import joinery.impl.Sorting;
 import joinery.impl.Timeseries;
 import joinery.impl.Views;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PosixParser;
+
 import com.codahale.metrics.annotation.Timed;
 
 /**
@@ -2066,7 +2073,127 @@ implements Iterable<List<V>> {
     	LONG_DEFAULT, 
     	DOUBLE_DEFAULT 
     };
+    
+    public static DataFrame<Object> processCommandline(String [] args) throws IOException {
+    	CommandLineParser parser = new PosixParser();
 
+        Options options = new Options();
+		options.addOption( "plt", "plot",           false, 
+				"Plot displays the numeric data of a data frame as a chart " );
+		options.addOption( "shw", "show",           false, 
+				"Show displays the tabular data of a data frame in a gui window " );
+		options.addOption( "cmp", "compare",        false, 
+				"filename of dataset file" );
+		options.addOption( "sh",  "shell",          false, 
+				"number of topics" );
+		options.addOption( "dn",  "drop_name",      true, 
+				"drop column names. Takes a list of names (Example: \"Customer Name,Comment,Id\") representing the cloumn names to drop" );
+		options.addOption( "dc",  "drop_column",    true, 
+				"drop column no's. Takes a list of integers (Example: \"1,2,8,11\") representing the cloumns to drop" );
+		options.addOption( "sep", "separator",      true, 
+				"column separator ',' , ';' , '\\t' (',' per default). '\t' denotes tab" );
+		options.addOption( "dbl", "double_default", false, 
+				"use double as number format (Long is default, numbers with decimals will still be parsed as Double)" );
+		
+		CommandLine parsedCommandLine = null;
+		HelpFormatter formatter = new HelpFormatter();
+
+		// Try to parse the command line
+		try {
+			parsedCommandLine = parser.parse( options, args );
+		} catch (ParseException e) {
+			System.out.println("Joinery: Could not parse command line due to:  " + e.getMessage());
+			System.out.println("Args where:");
+			for (int i = 0; i < args.length; i++) {
+				System.out.print(args[i] + ", ");
+			}
+			formatter.printHelp( DataFrame.class.getCanonicalName() + " [options] <csv file>", options );
+			System.exit(-1);
+		}
+		
+		// Make sure we got a CSV file
+		if(parsedCommandLine.getArgs().length==0) {
+			System.out.println("No CSV file given...");
+			formatter.printHelp( DataFrame.class.getCanonicalName() + " [options] <csv file>", options );
+			System.exit(255);
+		}
+        
+		final List<DataFrame<Object>> frames = new ArrayList<>();
+		
+		String sep = parsedCommandLine.hasOption( "separator" ) 
+				? (String) parsedCommandLine.getOptionValue("separator").trim() 
+						: ",";
+		if(!(sep.equals(",") || sep.equals(";") || sep.equals("\\t"))) {
+			System.out.println("Only the separators ',' , ';' or '\\t' is currently supported...");
+			formatter.printHelp( DataFrame.class.getCanonicalName() + " [options] <csv file>", options );
+			System.exit(255);
+		}
+			
+		DataFrame<Object> df = null;
+		
+		// Read DataFrame with any given separator
+		String csvFilename = parsedCommandLine.getArgs()[0];
+		if(parsedCommandLine.hasOption( "double_default") ) {
+				df = DataFrame.readCsv(csvFilename,sep,NumberDefault.DOUBLE_DEFAULT);
+				frames.add(df);
+		} else {
+			df = DataFrame.readCsv(csvFilename, sep);
+			frames.add(df);
+		}
+		
+		// Now process any drop column arguments, it makes sense to
+		// drop the integer indexed first since named ones are 
+		// independent of index and thus we can do those after
+		// and get the drops correct in case of both index and
+		// named drops
+		if (parsedCommandLine.hasOption( "drop_column" )) {
+			String [] colIdxs = parsedCommandLine.getOptionValue("drop_column").split(",");
+			List<Integer> dropIdxs = new ArrayList<>();
+			for (int i = 0; i < colIdxs.length; i++) {
+				String colVal = colIdxs[i].trim();
+				if(colVal.length()>0) dropIdxs.add(Integer.parseInt(colVal));
+			}
+			Integer [] idxs = dropIdxs.toArray(new Integer[0]);
+			if(dropIdxs.size()>0) df = df.drop(idxs);
+		}
+
+		if (parsedCommandLine.hasOption( "drop_name" )) {
+			String [] colNames = parsedCommandLine.getOptionValue("drop_name").split(",");
+			for (String colName : colNames) {
+				String trimmedName = colName.trim();
+				if(trimmedName.length()>0) df = df.drop(trimmedName);				
+			}
+		}
+		
+        if (parsedCommandLine.hasOption( "plot" )) {
+            if (frames.size() == 1) {
+                frames.get(0).plot();
+                return df;
+            }
+        }
+
+        if (parsedCommandLine.hasOption( "show" )) {
+            if (frames.size() == 1) {
+                frames.get(0).show();
+                return df;
+            }
+        }
+
+        if (parsedCommandLine.hasOption( "compare" )) {
+            if (frames.size() == 2) {
+                System.out.println(DataFrame.compare(frames.get(0), frames.get(1)));
+                return df;
+            }
+        }
+
+        if (parsedCommandLine.hasOption( "shell" )) {
+            Shell.repl(frames);
+            return df;
+        }
+        
+        return df;
+    }
+	
     /**
      * Entry point to joinery as a command line tool.
      *
@@ -2083,41 +2210,6 @@ implements Iterable<List<V>> {
      */
     public static final void main(final String[] args)
     throws IOException {
-        final List<DataFrame<Object>> frames = new ArrayList<>();
-        for (int i = 1; i < args.length; i++) {
-            frames.add(DataFrame.readCsv(args[i]));
-        }
-
-        if (args.length > 0 && "plot".equalsIgnoreCase(args[0])) {
-            if (frames.size() == 1) {
-                frames.get(0).plot();
-                return;
-            }
-        }
-
-        if (args.length > 0 && "show".equalsIgnoreCase(args[0])) {
-            if (frames.size() == 1) {
-                frames.get(0).show();
-                return;
-            }
-        }
-
-        if (args.length > 0 && "compare".equalsIgnoreCase(args[0])) {
-            if (frames.size() == 2) {
-                System.out.println(DataFrame.compare(frames.get(0), frames.get(1)));
-                return;
-            }
-        }
-
-        if (args.length > 0 && "shell".equalsIgnoreCase(args[0])) {
-            Shell.repl(frames);
-            return;
-        }
-
-        System.err.printf(
-                "usage: %s [compare|plot|show|shell] [csv-file ...]\n",
-                DataFrame.class.getCanonicalName()
-            );
-        System.exit(255);
+    	processCommandline(args);
     }
 }

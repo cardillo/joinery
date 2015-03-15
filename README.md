@@ -110,7 +110,7 @@ These tools are available by running `joinery.DataFrame` as an application.
 
 ```bash
 $ java joinery.DataFrame
-usage: joinery.DataFrame [compare|plot|show|shell] [csv-file ...]
+usage: joinery.DataFrame [--compare|--plot|--show|--shell] [csv-file ...]
 ```
 
 show
@@ -118,7 +118,7 @@ show
 Show displays the tabular data of a data frame in a gui window.
 
 ```bash
-$ java joinery.DataFrame show data.csv
+$ java joinery.DataFrame --show data.csv
 ```
 
 ![Screenshot of show window](https://raw.githubusercontent.com/cardillo/joinery/master/src/main/resources/templates/assets/images/joinery-show.png)
@@ -128,7 +128,7 @@ plot
 Plot displays the numeric data of a data frame as a chart.
 
 ```bash
-$ java joinery.DataFrame plot data.csv
+$ java joinery.DataFrame --plot data.csv
 ```
 
 ![Screenshot of plot window](https://raw.githubusercontent.com/cardillo/joinery/master/src/main/resources/templates/assets/images/joinery-plot.png)
@@ -138,7 +138,7 @@ shell
 Launches an interactive JavaScript shell for working with data frames.
 
 ```javascript
-$ java joinery.DataFrame shell
+$ java joinery.DataFrame --shell
 > df = DataFrame.readCsv('https://www.quandl.com/api/v1/datasets/GOOG/NASDAQ_AAPL.csv')
              Date             Open            High            Low             Close              Volume
    0    2015-02-20      128.62000000    129.50000000    128.05000000    129.50000000     48948419.00000000
