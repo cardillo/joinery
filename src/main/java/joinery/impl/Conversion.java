@@ -29,18 +29,37 @@ import java.util.Map;
 
 import joinery.DataFrame;
 import joinery.DataFrame.Function;
+import joinery.DataFrame.NumberDefault;
 
 public class Conversion {
     public static <V> void convert(final DataFrame<V> df) {
+        convert(df, NumberDefault.LONG_DEFAULT);
+    }
+
+    public static <V> void convert(final DataFrame<V> df, final NumberDefault numDefault) {
         final Map<Integer, Function<V, ?>> conversions = new HashMap<>();
-        final List<Function<V, ?>> converters = Arrays.<Function<V, ?>>asList(
-                new LongConversion<V>(),
-                new DoubleConversion<V>(),
-                new BooleanConversion<V>(),
-                new DateTimeConversion<V>()
-            );
+        List<Function<V, ?>> converters;
         final int rows = df.length();
         final int cols = df.size();
+
+        switch (numDefault) {
+            case LONG_DEFAULT:
+                converters = Arrays.<Function<V, ?>>asList(
+		            new LongConversion<V>(),
+		            new DoubleConversion<V>(),
+		            new BooleanConversion<V>(),
+		            new DateTimeConversion<V>());
+		        break;
+		    case DOUBLE_DEFAULT:
+		        converters = Arrays.<Function<V, ?>>asList(
+		            new DoubleConversion<V>(),
+		            new LongConversion<V>(),
+		            new BooleanConversion<V>(),
+		            new DateTimeConversion<V>());
+		        break;
+		    default:
+		        throw new IllegalArgumentException("Number default contains an Illegal value");
+        }
 
         // find conversions
         for (int c = 0; c < cols; c++) {

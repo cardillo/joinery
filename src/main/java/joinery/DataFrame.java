@@ -1284,6 +1284,12 @@ implements Iterable<List<V>> {
         return this;
     }
 
+    public DataFrame<V> convert(final NumberDefault numDefault) {
+        Conversion.convert(this,numDefault);
+        return this;
+    }
+
+
     /**
      * Convert columns based on the requested types.
      *
@@ -1359,34 +1365,34 @@ implements Iterable<List<V>> {
      * @return
      */
     public double[][] asDoubleMatrix() {
-    	double [][] matrix = new double[length()][size()];
-    	for (int i = 0; i < matrix.length; i++) {
-			for (int j = 0; j < matrix[0].length; j++) {
-				matrix[i][j] = (Double) get(i,j);
-			}
-		}
-        return matrix;
-    }
-    
-    /**
-     * returns a double [][] representation of DataFrame, assumes all values in the DataFrame are doubles.
-     * This version of the method  replace NA's with {@code naReplaceement} 
-     * @param naReplacement
-     * @return
-     */
-    public double[][] asDoubleMatrix(double naReplacement) {
-    	double [][] matrix = new double[length()][size()];
-    	for (int i = 0; i < matrix.length; i++) {
-			for (int j = 0; j < matrix[0].length; j++) {
-				Double val = (Double) get(i,j);
-				val = val == null ? naReplacement : val; 
-				matrix[i][j] = val;
-			}
-		}
+        final double [][] matrix = new double[length()][size()];
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[0].length; j++) {
+                matrix[i][j] = (Double) get(i,j);
+            }
+        }
         return matrix;
     }
 
-    
+    /**
+     * returns a double [][] representation of DataFrame, assumes all values in the DataFrame are doubles.
+     * This version of the method  replace NA's with {@code naReplaceement}
+     * @param naReplacement
+     * @return
+     */
+    public double[][] asDoubleMatrix(final double naReplacement) {
+        final double [][] matrix = new double[length()][size()];
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[0].length; j++) {
+                Double val = (Double) get(i,j);
+                val = val == null ? naReplacement : val;
+                matrix[i][j] = val;
+            }
+        }
+        return matrix;
+    }
+
+
     public Object[] toArray() {
         return toArray(new Object[size() * length()]);
     }
@@ -1953,6 +1959,27 @@ implements Iterable<List<V>> {
         return Serialization.readCsv(input);
     }
 
+    public static final DataFrame<Object> readCsv(final String file, final String separator)
+    throws IOException {
+        return Serialization.readCsv(file, separator, NumberDefault.LONG_DEFAULT);
+    }
+
+    public static final DataFrame<Object> readCsv(final InputStream input, final String separator)
+    throws IOException {
+        return Serialization.readCsv(input, separator, NumberDefault.LONG_DEFAULT);
+    }
+
+    public static final DataFrame<Object> readCsv(final String file, final String separator, final NumberDefault longDefault)
+    throws IOException {
+        return Serialization.readCsv(file, separator, longDefault);
+    }
+
+    public static final DataFrame<Object> readCsv(final InputStream input, final String separator, final NumberDefault longDefault)
+    throws IOException {
+        return Serialization.readCsv(input, separator, longDefault);
+    }
+
+
     public final void writeCsv(final String file)
     throws IOException {
         Serialization.writeCsv(this, new FileOutputStream(file));
@@ -2094,6 +2121,11 @@ implements Iterable<List<V>> {
     public enum Axis {
         ROWS,
         COLUMNS
+    }
+
+    public static enum NumberDefault {
+        LONG_DEFAULT,
+        DOUBLE_DEFAULT
     }
 
     /**
