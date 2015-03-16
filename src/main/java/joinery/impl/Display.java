@@ -18,10 +18,13 @@
 
 package joinery.impl;
 
+import java.awt.Color;
 import java.awt.GridLayout;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,22 +38,17 @@ import javax.swing.table.AbstractTableModel;
 import joinery.DataFrame;
 import joinery.DataFrame.PlotType;
 
+import org.apache.commons.math3.stat.regression.SimpleRegression;
+
 import com.xeiam.xchart.Chart;
 import com.xeiam.xchart.ChartBuilder;
+import com.xeiam.xchart.Series;
+import com.xeiam.xchart.SeriesLineStyle;
+import com.xeiam.xchart.SeriesMarker;
 import com.xeiam.xchart.StyleManager.ChartType;
 import com.xeiam.xchart.XChartPanel;
 
 public class Display {
-    private static ChartType chartType(final PlotType type) {
-        switch (type) {
-            case AREA:      return ChartType.Area;
-            case BAR:       return ChartType.Bar;
-            case GRID:
-            case SCATTER:   return ChartType.Scatter;
-            default:        return ChartType.Line;
-        }
-    }
-
     public static <V> void plot(final DataFrame<V> df, final PlotType type) {
         final List<XChartPanel> panels = new LinkedList<>();
         final DataFrame<Number> numeric = df.numeric().fillna(0);
@@ -70,7 +68,7 @@ public class Display {
             }
         }
 
-        if (type == PlotType.GRID) {
+        if (EnumSet.of(PlotType.GRID, PlotType.GRID_WITH_TREND).contains(type)) {
             for (final Object col : numeric.columns()) {
                 final Chart chart = new ChartBuilder()
                     .chartType(chartType(type))
@@ -78,7 +76,11 @@ public class Display {
                     .height(800 / cols)
                     .title(String.valueOf(col))
                     .build();
-                chart.addSeries(String.valueOf(col), xdata, numeric.col(col));
+                final Series series = chart.addSeries(String.valueOf(col), xdata, numeric.col(col));
+                if (type == PlotType.GRID_WITH_TREND) {
+                    addTrend(chart, series, xdata);
+                    series.setLineStyle(SeriesLineStyle.NONE);
+                }
                 chart.getStyleManager().setLegendVisible(false);
                 chart.getStyleManager().setDatePattern(dateFormat(xdata));
                 panels.add(new XChartPanel(chart));
@@ -90,12 +92,16 @@ public class Display {
 
             chart.getStyleManager().setDatePattern(dateFormat(xdata));
             switch (type) {
-                case SCATTER: case LINE_AND_POINTS: break;
+                case SCATTER: case SCATTER_WITH_TREND: case LINE_AND_POINTS: break;
                 default: chart.getStyleManager().setMarkerSize(0); break;
             }
 
             for (final Object col : numeric.columns()) {
-                chart.addSeries(String.valueOf(col), xdata, numeric.col(col));
+                final Series series = chart.addSeries(String.valueOf(col), xdata, numeric.col(col));
+                if (type == PlotType.SCATTER_WITH_TREND) {
+                    addTrend(chart, series, xdata);
+                    series.setLineStyle(SeriesLineStyle.NONE);
+                }
             }
 
             panels.add(new XChartPanel(chart));
@@ -164,6 +170,19 @@ public class Display {
         });
     }
 
+    private static ChartType chartType(final PlotType type) {
+        switch (type) {
+            case AREA:                  return ChartType.Area;
+            case BAR:                   return ChartType.Bar;
+            case GRID:
+            case SCATTER:               return ChartType.Scatter;
+            case SCATTER_WITH_TREND:
+            case GRID_WITH_TREND:
+            case LINE:
+            default:                    return ChartType.Line;
+        }
+    }
+
     private static final String title(final DataFrame<?> df) {
         return String.format(
                 "%s (%d rows x %d columns)",
@@ -211,5 +230,21 @@ public class Display {
         }
 
         return formats[0].substring(1);
+    }
+
+    private static void addTrend(final Chart chart, final Series series, final List<Object> xdata) {
+        final SimpleRegression model = new SimpleRegression();
+        final Iterator<? extends Number> y = series.getYData().iterator();
+        for (int x = 0; y.hasNext(); x++) {
+            model.addData(x, y.next().doubleValue());
+        }
+        final Color mc = series.getMarkerColor();
+        final Color c = new Color(mc.getRed(), mc.getGreen(), mc.getBlue(), 0x60);
+        final Series trend = chart.addSeries(series.getName() + " (trend)",
+                Arrays.asList(xdata.get(0), xdata.get(xdata.size() - 1)),
+                Arrays.asList(model.predict(0), model.predict(xdata.size() - 1))
+            );
+        trend.setLineColor(c);
+        trend.setMarker(SeriesMarker.NONE);
     }
 }

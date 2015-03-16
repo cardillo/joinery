@@ -2131,11 +2131,13 @@ implements Iterable<List<V>> {
      */
     public enum PlotType {
         SCATTER,
+        SCATTER_WITH_TREND,
         LINE,
         LINE_AND_POINTS,
         AREA,
         BAR,
-        GRID
+        GRID,
+        GRID_WITH_TREND
     }
 
     /**

@@ -65,10 +65,12 @@ public class DataFramePlotTest {
 
         df.plot();
         df.plot(PlotType.SCATTER);
+        df.plot(PlotType.SCATTER_WITH_TREND);
         df.plot(PlotType.AREA);
         df.plot(PlotType.BAR);
         df.plot(PlotType.LINE_AND_POINTS);
         df.plot(PlotType.GRID);
+        df.plot(PlotType.GRID_WITH_TREND);
 
         final Calendar cal = Calendar.getInstance();
         cal.clear();
