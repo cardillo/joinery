@@ -202,48 +202,47 @@ public class Serialization {
     }
 
     public static DataFrame<Object> readCsv(final String file)
-    		throws IOException {
-    	return readCsv(file.contains("://") ?
-    			new URL(file).openStream() : new FileInputStream(file), ",", NumberDefault.LONG_DEFAULT);
+    throws IOException {
+        return readCsv(file.contains("://") ?
+                new URL(file).openStream() : new FileInputStream(file), ",", NumberDefault.LONG_DEFAULT);
     }
 
     public static DataFrame<Object> readCsv(final String file, final String separator, NumberDefault numDefault)
-    		throws IOException {
-    	return readCsv(file.contains("://") ?
-    			new URL(file).openStream() : new FileInputStream(file), separator, numDefault);
+    throws IOException {
+        return readCsv(file.contains("://") ?
+                new URL(file).openStream() : new FileInputStream(file), separator, numDefault);
     }
 
     public static DataFrame<Object> readCsv(final InputStream input) 
-    		throws IOException {
-    	return readCsv(input, ",", NumberDefault.LONG_DEFAULT);
+    throws IOException {
+        return readCsv(input, ",", NumberDefault.LONG_DEFAULT);
     }
 
     public static DataFrame<Object> readCsv(final InputStream input, String separator, NumberDefault numDefault)
-    		throws IOException {
-    	CsvPreference csvPreference;
-    	switch (separator) {
-    	case "\t":
-    		csvPreference = CsvPreference.TAB_PREFERENCE;
-    		break;
-    	case ",":
-    		csvPreference = CsvPreference.STANDARD_PREFERENCE;
-    		break;
-    	case ";":
-    		csvPreference = CsvPreference.EXCEL_NORTH_EUROPE_PREFERENCE;
-    		break;
-    	default:
-    		throw new IllegalArgumentException("Separator: " + separator + " is not currently supported");
-    	}
-    	try (CsvListReader reader = new CsvListReader(
-    			new InputStreamReader(input), csvPreference)) {
-    		final List<String> header = Arrays.asList(reader.getHeader(true));
-    		final CellProcessor[] procs = new CellProcessor[header.size()];
-    		final DataFrame<Object> df = new DataFrame<>(header);
-    		for (List<Object> row = reader.read(procs); row != null; row = reader.read(procs)) {
-    			df.append(new ArrayList<>(row));
-    		}
-    		return df.convert(numDefault);
-    	}
+    throws IOException {
+        CsvPreference csvPreference;
+        switch (separator) {
+            case "\\t":
+                csvPreference = CsvPreference.TAB_PREFERENCE;
+                break;
+            case ",":
+                csvPreference = CsvPreference.STANDARD_PREFERENCE;
+                break;
+            case ";":
+                csvPreference = CsvPreference.EXCEL_NORTH_EUROPE_PREFERENCE;
+                break;
+            default:
+                throw new IllegalArgumentException("Separator: " + separator + " is not currently supported");
+        }
+        try (CsvListReader reader = new CsvListReader(new InputStreamReader(input), csvPreference)) {
+            final List<String> header = Arrays.asList(reader.getHeader(true));
+            final CellProcessor[] procs = new CellProcessor[header.size()];
+            final DataFrame<Object> df = new DataFrame<>(header);
+            for (List<Object> row = reader.read(procs); row != null; row = reader.read(procs)) {
+                df.append(new ArrayList<>(row));
+            }
+            return df.convert(numDefault);
+        }
     }
 
     public static <V> void writeCsv(final DataFrame<V> df, final String output)
@@ -253,8 +252,7 @@ public class Serialization {
 
     public static <V> void writeCsv(final DataFrame<V> df, final OutputStream output)
     throws IOException {
-        try (CsvListWriter writer = new CsvListWriter(
-                new OutputStreamWriter(output), CsvPreference.STANDARD_PREFERENCE)) {
+        try (CsvListWriter writer = new CsvListWriter(new OutputStreamWriter(output), CsvPreference.STANDARD_PREFERENCE)) {
             final String[] header = new String[df.size()];
             final Iterator<Object> it = df.columns().iterator();
             for (int c = 0; c < df.size(); c++) {
