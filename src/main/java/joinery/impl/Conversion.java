@@ -45,20 +45,20 @@ public class Conversion {
         switch (numDefault) {
             case LONG_DEFAULT:
                 converters = Arrays.<Function<V, ?>>asList(
-		            new LongConversion<V>(),
-		            new DoubleConversion<V>(),
-		            new BooleanConversion<V>(),
-		            new DateTimeConversion<V>());
-		        break;
-		    case DOUBLE_DEFAULT:
-		        converters = Arrays.<Function<V, ?>>asList(
-		            new DoubleConversion<V>(),
-		            new LongConversion<V>(),
-		            new BooleanConversion<V>(),
-		            new DateTimeConversion<V>());
-		        break;
-		    default:
-		        throw new IllegalArgumentException("Number default contains an Illegal value");
+                    new LongConversion<V>(),
+                    new DoubleConversion<V>(),
+                    new BooleanConversion<V>(),
+                    new DateTimeConversion<V>());
+                break;
+            case DOUBLE_DEFAULT:
+                converters = Arrays.<Function<V, ?>>asList(
+                    new DoubleConversion<V>(),
+                    new LongConversion<V>(),
+                    new BooleanConversion<V>(),
+                    new DateTimeConversion<V>());
+                break;
+            default:
+                throw new IllegalArgumentException("Number default contains an Illegal value");
         }
 
         // find conversions
