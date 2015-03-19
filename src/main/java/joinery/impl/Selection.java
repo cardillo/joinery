@@ -19,7 +19,6 @@
 package joinery.impl;
 
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,8 +27,8 @@ import joinery.DataFrame;
 import joinery.DataFrame.Predicate;
 
 public class Selection {
-    public static <V> BitSet select(final DataFrame<V> df, final Predicate<V> predicate) {
-        final BitSet selected = new BitSet();
+    public static <V> SparseBitSet select(final DataFrame<V> df, final Predicate<V> predicate) {
+        final SparseBitSet selected = new SparseBitSet();
         final Iterator<List<V>> rows = df.iterator();
         for (int r = 0; rows.hasNext(); r++) {
             if (predicate.apply(rows.next())) {
@@ -39,7 +38,7 @@ public class Selection {
         return selected;
     }
 
-    public static Index select(final Index index, final BitSet selected) {
+    public static Index select(final Index index, final SparseBitSet selected) {
         final List<Object> names = new ArrayList<>(index.names());
         final Index newidx = new Index();
         for (int r = selected.nextSetBit(0); r >= 0; r = selected.nextSetBit(r + 1)) {
@@ -49,7 +48,7 @@ public class Selection {
         return newidx;
     }
 
-    public static <V> BlockManager<V> select(final BlockManager<V> blocks, final BitSet selected) {
+    public static <V> BlockManager<V> select(final BlockManager<V> blocks, final SparseBitSet selected) {
         final List<List<V>> data = new LinkedList<List<V>>();
         for (int c = 0; c < blocks.size(); c++) {
             final List<V> column = new ArrayList<>(selected.cardinality());
@@ -61,7 +60,7 @@ public class Selection {
         return new BlockManager<>(data);
     }
 
-    public static <V> BlockManager<V> select(final BlockManager<V> blocks, final BitSet rows, final BitSet cols) {
+    public static <V> BlockManager<V> select(final BlockManager<V> blocks, final SparseBitSet rows, final SparseBitSet cols) {
         final List<List<V>> data = new LinkedList<List<V>>();
         for (int c = cols.nextSetBit(0); c >= 0; c = cols.nextSetBit(c + 1)) {
             final List<V> column = new ArrayList<>(rows.cardinality());
@@ -73,13 +72,13 @@ public class Selection {
         return new BlockManager<>(data);
     }
 
-    public static <V> BitSet[] slice(final DataFrame<V> df,
+    public static <V> SparseBitSet[] slice(final DataFrame<V> df,
             final Integer rowStart, final Integer rowEnd, final Integer colStart, final Integer colEnd) {
-        final BitSet rows = new BitSet();
-        final BitSet cols = new BitSet();
+        final SparseBitSet rows = new SparseBitSet();
+        final SparseBitSet cols = new SparseBitSet();
         rows.set(rowStart, rowEnd);
         cols.set(colStart, colEnd);
-        return new BitSet[] { rows, cols };
+        return new SparseBitSet[] { rows, cols };
     }
 
     public static class DropNaPredicate<V>

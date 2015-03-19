@@ -25,7 +25,6 @@ import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -52,6 +51,7 @@ import joinery.impl.Serialization;
 import joinery.impl.Shaping;
 import joinery.impl.Shell;
 import joinery.impl.Sorting;
+import joinery.impl.SparseBitSet;
 import joinery.impl.Timeseries;
 import joinery.impl.Views;
 
@@ -924,7 +924,7 @@ implements Iterable<List<V>> {
     }
 
     public DataFrame<V> slice(final Integer rowStart, final Integer rowEnd, final Integer colStart, final Integer colEnd) {
-        final BitSet[] slice = Selection.slice(this, rowStart, rowEnd, colStart, colEnd);
+        final SparseBitSet[] slice = Selection.slice(this, rowStart, rowEnd, colStart, colEnd);
         return new DataFrame<>(
                 Selection.select(index, slice[0]),
                 Selection.select(columns, slice[1]),
@@ -1081,7 +1081,7 @@ implements Iterable<List<V>> {
      * @return a subset of the data frame
      */
     public DataFrame<V> select(final Predicate<V> predicate) {
-        final BitSet selected = Selection.select(this, predicate);
+        final SparseBitSet selected = Selection.select(this, predicate);
         return new DataFrame<>(
                 Selection.select(index, selected),
                 columns,
@@ -1122,7 +1122,7 @@ implements Iterable<List<V>> {
      * @return the new data frame
      */
     public DataFrame<V> head(final int limit) {
-        final BitSet selected = new BitSet();
+        final SparseBitSet selected = new SparseBitSet();
         selected.set(0, Math.min(limit, length()));
         return new DataFrame<>(
                 Selection.select(index, selected),
@@ -1164,7 +1164,7 @@ implements Iterable<List<V>> {
      * @return the new data frame
      */
     public DataFrame<V> tail(final int limit) {
-        final BitSet selected = new BitSet();
+        final SparseBitSet selected = new SparseBitSet();
         final int len = length();
         selected.set(Math.max(len - limit, 0), len);
         return new DataFrame<>(
@@ -1497,8 +1497,8 @@ implements Iterable<List<V>> {
      */
     public Map<Object, DataFrame<V>> explode() {
         final Map<Object, DataFrame<V>> exploded = new LinkedHashMap<>();
-        for (final Map.Entry<Object, BitSet> entry : groups) {
-            final BitSet selected = entry.getValue();
+        for (final Map.Entry<Object, SparseBitSet> entry : groups) {
+            final SparseBitSet selected = entry.getValue();
             exploded.put(entry.getKey(), new DataFrame<V>(
                     Selection.select(index, selected),
                     columns,
@@ -1755,7 +1755,7 @@ implements Iterable<List<V>> {
      * @return a data frame containing only the numeric columns
      */
     public DataFrame<Number> numeric() {
-        final BitSet numeric = Inspection.numeric(this);
+        final SparseBitSet numeric = Inspection.numeric(this);
         final Set<Object> keep = Selection.select(columns, numeric).names();
         return retain(keep.toArray(new Object[keep.size()]))
                 .cast(Number.class);
@@ -1774,7 +1774,7 @@ implements Iterable<List<V>> {
      * @return a data frame containing only the non-numeric columns
      */
     public DataFrame<V> nonnumeric() {
-        final BitSet nonnumeric = Inspection.nonnumeric(this);
+        final SparseBitSet nonnumeric = Inspection.nonnumeric(this);
         final Set<Object> keep = Selection.select(columns, nonnumeric).names();
         return retain(keep.toArray(new Object[keep.size()]));
     }

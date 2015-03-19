@@ -19,7 +19,6 @@
 package joinery.impl;
 
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.List;
 
 import joinery.DataFrame;
@@ -34,8 +33,8 @@ public class Inspection {
         return types;
     }
 
-    public static BitSet numeric(final DataFrame<?> df) {
-        final BitSet numeric = new BitSet();
+    public static SparseBitSet numeric(final DataFrame<?> df) {
+        final SparseBitSet numeric = new SparseBitSet();
         final List<Class<?>> types = types(df);
         for (int c = 0; c < types.size(); c++) {
             if (Number.class.isAssignableFrom(types.get(c))) {
@@ -45,8 +44,8 @@ public class Inspection {
         return numeric;
     }
 
-    public static BitSet nonnumeric(final DataFrame<?> df) {
-        final BitSet nonnumeric = numeric(df);
+    public static SparseBitSet nonnumeric(final DataFrame<?> df) {
+        final SparseBitSet nonnumeric = numeric(df);
         nonnumeric.flip(0, df.size());
         return nonnumeric;
     }

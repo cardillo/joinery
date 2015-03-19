@@ -19,7 +19,6 @@
 package joinery.impl;
 
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -33,9 +32,9 @@ import joinery.DataFrame.Aggregate;
 import joinery.DataFrame.KeyFunction;
 
 public class Grouping
-implements Iterable<Map.Entry<Object, BitSet>> {
+implements Iterable<Map.Entry<Object, SparseBitSet>> {
 
-    private final Map<Object, BitSet> groups = new LinkedHashMap<>();
+    private final Map<Object, SparseBitSet> groups = new LinkedHashMap<>();
     private final Set<Integer> columns = new LinkedHashSet<>();
 
     public Grouping() { }
@@ -45,9 +44,9 @@ implements Iterable<Map.Entry<Object, BitSet>> {
         for (int r = 0; iter.hasNext(); r++) {
             final List<V> row = iter.next();
             final Object key = function.apply(row);
-            BitSet group = groups.get(key);
+            SparseBitSet group = groups.get(key);
             if (group == null) {
-                group = new BitSet();
+                group = new SparseBitSet();
                 groups.put(key, group);
             }
             group.set(r);
@@ -108,8 +107,8 @@ implements Iterable<Map.Entry<Object, BitSet>> {
                 newcols.add(names.get(c));
             } else {
                 final List<V> column = new ArrayList<>();
-                for (final Map.Entry<Object, BitSet> entry : groups.entrySet()) {
-                    final BitSet rows = entry.getValue();
+                for (final Map.Entry<Object, SparseBitSet> entry : groups.entrySet()) {
+                    final SparseBitSet rows = entry.getValue();
                     final int r = rows.nextSetBit(0);
                     column.add(df.get(r, c));
                 }
@@ -127,8 +126,8 @@ implements Iterable<Map.Entry<Object, BitSet>> {
                         column.add((V)function.apply(df.col(c)));
                     } catch (final ClassCastException ignored) { }
                 } else {
-                    for (final Map.Entry<Object, BitSet> entry : groups.entrySet()) {
-                        final BitSet rows = entry.getValue();
+                    for (final Map.Entry<Object, SparseBitSet> entry : groups.entrySet()) {
+                        final SparseBitSet rows = entry.getValue();
                         final List<V> values = new ArrayList<>(rows.cardinality());
                         for (int r = rows.nextSetBit(0); r >= 0; r = rows.nextSetBit(r + 1)) {
                             values.add(df.get(r, c));
@@ -165,7 +164,7 @@ implements Iterable<Map.Entry<Object, BitSet>> {
     }
 
     @Override
-    public Iterator<Map.Entry<Object, BitSet>> iterator() {
+    public Iterator<Map.Entry<Object, SparseBitSet>> iterator() {
         return groups.entrySet().iterator();
     }
 }
