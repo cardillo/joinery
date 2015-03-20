@@ -120,6 +120,18 @@ public class DataFrameAggregationTest {
     }
 
     @Test
+    public void testCumsumGrouped() {
+        assertArrayEquals(
+                new Object[] {
+                    "one", "one", "two", "two", "three", "three", "three",
+                    10.0, 30.0, 30.0, 70.0, 50.0, 110.0, 180.0,
+                    10.0, 30.0, 30.0, 70.0, 50.0, 110.0, 180.0
+                },
+                df.groupBy("b").cumsum().toArray()
+            );
+    }
+
+    @Test
     public void testCumprod() {
         assertArrayEquals(
                 new Double[] {

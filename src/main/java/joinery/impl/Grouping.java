@@ -96,7 +96,7 @@ implements Iterable<Map.Entry<Object, SparseBitSet>> {
         final List<Object> index = new ArrayList<>();
 
         // construct new row index
-        if (!groups.isEmpty()) {
+        if (function instanceof Aggregate && !groups.isEmpty()) {
             for (final Object key : groups.keySet()) {
                 index.add(key);
             }
@@ -104,10 +104,7 @@ implements Iterable<Map.Entry<Object, SparseBitSet>> {
 
         // add key columns
         for (final int c : columns) {
-            if (groups.isEmpty()) {
-                grouped.add(df.col(c));
-                newcols.add(names.get(c));
-            } else {
+            if (function instanceof Aggregate && !groups.isEmpty()) {
                 final List<V> column = new ArrayList<>();
                 for (final Map.Entry<Object, SparseBitSet> entry : groups.entrySet()) {
                     final SparseBitSet rows = entry.getValue();
@@ -115,6 +112,9 @@ implements Iterable<Map.Entry<Object, SparseBitSet>> {
                     column.add(df.get(r, c));
                 }
                 grouped.add(column);
+                newcols.add(names.get(c));
+            } else {
+                grouped.add(df.col(c));
                 newcols.add(names.get(c));
             }
         }
@@ -132,11 +132,11 @@ implements Iterable<Map.Entry<Object, SparseBitSet>> {
                                 column.add((V)Function.class.cast(function).apply(df.get(r, c)));
                             }
                         }
-
-                        if (function instanceof CumulativeFunction) {
-                            CumulativeFunction.class.cast(function).reset();
-                        }
                     } catch (final ClassCastException ignored) { }
+
+                    if (function instanceof CumulativeFunction) {
+                        CumulativeFunction.class.cast(function).reset();
+                    }
                 } else {
                     for (final Map.Entry<Object, SparseBitSet> entry : groups.entrySet()) {
                         final SparseBitSet rows = entry.getValue();
@@ -152,11 +152,11 @@ implements Iterable<Map.Entry<Object, SparseBitSet>> {
                                     column.add((V)Function.class.cast(function).apply(df.get(r, c)));
                                 }
                             }
-
-                            if (function instanceof CumulativeFunction) {
-                                CumulativeFunction.class.cast(function).reset();
-                            }
                         } catch (final ClassCastException ignored) { }
+
+                        if (function instanceof CumulativeFunction) {
+                            CumulativeFunction.class.cast(function).reset();
+                        }
                     }
                 }
 
