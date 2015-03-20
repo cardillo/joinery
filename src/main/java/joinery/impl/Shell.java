@@ -21,6 +21,7 @@ package joinery.impl;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -42,7 +43,12 @@ import org.mozilla.javascript.WrappedException;
 public class Shell {
     public static Object repl(final List<DataFrame<Object>> frames)
     throws IOException {
-        return new Repl(frames).run();
+        return repl(System.in, frames);
+    }
+
+    public static Object repl(final InputStream input, final List<DataFrame<Object>> frames)
+    throws IOException {
+        return new Repl(input, frames).run();
     }
 
     private static class Repl
@@ -54,12 +60,14 @@ public class Shell {
         private static final String FILENAME = "<shell>";
         private final String NEWLINE = System.getProperty("line.separator");
 
+        private final InputStream input;
         private final List<DataFrame<Object>> frames;
         private final boolean interactive = System.console() != null;
         private transient boolean quit = false;
         private transient int statement = 1;
 
-        public Repl(final List<DataFrame<Object>> frames) {
+        private Repl(final InputStream input, final List<DataFrame<Object>> frames) {
+            this.input = input;
             this.frames = frames;
         }
 
@@ -71,7 +79,7 @@ public class Shell {
         public Object run()
         throws IOException {
             Object result = null;
-            final Console console = console();
+            final Console console = console(input);
             final Context ctx = Context.enter();
 
             if (interactive) {
@@ -206,14 +214,14 @@ public class Shell {
             }
         }
 
-        private Console console()
+        private Console console(final InputStream input)
         throws IOException {
             if (interactive) {
                 try {
                     return new JLineConsole();
                 } catch (final NoClassDefFoundError ignored) { }
             }
-            return new Console();
+            return new Console(new BufferedReader(new InputStreamReader(input)));
         }
 
         private class Console {
@@ -221,10 +229,10 @@ public class Shell {
 
             private Console()
             throws IOException {
-                this(new BufferedReader(new InputStreamReader(System.in)));
+                this.reader = null;
             }
 
-            protected Console(final BufferedReader reader)
+            private Console(final BufferedReader reader)
             throws IOException {
                 this.reader = reader;
             }

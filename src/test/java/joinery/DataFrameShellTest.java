@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -45,17 +46,17 @@ public class DataFrameShellTest {
     @Test
     public void testNoInput()
     throws IOException {
-        input("");
-        assertNull(Shell.repl(Collections.<DataFrame<Object>>emptyList()));
+        final InputStream in = input("");
+        assertNull(Shell.repl(in, Collections.<DataFrame<Object>>emptyList()));
     }
 
     @Test
     public void testNewDataFrame()
     throws IOException {
-        input("new DataFrame()");
+        final InputStream in = input("new DataFrame()");
         assertEquals(
                 DataFrameAdapter.class,
-                Shell.repl(Collections.<DataFrame<Object>>emptyList()).getClass()
+                Shell.repl(in, Collections.<DataFrame<Object>>emptyList()).getClass()
             );
     }
 
@@ -70,22 +71,22 @@ public class DataFrameShellTest {
           .append("  3,\n")
           .append("  4\n")
           .append("])");
-        input(sb.toString());
+        final InputStream in = input(sb.toString());
         assertEquals(
                 DataFrameAdapter.class,
-                Shell.repl(Collections.<DataFrame<Object>>emptyList()).getClass()
+                Shell.repl(in, Collections.<DataFrame<Object>>emptyList()).getClass()
             );
     }
 
     @Test
     public void testInvalidExpressions()
     throws IOException {
-        for (final String in : Arrays.asList(
+        for (final String s : Arrays.asList(
                     "[", "]", "{", "}", "(", ")", "\"", "'")) {
-            input(in);
+            final InputStream in = input(s);
             assertEquals(
                     EvaluatorException.class,
-                    Shell.repl(Collections.<DataFrame<Object>>emptyList()).getClass()
+                    Shell.repl(in, Collections.<DataFrame<Object>>emptyList()).getClass()
                 );
         }
     }
@@ -97,34 +98,34 @@ public class DataFrameShellTest {
         sb.append("frames[0].groupBy(function (row) {\n")
           .append("  return row.get(1)\n")
           .append("})");
-        input(sb.toString());
+        final InputStream in = input(sb.toString());
         assertEquals(
                 DataFrameAdapter.class,
-                Shell.repl(Arrays.asList(df)).getClass()
+                Shell.repl(in, Arrays.asList(df)).getClass()
             );
     }
 
     @Test
     public void testDataFrameArguments()
     throws IOException {
-        input("frames[0]");
+        final InputStream in = input("frames[0]");
         assertEquals(
                 DataFrameAdapter.class,
-                Shell.repl(Arrays.asList(df)).getClass()
+                Shell.repl(in, Arrays.asList(df)).getClass()
             );
     }
 
     @Test
     public void testLastResult()
     throws IOException {
-        input("frames[0]\n_");
+        final InputStream in = input("frames[0]\n_");
         assertEquals(
                 DataFrameAdapter.class,
-                Shell.repl(Arrays.asList(df)).getClass()
+                Shell.repl(in, Arrays.asList(df)).getClass()
             );
     }
 
-    private static final void input(final String input) {
-        System.setIn(new ByteArrayInputStream(input.getBytes()));
+    private static final InputStream input(final String input) {
+        return new ByteArrayInputStream(input.getBytes());
     }
 }
