@@ -46,6 +46,7 @@
     <metrics.version>3.1.0</metrics.version>
     <xchart.version>2.4.2</xchart.version>
     <jline.version>2.6</jline.version>
+    <slf4j.version>1.7.7</slf4j.version>
 
     <!-- use property to allow redefining via profiles/command line -->
     <groups>!joinery.perf.PerformanceTests</groups>
@@ -58,6 +59,12 @@
       <groupId>io.dropwizard.metrics</groupId>
       <artifactId>metrics-annotation</artifactId>
       <version>${metrics.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>net.sf.supercsv</groupId>
@@ -380,6 +387,12 @@
           <groupId>org.aspectj</groupId>
           <artifactId>aspectjrt</artifactId>
           <version>${aspectj.version}</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-nop</artifactId>
+          <version>${slf4j.version}</version>
           <scope>test</scope>
         </dependency>
       </dependencies>
