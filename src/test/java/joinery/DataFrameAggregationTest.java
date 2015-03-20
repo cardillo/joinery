@@ -54,7 +54,7 @@ public class DataFrameAggregationTest {
     public void testStd() {
         assertArrayEquals(
                 new double[] { 21.6024, 21.6024 },
-                (double[])df.convert().stddev().toArray(double[].class),
+                df.convert().stddev().toArray(double[].class),
                 0.0001
             );
     }
@@ -63,7 +63,7 @@ public class DataFrameAggregationTest {
     public void testVar() {
         assertArrayEquals(
                 new double[] { 466.6666, 466.6666 },
-                (double[])df.convert().var().toArray(double[].class),
+                df.convert().var().toArray(double[].class),
                 0.0001
             );
     }
@@ -105,6 +105,52 @@ public class DataFrameAggregationTest {
         assertArrayEquals(
                 new Double[] { 40.0, 40.0 },
                 df.convert().median().toArray()
+            );
+    }
+
+    @Test
+    public void testCumsum() {
+        assertArrayEquals(
+                new Double[] {
+                    10.0, 30.0, 60.0, 100.0, 150.0, 210.0, 280.0,
+                    10.0, 30.0, 60.0, 100.0, 150.0, 210.0, 280.0
+                },
+                df.cumsum().toArray()
+            );
+    }
+
+    @Test
+    public void testCumprod() {
+        assertArrayEquals(
+                new Double[] {
+                   10.0, 200.0, 6000.0, 240000.0, 12000000.0, 720000000.0, 50400000000.0,
+                   10.0, 200.0, 6000.0, 240000.0, 12000000.0, 720000000.0, 50400000000.0
+                },
+                df.cumprod().toArray()
+            );
+    }
+
+    @Test
+    public void testCummin() {
+        df.set(4, 2, 1);
+        assertArrayEquals(
+                new Double[] {
+                   10.0, 10.0, 10.0, 10.0, 1.0, 1.0, 1.0,
+                   10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0
+                },
+                df.cummin().toArray()
+            );
+    }
+
+    @Test
+    public void testCummax() {
+        df.set(4, 2, 100);
+        assertArrayEquals(
+                new Double[] {
+                   10.0, 20.0, 30.0, 40.0, 100.0, 100.0, 100.0,
+                   10.0, 20.0, 30.0, 40.0,  50.0,  60.0,  70.0
+                },
+                df.cummax().toArray()
             );
     }
 

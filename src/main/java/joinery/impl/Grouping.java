@@ -29,7 +29,9 @@ import java.util.Set;
 
 import joinery.DataFrame;
 import joinery.DataFrame.Aggregate;
+import joinery.DataFrame.Function;
 import joinery.DataFrame.KeyFunction;
+import joinery.impl.Transforms.CumulativeFunction;
 
 public class Grouping
 implements Iterable<Map.Entry<Object, SparseBitSet>> {
@@ -83,7 +85,7 @@ implements Iterable<Map.Entry<Object, SparseBitSet>> {
     }
 
     @SuppressWarnings("unchecked")
-    public <V> DataFrame<V> apply(final DataFrame<V> df, final Aggregate<V, ?> function) {
+    public <V> DataFrame<V> apply(final DataFrame<V> df, final Function<?, ?> function) {
         if (df.isEmpty()) {
             return df;
         }
@@ -123,17 +125,37 @@ implements Iterable<Map.Entry<Object, SparseBitSet>> {
                 final List<V> column = new ArrayList<>();
                 if (groups.isEmpty()) {
                     try {
-                        column.add((V)function.apply(df.col(c)));
+                        if (function instanceof Aggregate) {
+                            column.add((V)Aggregate.class.cast(function).apply(df.col(c)));
+                        } else {
+                            for (int r = 0; r < df.length(); r++) {
+                                column.add((V)Function.class.cast(function).apply(df.get(r, c)));
+                            }
+                        }
+
+                        if (function instanceof CumulativeFunction) {
+                            CumulativeFunction.class.cast(function).reset();
+                        }
                     } catch (final ClassCastException ignored) { }
                 } else {
                     for (final Map.Entry<Object, SparseBitSet> entry : groups.entrySet()) {
                         final SparseBitSet rows = entry.getValue();
-                        final List<V> values = new ArrayList<>(rows.cardinality());
-                        for (int r = rows.nextSetBit(0); r >= 0; r = rows.nextSetBit(r + 1)) {
-                            values.add(df.get(r, c));
-                        }
                         try {
-                            column.add((V)function.apply(values));
+                            if (function instanceof Aggregate) {
+                                final List<V> values = new ArrayList<>(rows.cardinality());
+                                for (int r = rows.nextSetBit(0); r >= 0; r = rows.nextSetBit(r + 1)) {
+                                    values.add(df.get(r, c));
+                                }
+                                column.add((V)Aggregate.class.cast(function).apply(values));
+                            } else {
+                                for (int r = rows.nextSetBit(0); r >= 0; r = rows.nextSetBit(r + 1)) {
+                                    column.add((V)Function.class.cast(function).apply(df.get(r, c)));
+                                }
+                            }
+
+                            if (function instanceof CumulativeFunction) {
+                                CumulativeFunction.class.cast(function).reset();
+                            }
                         } catch (final ClassCastException ignored) { }
                     }
                 }

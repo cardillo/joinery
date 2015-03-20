@@ -399,6 +399,22 @@ extends ScriptableObject {
         return new DataFrameAdapter(this, df.median());
     }
 
+    public DataFrameAdapter jsFunction_cumsum() {
+        return new DataFrameAdapter(this, df.cumsum());
+    }
+
+    public DataFrameAdapter jsFunction_cumprod() {
+        return new DataFrameAdapter(this, df.cumprod());
+    }
+
+    public DataFrameAdapter jsFunction_cummin() {
+        return new DataFrameAdapter(this, df.cummin());
+    }
+
+    public DataFrameAdapter jsFunction_cummax() {
+        return new DataFrameAdapter(this, df.cummax());
+    }
+
     public DataFrameAdapter jsFunction_describe() {
         return new DataFrameAdapter(this, df.describe());
     }

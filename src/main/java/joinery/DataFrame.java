@@ -53,6 +53,7 @@ import joinery.impl.Shell;
 import joinery.impl.Sorting;
 import joinery.impl.SparseBitSet;
 import joinery.impl.Timeseries;
+import joinery.impl.Transforms;
 import joinery.impl.Views;
 
 import com.codahale.metrics.annotation.Timed;
@@ -1676,6 +1677,26 @@ implements Iterable<List<V>> {
     @Timed
     public DataFrame<V> median() {
         return groups.apply(this, new Aggregation.Median<V>());
+    }
+
+    @Timed
+    public DataFrame<V> cumsum() {
+        return groups.apply(this, new Transforms.CumulativeSum<V>());
+    }
+
+    @Timed
+    public DataFrame<V> cumprod() {
+        return groups.apply(this, new Transforms.CumulativeProduct<V>());
+    }
+
+    @Timed
+    public DataFrame<V> cummin() {
+        return groups.apply(this, new Transforms.CumulativeMin<V>());
+    }
+
+    @Timed
+    public DataFrame<V> cummax() {
+        return groups.apply(this, new Transforms.CumulativeMax<V>());
     }
 
     @Timed
