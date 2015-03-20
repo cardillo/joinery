@@ -18,6 +18,7 @@
 
 package joinery.impl;
 
+import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 
@@ -30,6 +31,7 @@ import org.aspectj.lang.reflect.FieldSignature;
 import org.aspectj.lang.reflect.MethodSignature;
 
 import com.codahale.metrics.ConsoleReporter;
+import com.codahale.metrics.CsvReporter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
 import com.codahale.metrics.Timer;
@@ -100,6 +102,9 @@ public class Metrics {
     public static void displayMetrics() {
         ConsoleReporter.forRegistry(registry)
                 .build()
+                .report();
+        CsvReporter.forRegistry(registry)
+                .build(new File("target/"))
                 .report();
     }
 }
