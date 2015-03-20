@@ -46,6 +46,10 @@
     <metrics.version>3.1.0</metrics.version>
     <xchart.version>2.4.2</xchart.version>
     <jline.version>2.6</jline.version>
+
+    <!-- use property to allow redefining via profiles/command line -->
+    <groups>!joinery.perf.PerformanceTests</groups>
+    <parallel>all</parallel>
   </properties>
 
   <dependencies>
@@ -131,8 +135,10 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.18.1</version>
           <configuration>
-            <!-- exclude performance tests (they take a while) -->
-            <excludedGroups>joinery.perf.PerformanceTests</excludedGroups>
+            <!-- parallel tests -->
+            <parallel>${parallel}</parallel>
+            <threadCount>8</threadCount>
+            <groups>${groups}</groups>
           </configuration>
         </plugin>
 
@@ -142,9 +148,12 @@
           <artifactId>maven-failsafe-plugin</artifactId>
           <version>2.18.1</version>
           <configuration>
+            <!-- parallel tests -->
+            <parallel>all</parallel>
+            <threadCount>2</threadCount>
             <!-- run performance tests as part of integration/verify -->
             <includes>
-              <include>**/*Test.java</include>
+              <include>**/*PerfTest.java</include>
             </includes>
             <groups>joinery.perf.PerformanceTests</groups>
           </configuration>
@@ -303,6 +312,15 @@
         </executions>
       </plugin>
 
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!-- exclude performance tests (they take a while) -->
+          <groups>${groups}</groups>
+        </configuration>
+      </plugin>
+
       <!-- run integration tests as part of verify goal -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -458,6 +476,21 @@
           </plugin>
         </plugins>
       </build>
+    </profile>
+
+    <!-- profile to prevent test groups from filtering out
+         tests which are explicitly requested via -Dtest="..." -->
+    <profile>
+      <id>all-tests</id>
+      <activation>
+        <property>
+          <name>test</name>
+        </property>
+      </activation>
+      <properties>
+        <groups/>
+        <parallel>none</parallel>
+      </properties>
     </profile>
   </profiles>
 </project>
