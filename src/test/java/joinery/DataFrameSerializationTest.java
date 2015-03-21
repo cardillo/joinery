@@ -69,7 +69,7 @@ public class DataFrameSerializationTest {
 
     @Test
     public void testReadCsvSemicolonInputStream() throws IOException {
-    	DataFrame<Object> cdf = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization_semicolon.csv"), ";");
+        DataFrame<Object> cdf = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization_semicolon.csv"), ";");
         final Object[][] expected = new Object[][] {
                 new Object[] { "a", "a", "b", "b", "c", "c" },
                 new Object[] { "alpha", "bravo", "charlie", "delta", "echo", "foxtrot" },
@@ -86,8 +86,7 @@ public class DataFrameSerializationTest {
     
     @Test
     public void testReadCsvTabInputStream() throws IOException {
-    	DataFrame<Object> cdf = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization_tab.csv"), "\\t");
-    	System.out.println(df);
+        DataFrame<Object> cdf = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization_tab.csv"), "\\t");
         final Object[][] expected = new Object[][] {
                 new Object[] { "a", "a", "b", "b", "c", "c" },
                 new Object[] { "alpha", "bravo", "charlie", "delta", "echo", "foxtrot" },
