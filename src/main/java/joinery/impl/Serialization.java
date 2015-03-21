@@ -204,21 +204,27 @@ public class Serialization {
     public static DataFrame<Object> readCsv(final String file)
     throws IOException {
         return readCsv(file.contains("://") ?
-                new URL(file).openStream() : new FileInputStream(file), ",", NumberDefault.LONG_DEFAULT);
+                new URL(file).openStream() : new FileInputStream(file), ",", NumberDefault.LONG_DEFAULT, null);
     }
 
     public static DataFrame<Object> readCsv(final String file, final String separator, NumberDefault numDefault)
     throws IOException {
         return readCsv(file.contains("://") ?
-                new URL(file).openStream() : new FileInputStream(file), separator, numDefault);
+                new URL(file).openStream() : new FileInputStream(file), separator, numDefault, null);
+    }
+
+    public static DataFrame<Object> readCsv(final String file, final String separator, NumberDefault numDefault, final String naString)
+    throws IOException {
+        return readCsv(file.contains("://") ?
+                new URL(file).openStream() : new FileInputStream(file), separator, numDefault, naString);
     }
 
     public static DataFrame<Object> readCsv(final InputStream input) 
     throws IOException {
-        return readCsv(input, ",", NumberDefault.LONG_DEFAULT);
+        return readCsv(input, ",", NumberDefault.LONG_DEFAULT, null);
     }
 
-    public static DataFrame<Object> readCsv(final InputStream input, String separator, NumberDefault numDefault)
+    public static DataFrame<Object> readCsv(final InputStream input, String separator, NumberDefault numDefault, String naString)
     throws IOException {
         CsvPreference csvPreference;
         switch (separator) {
@@ -241,7 +247,7 @@ public class Serialization {
             for (List<Object> row = reader.read(procs); row != null; row = reader.read(procs)) {
                 df.append(new ArrayList<>(row));
             }
-            return df.convert(numDefault);
+            return df.convert(numDefault, naString);
         }
     }
 

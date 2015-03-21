@@ -1291,8 +1291,8 @@ implements Iterable<List<V>> {
         return this;
     }
 
-    public DataFrame<V> convert(final NumberDefault numDefault) {
-        Conversion.convert(this,numDefault);
+    public DataFrame<V> convert(final NumberDefault numDefault, final String naString) {
+        Conversion.convert(this,numDefault,naString);
         return this;
     }
 
@@ -2011,7 +2011,12 @@ implements Iterable<List<V>> {
 
     public static final DataFrame<Object> readCsv(final InputStream input, final String separator)
     throws IOException {
-        return Serialization.readCsv(input, separator, NumberDefault.LONG_DEFAULT);
+        return Serialization.readCsv(input, separator, NumberDefault.LONG_DEFAULT, null);
+    }
+
+    public static final DataFrame<Object> readCsv(final InputStream input, final String separator, final String naString)
+    throws IOException {
+        return Serialization.readCsv(input, separator, NumberDefault.LONG_DEFAULT, naString);
     }
 
     public static final DataFrame<Object> readCsv(final String file, final String separator, final NumberDefault longDefault)
@@ -2019,9 +2024,14 @@ implements Iterable<List<V>> {
         return Serialization.readCsv(file, separator, longDefault);
     }
 
+    public static final DataFrame<Object> readCsv(final String file, final String separator, final NumberDefault longDefault, final String naString)
+    throws IOException {
+        return Serialization.readCsv(file, separator, longDefault, naString);
+    }
+
     public static final DataFrame<Object> readCsv(final InputStream input, final String separator, final NumberDefault longDefault)
     throws IOException {
-        return Serialization.readCsv(input, separator, longDefault);
+        return Serialization.readCsv(input, separator, longDefault, null);
     }
 
     public final void writeCsv(final String file)
