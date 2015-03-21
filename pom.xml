@@ -443,6 +443,9 @@
     <!-- profile for release builds -->
     <profile>
       <id>release</id>
+      <properties>
+        <groups/>
+      </properties>
       <build>
         <plugins>
           <!-- configure source generation -->
@@ -501,7 +504,7 @@
         </property>
       </activation>
       <properties>
-        <groups />
+        <groups/>
         <parallel>none</parallel>
       </properties>
     </profile>
