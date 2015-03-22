@@ -204,21 +204,38 @@ public class Serialization {
     public static DataFrame<Object> readCsv(final String file)
     throws IOException {
         return readCsv(file.contains("://") ?
-                new URL(file).openStream() : new FileInputStream(file), ",", NumberDefault.LONG_DEFAULT);
+                new URL(file).openStream() : new FileInputStream(file), ",", NumberDefault.LONG_DEFAULT, null);
     }
 
     public static DataFrame<Object> readCsv(final String file, final String separator, NumberDefault numDefault)
     throws IOException {
         return readCsv(file.contains("://") ?
-                new URL(file).openStream() : new FileInputStream(file), separator, numDefault);
+                new URL(file).openStream() : new FileInputStream(file), separator, numDefault, null);
+    }
+
+    public static DataFrame<Object> readCsv(final String file, final String separator, NumberDefault numDefault, final String naString)
+    throws IOException {
+        return readCsv(file.contains("://") ?
+                new URL(file).openStream() : new FileInputStream(file), separator, numDefault, naString);
+    }
+
+    public static DataFrame<Object> readCsv(final String file, final String separator, NumberDefault numDefault, final String naString, boolean hasHeader)
+    throws IOException {
+        return readCsv(file.contains("://") ?
+                new URL(file).openStream() : new FileInputStream(file), separator, numDefault, naString, hasHeader);
     }
 
     public static DataFrame<Object> readCsv(final InputStream input) 
     throws IOException {
-        return readCsv(input, ",", NumberDefault.LONG_DEFAULT);
+        return readCsv(input, ",", NumberDefault.LONG_DEFAULT, null);
     }
 
-    public static DataFrame<Object> readCsv(final InputStream input, String separator, NumberDefault numDefault)
+    public static DataFrame<Object> readCsv(final InputStream input, String separator, NumberDefault numDefault, String naString) 
+    throws IOException {
+    	return readCsv(input,separator, numDefault,naString, true);
+    }
+    
+    public static DataFrame<Object> readCsv(final InputStream input, String separator, NumberDefault numDefault, String naString, boolean hasHeader)
     throws IOException {
         CsvPreference csvPreference;
         switch (separator) {
@@ -235,13 +252,29 @@ public class Serialization {
                 throw new IllegalArgumentException("Separator: " + separator + " is not currently supported");
         }
         try (CsvListReader reader = new CsvListReader(new InputStreamReader(input), csvPreference)) {
-            final List<String> header = Arrays.asList(reader.getHeader(true));
-            final CellProcessor[] procs = new CellProcessor[header.size()];
-            final DataFrame<Object> df = new DataFrame<>(header);
+        	final List<String> header;
+        	final DataFrame<Object> df;
+        	final CellProcessor[] procs;
+        	if(hasHeader) {
+        		header = Arrays.asList(reader.getHeader(true));
+        		procs = new CellProcessor[header.size()];
+                df = new DataFrame<>(header);
+        	} else {
+        		// Read the first row to figure out how many columns we have
+        		reader.read();
+        		header = new ArrayList<String>();
+        		for (int i = 0; i < reader.length(); i++) {
+					header.add("V"+i);
+				}
+        		procs = new CellProcessor[header.size()];
+        		df = new DataFrame<>(header);
+        		// The following line executes the procs on the previously read row again
+        		df.append(reader.executeProcessors(procs));
+        	}
             for (List<Object> row = reader.read(procs); row != null; row = reader.read(procs)) {
                 df.append(new ArrayList<>(row));
             }
-            return df.convert(numDefault);
+            return df.convert(numDefault, naString);
         }
     }
 

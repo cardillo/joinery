@@ -66,6 +66,74 @@ public class DataFrameSerializationTest {
                 );
         }
     }
+    
+    @Test
+    public void testReadCsvNAInputStream() throws IOException {
+    	DataFrame<Object> nadf = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization_wNA.csv"), ",", "NA");
+        final Object[][] expected = new Object[][] {
+                new Object[] { "a", "a", "b", "b", "c", "c" },
+                new Object[] { "alpha", null, "charlie", "delta", "echo", "foxtrot" },
+                new Object[] { 1L, 2L, 3L, null, 5L, 6L }
+            };
+
+        for (int i = 0; i < expected.length; i++) {
+            assertArrayEquals(
+                    expected[i],
+                    nadf.col(i).toArray()
+                );
+        }
+    }
+    
+    @Test
+    public void testReadCsvNoHeaderInputStream() throws IOException {
+    	DataFrame<Object> df_noHeader = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization_no_header.csv"), ",", "NA", false);
+        final Object[][] expected = new Object[][] {
+                new Object[] { "a", "a", "b", "b", "c", "c" },
+                new Object[] { "alpha", "bravo", "charlie", "delta", "echo", "foxtrot" },
+                new Object[] { 1L, 2L, 3L, 4L, 5L, 6L }
+            };
+
+        for (int i = 0; i < expected.length; i++) {
+            assertArrayEquals(
+                    expected[i],
+                    df_noHeader.col(i).toArray()
+                );
+        }
+    }
+
+    @Test
+    public void testReadCsvSemicolonInputStream() throws IOException {
+        DataFrame<Object> cdf = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization_semicolon.csv"), ";");
+        final Object[][] expected = new Object[][] {
+                new Object[] { "a", "a", "b", "b", "c", "c" },
+                new Object[] { "alpha", "bravo", "charlie", "delta", "echo", "foxtrot" },
+                new Object[] { 1L, 2L, 3L, 4L, 5L, 6L }
+            };
+
+        for (int i = 0; i < expected.length; i++) {
+            assertArrayEquals(
+                    expected[i],
+                    cdf.col(i).toArray()
+                );
+        }
+    }
+    
+    @Test
+    public void testReadCsvTabInputStream() throws IOException {
+        DataFrame<Object> cdf = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization_tab.csv"), "\\t");
+        final Object[][] expected = new Object[][] {
+                new Object[] { "a", "a", "b", "b", "c", "c" },
+                new Object[] { "alpha", "bravo", "charlie", "delta", "echo", "foxtrot" },
+                new Object[] { 1L, 2L, 3L, 4L, 5L, 6L }
+            };
+
+        for (int i = 0; i < expected.length; i++) {
+            assertArrayEquals(
+                    expected[i],
+                    cdf.col(i).toArray()
+                );
+        }
+    }
 
     @Test
     public void testWriteCsvString()

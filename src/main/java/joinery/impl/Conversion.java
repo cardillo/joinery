@@ -33,10 +33,10 @@ import joinery.DataFrame.NumberDefault;
 
 public class Conversion {
     public static <V> void convert(final DataFrame<V> df) {
-        convert(df, NumberDefault.LONG_DEFAULT);
+        convert(df, NumberDefault.LONG_DEFAULT, null);
     }
 
-    public static <V> void convert(final DataFrame<V> df, final NumberDefault numDefault) {
+    public static <V> void convert(final DataFrame<V> df, final NumberDefault numDefault, final String naString) {
         final Map<Integer, Function<V, ?>> conversions = new HashMap<>();
         List<Function<V, ?>> converters;
         final int rows = df.length();
@@ -61,12 +61,13 @@ public class Conversion {
                 throw new IllegalArgumentException("Number default contains an Illegal value");
         }
 
+        NAConversion<V> naConverter = new NAConversion<>(naString);
         // find conversions
         for (int c = 0; c < cols; c++) {
             for (final Function<V, ?> conv : converters) {
                 boolean all = true;
                 for (int r = 0; r < rows; r++) {
-                    if (conv.apply(df.get(r, c)) == null) {
+                    if (conv.apply(df.get(r, c)) == null && naConverter.apply(df.get(r, c)) != null) {
                         all = false;
                         break;
                     }
@@ -79,7 +80,7 @@ public class Conversion {
         }
 
         // apply conversions
-        convert(df, conversions);
+        convert(df, conversions, naString);
     }
 
     @SafeVarargs
@@ -103,11 +104,11 @@ public class Conversion {
                 conversions.put(i, conv);
             }
         }
-        convert(df, conversions);
+        convert(df, conversions, null);
     }
 
     @SuppressWarnings("unchecked")
-    public static <V> void convert(final DataFrame<V> df, final Map<Integer, Function<V, ?>> conversions) {
+    public static <V> void convert(final DataFrame<V> df, final Map<Integer, Function<V, ?>> conversions, String naString) {
         final int rows = df.length();
         final int cols = df.size();
         for (int c = 0; c < cols; c++) {
@@ -115,6 +116,12 @@ public class Conversion {
             if (conv != null) {
                 for (int r = 0; r < rows; r++) {
                     df.set(r, c, (V)conv.apply(df.get(r, c)));
+                }
+            } 
+            else {
+            	NAConversion<V> naConverter = new NAConversion<>(naString);
+            	for (int r = 0; r < rows; r++) {
+                    df.set(r, c, (V)naConverter.apply(df.get(r, c)));
                 }
             }
         }
@@ -138,6 +145,18 @@ public class Conversion {
             });
     }
 
+    private static class NAConversion<V>
+    implements Function<V, V> {
+    	final String naString; 
+    	public NAConversion(String naString) {
+    		this.naString = naString;
+    	}
+		@Override
+		public V apply(V value) {
+			return naString != null && String.valueOf(value).equals(naString) ? null : value;
+		}	
+    }
+    
     private static final class StringConversion<V>
     implements Function<V, String> {
         @Override
