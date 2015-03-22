@@ -2019,6 +2019,21 @@ implements Iterable<List<V>> {
         return Serialization.readCsv(input, separator, NumberDefault.LONG_DEFAULT, naString);
     }
 
+    public static final DataFrame<Object> readCsv(final InputStream input, final String separator, final String naString, final boolean hasHeader)
+    throws IOException {
+        return Serialization.readCsv(input, separator, NumberDefault.LONG_DEFAULT, naString, hasHeader);
+    }
+
+    public static final DataFrame<Object> readCsv(final String file, final String separator, final String naString, final boolean hasHeader)
+    throws IOException {
+        return Serialization.readCsv(file, separator, NumberDefault.LONG_DEFAULT, naString, hasHeader);
+    }
+
+    public static final DataFrame<Object> readCsv(final String file, final String separator, final NumberDefault numberDefault, final String naString, final boolean hasHeader)
+    throws IOException {
+        return Serialization.readCsv(file, separator, numberDefault, naString, hasHeader);
+    }
+
     public static final DataFrame<Object> readCsv(final String file, final String separator, final NumberDefault longDefault)
     throws IOException {
         return Serialization.readCsv(file, separator, longDefault);
