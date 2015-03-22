@@ -153,7 +153,7 @@ public class Conversion {
     	}
 		@Override
 		public V apply(V value) {
-			return String.valueOf(value).equals(naString) ? null : value;
+			return naString != null && String.valueOf(value).equals(naString) ? null : value;
 		}	
     }
     
