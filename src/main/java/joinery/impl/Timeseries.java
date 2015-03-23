@@ -18,94 +18,79 @@
 
 package joinery.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
 import joinery.DataFrame;
-import joinery.DataFrame.RowFunction;
+import joinery.DataFrame.Function;
 
 public class Timeseries {
-    @SuppressWarnings("unchecked")
-    public static <V> DataFrame<V> diff(final DataFrame<V> df, final int period) {
-        final DataFrame<V> nonnumeric = df.nonnumeric();
-        final DataFrame<V> diff = (DataFrame<V>)
-                df.numeric().transform(new DiscreteDifferenceTransform(period));
-        return nonnumeric.isEmpty() ? diff : nonnumeric.join(diff);
+    public static <V> DataFrame<V> rollapply(final DataFrame<V> df, final Function<List<V>, V> function, final int period) {
+        return df.apply(new RollingFunction<>(function, period));
     }
 
-    @SuppressWarnings("unchecked")
-    public static <V> DataFrame<V> percentChange(final DataFrame<V> df, final int period) {
-        final DataFrame<V> nonnumeric = df.nonnumeric();
-        final DataFrame<V> diff = (DataFrame<V>)
-                df.numeric() .transform(new PercentChangeTransform(period));
-        return nonnumeric.isEmpty() ? diff : nonnumeric.join(diff);
-    }
+    public static class RollingFunction<V>
+    implements Function<V, V> {
+        private final Function<List<V>, V> function;
+        private final int period;
+        protected final LinkedList<V> window;
 
-    private static abstract class WindowTransform<V>
-    implements RowFunction<V, V> {
-        protected final int period;
-        protected final Queue<List<V>> window;
-
-        protected WindowTransform(final int period) {
-            if (period < 1) {
-                throw new IllegalArgumentException("period must be a positive integer");
-            }
+        RollingFunction(final Function<List<V>, V> function, final int period) {
+            this.function = function;
             this.period = period;
             this.window = new LinkedList<>();
         }
 
         @Override
-        public List<List<V>> apply(final List<V> values) {
-            final List<V> row = new ArrayList<>(values);
-            if (window.size() < period) {
-                for (int i = 0; i < values.size(); i++) {
-                    row.set(i, null);
-                }
-            } else {
-                compute(window, row);
-                window.remove();
+        public V apply(final V value) {
+            while (window.size() < period) {
+                window.add(null);
             }
-            window.add(values);
-            return Collections.singletonList(row);
-        }
-
-        protected abstract void compute(Queue<List<V>> window, List<V> values);
-    }
-
-    private static class DiscreteDifferenceTransform
-    extends WindowTransform<Number> {
-        public DiscreteDifferenceTransform(final int period) {
-            super(period);
-        }
-
-        @Override
-        protected void compute(final Queue<List<Number>> window, final List<Number> values) {
-            final List<Number> last = window.peek();
-            for (int i = 0; i < values.size(); i++) {
-                final Double diff = values.get(i).doubleValue()
-                                    - last.get(i).doubleValue();
-                values.set(i, diff);
-            }
+            window.add(value);
+            final V result = function.apply(window);
+            window.remove();
+            return result;
         }
     }
 
-    private static class PercentChangeTransform
-    extends WindowTransform<Number> {
-        public PercentChangeTransform(final int period) {
-            super(period);
-        }
-
+    private static class DiscreteDifferenceFunction
+    implements Function<List<Number>, Number> {
         @Override
-        protected void compute(final Queue<List<Number>> window, final List<Number> values) {
-            final List<Number> last = window.peek();
-            for (int i = 0; i < values.size(); i++) {
-                final double x1 = last.get(i).doubleValue();
-                final double x2 = values.get(i).doubleValue();
-                values.set(i, (x2 - x1) / x1);
+        public Number apply(final List<Number> values) {
+            if (values.contains(null)) {
+                return null;
             }
+            return values.get(values.size() - 1).doubleValue()
+                 - values.get(0).doubleValue();
         }
+    }
+
+    private static class PercentChangeFunction
+    implements Function<List<Number>, Number> {
+        @Override
+        public Number apply(final List<Number> values) {
+            if (values.contains(null)) {
+                return null;
+            }
+            final double x1 = values.get(0).doubleValue();
+            final double x2 = values.get(values.size() - 1).doubleValue();
+            return  (x2 - x1) / x1;
+        }
+    }
+
+    public static <V> DataFrame<V> diff(final DataFrame<V> df, final int period) {
+        final DataFrame<V> nonnumeric = df.nonnumeric();
+        @SuppressWarnings("unchecked")
+        final DataFrame<V> diff = (DataFrame<V>)df.numeric().apply(
+                new RollingFunction<Number>(new DiscreteDifferenceFunction(), period));
+        return nonnumeric.isEmpty() ? diff : nonnumeric.join(diff);
+    }
+
+    public static <V> DataFrame<V> percentChange(final DataFrame<V> df, final int period) {
+        final DataFrame<V> nonnumeric = df.nonnumeric();
+        @SuppressWarnings("unchecked")
+        final DataFrame<V> diff = (DataFrame<V>)df.numeric().apply(
+                new RollingFunction<Number>(new PercentChangeFunction(), period));
+        return nonnumeric.isEmpty() ? diff : nonnumeric.join(diff);
     }
 }

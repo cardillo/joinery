@@ -1944,6 +1944,14 @@ implements Iterable<List<V>> {
         return Timeseries.percentChange(this, period);
     }
 
+    public DataFrame<V> rollapply(final Function<List<V>, V> function) {
+        return rollapply(function, 1);
+    }
+
+    public DataFrame<V> rollapply(final Function<List<V>, V> function, final int period) {
+        return Timeseries.rollapply(this, function, period);
+    }
+
     /**
      * Display the numeric columns of this data frame
      * as a line chart in a new swing frame.
