@@ -1422,8 +1422,10 @@ implements Iterable<List<V>> {
         if (dim == 1) {
             @SuppressWarnings("unchecked")
             final U array = (U)Array.newInstance(type, size * len);
-            for (int i = 0; i < size * len; i++) {
-                Array.set(array, i, data.get(i / size, i % len));
+            for (int c = 0; c < size; c++) {
+                for (int r = 0; r < len; r++) {
+                    Array.set(array, c * len + r, data.get(c, r));
+                }
             }
             return array;
         } else if (dim == 2) {
