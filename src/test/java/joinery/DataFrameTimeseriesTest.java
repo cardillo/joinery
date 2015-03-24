@@ -23,12 +23,11 @@ import static org.junit.Assert.assertArrayEquals;
 import java.io.IOException;
 import java.util.List;
 
+import joinery.DataFrame.Function;
+
 import org.junit.Before;
 import org.junit.Test;
 
-/**
- *
- */
 public class DataFrameTimeseriesTest {
     private DataFrame<Object> df;
 
@@ -112,6 +111,29 @@ public class DataFrameTimeseriesTest {
                           .cast(Number.class)
                           .percentChange(3)
                           .col("Close")),
+                0.0001
+            );
+    }
+
+    @Test
+    public void testRollApplyMultiColumn() {
+        assertArrayEquals(
+                new double[] {
+                        Double.NaN, 119.435, 119.325, 120.870, 123.450, 125.670, 126.770, 127.455, 128.275, 128.585,
+                        Double.NaN, 42976406.0, 41298182.0, 50449151.5, 67785151.5, 74018131.5, 64373342.5, 58712312.0, 54022071.0, 41066090.5
+                    },
+                df.numeric()
+                  .retain("Close", "Volume")
+                  .rollapply(new Function<List<Number>, Number>() {
+                    @Override
+                    public Number apply(final List<Number> values) {
+                        if (values.contains(null))
+                            return null;
+                        return (values.get(0).doubleValue() + values.get(1).doubleValue()) / 2.0;
+                    }
+                  })
+                  .fillna(Double.NaN)
+                  .toArray(double[].class),
                 0.0001
             );
     }

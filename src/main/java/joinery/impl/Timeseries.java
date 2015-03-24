@@ -18,6 +18,7 @@
 
 package joinery.impl;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -26,7 +27,18 @@ import joinery.DataFrame.Function;
 
 public class Timeseries {
     public static <V> DataFrame<V> rollapply(final DataFrame<V> df, final Function<List<V>, V> function, final int period) {
-        return df.apply(new RollingFunction<>(function, period));
+        // can't use apply because rolling window functions are likely path dependent
+        final List<List<V>> data = new ArrayList<>(df.size());
+        final RollingFunction<V> f = new RollingFunction<>(function, period);
+        for (int c = 0; c < df.size(); c++) {
+            final List<V> column = new ArrayList<>(df.length());
+            for (int r = 0; r < df.length(); r++) {
+                column.add(f.apply(df.get(r, c)));
+            }
+            data.add(column);
+            f.reset();
+        }
+        return new DataFrame<>(df.index(), df.columns(), data);
     }
 
     public static class RollingFunction<V>
@@ -50,6 +62,10 @@ public class Timeseries {
             final V result = function.apply(window);
             window.remove();
             return result;
+        }
+
+        public void reset() {
+            window.clear();
         }
     }
 
