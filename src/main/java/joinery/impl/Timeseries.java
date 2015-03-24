@@ -29,7 +29,7 @@ public class Timeseries {
     public static <V> DataFrame<V> rollapply(final DataFrame<V> df, final Function<List<V>, V> function, final int period) {
         // can't use apply because rolling window functions are likely path dependent
         final List<List<V>> data = new ArrayList<>(df.size());
-        final RollingFunction<V> f = new RollingFunction<>(function, period);
+        final WindowFunction<V> f = new WindowFunction<>(function, period);
         for (int c = 0; c < df.size(); c++) {
             final List<V> column = new ArrayList<>(df.length());
             for (int r = 0; r < df.length(); r++) {
@@ -41,13 +41,13 @@ public class Timeseries {
         return new DataFrame<>(df.index(), df.columns(), data);
     }
 
-    public static class RollingFunction<V>
+    private static class WindowFunction<V>
     implements Function<V, V> {
         private final Function<List<V>, V> function;
         private final int period;
         protected final LinkedList<V> window;
 
-        RollingFunction(final Function<List<V>, V> function, final int period) {
+        private WindowFunction(final Function<List<V>, V> function, final int period) {
             this.function = function;
             this.period = period;
             this.window = new LinkedList<>();
@@ -98,7 +98,7 @@ public class Timeseries {
         final DataFrame<V> nonnumeric = df.nonnumeric();
         @SuppressWarnings("unchecked")
         final DataFrame<V> diff = (DataFrame<V>)df.numeric().apply(
-                new RollingFunction<Number>(new DiscreteDifferenceFunction(), period));
+                new WindowFunction<Number>(new DiscreteDifferenceFunction(), period));
         return nonnumeric.isEmpty() ? diff : nonnumeric.join(diff);
     }
 
@@ -106,7 +106,7 @@ public class Timeseries {
         final DataFrame<V> nonnumeric = df.nonnumeric();
         @SuppressWarnings("unchecked")
         final DataFrame<V> diff = (DataFrame<V>)df.numeric().apply(
-                new RollingFunction<Number>(new PercentChangeFunction(), period));
+                new WindowFunction<Number>(new PercentChangeFunction(), period));
         return nonnumeric.isEmpty() ? diff : nonnumeric.join(diff);
     }
 }
