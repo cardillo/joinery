@@ -463,6 +463,13 @@ extends ScriptableObject {
         return new DataFrameAdapter(object, cast(object).df.percentChange(period.intValue()));
     }
 
+    public static Scriptable jsFunction_rollapply(final Context ctx, final Scriptable object, final Object[] args, final Function func) {
+        @SuppressWarnings("unchecked")
+        final DataFrame.Function<List<Object>, Object> f = (DataFrame.Function<List<Object>, Object>)Context.jsToJava(args[0], DataFrame.Function.class);
+        final Number period = args.length == 2 ? Context.toNumber(args[1]) : 1;
+        return new DataFrameAdapter(object, cast(object).df.rollapply(f, period.intValue()));
+    }
+
     public static Object jsFunction_plot(final Context ctx, final Scriptable object, final Object[] args, final Function func) {
         if (args.length > 0) {
             final PlotType type = PlotType.class.cast(Context.jsToJava(args[0], PlotType.class));
