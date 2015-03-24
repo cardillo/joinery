@@ -62,10 +62,11 @@ public class DataFrameTimeseriesTest {
                     Double.NaN, -1.01, 0.79, 2.30, 2.86,
                     1.58, 0.62, 0.75, 0.89, -0.27
                 },
-                toArray(df.retain("Close")
-                          .cast(Number.class)
-                          .diff()
-                          .col("Close")),
+                df.retain("Close")
+                  .cast(Number.class)
+                  .diff()
+                  .fillna(Double.NaN)
+                  .toArray(double[].class),
                 0.0001
             );
     }
@@ -77,10 +78,11 @@ public class DataFrameTimeseriesTest {
                     Double.NaN, Double.NaN, Double.NaN, 2.08, 5.95,
                     6.74, 5.06, 2.95, 2.26, 1.37
                 },
-                toArray(df.retain("Close")
-                          .cast(Number.class)
-                          .diff(3)
-                          .col("Close")),
+                df.retain("Close")
+                  .cast(Number.class)
+                  .diff(3)
+                  .fillna(Double.NaN)
+                  .toArray(double[].class),
                 0.0001
             );
     }
@@ -92,10 +94,11 @@ public class DataFrameTimeseriesTest {
                     Double.NaN, -0.0084, 0.0066, 0.0192, 0.0234,
                     0.01265, 0.0049, 0.0059, 0.0070, -0.0021
                 },
-                toArray(df.retain("Close")
-                          .cast(Number.class)
-                          .percentChange()
-                          .col("Close")),
+                df.retain("Close")
+                  .cast(Number.class)
+                  .percentChange()
+                  .fillna(Double.NaN)
+                  .toArray(double[].class),
                 0.0001
             );
     }
@@ -107,10 +110,10 @@ public class DataFrameTimeseriesTest {
                     Double.NaN, Double.NaN, Double.NaN, 0.0173, 0.0500,
                     0.0563, 0.0415, 0.0236, 0.0179, 0.0108
                 },
-                toArray(df.retain("Close")
-                          .cast(Number.class)
-                          .percentChange(3)
-                          .col("Close")),
+                df.retain("Close")
+                  .percentChange(3)
+                  .fillna(Double.NaN)
+                  .toArray(double[].class),
                 0.0001
             );
     }
@@ -119,8 +122,10 @@ public class DataFrameTimeseriesTest {
     public void testRollApplyMultiColumn() {
         assertArrayEquals(
                 new double[] {
-                        Double.NaN, 119.435, 119.325, 120.870, 123.450, 125.670, 126.770, 127.455, 128.275, 128.585,
-                        Double.NaN, 42976406.0, 41298182.0, 50449151.5, 67785151.5, 74018131.5, 64373342.5, 58712312.0, 54022071.0, 41066090.5
+                        Double.NaN, 119.435, 119.325, 120.870, 123.450,
+                            125.670, 126.770, 127.455, 128.275, 128.585,
+                        Double.NaN, 42976406.0, 41298182.0, 50449151.5, 67785151.5,
+                            74018131.5, 64373342.5, 58712312.0, 54022071.0, 41066090.5
                     },
                 df.numeric()
                   .retain("Close", "Volume")
@@ -136,14 +141,5 @@ public class DataFrameTimeseriesTest {
                   .toArray(double[].class),
                 0.0001
             );
-    }
-
-    private static double[] toArray(final List<Number> values) {
-        final double[] a = new double[values.size()];
-        for (int i = 0; i < a.length; i++) {
-            final Number n = values.get(i);
-            a[i] = n != null ? n.doubleValue() : Double.NaN;
-        }
-        return a;
     }
 }

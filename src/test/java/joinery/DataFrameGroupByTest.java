@@ -97,7 +97,7 @@ public class DataFrameGroupByTest {
     @Test
     public void testGroups() {
         final Map<Object, DataFrame<Object>> groups =
-                df.convert().groupBy("b").explode();
+                df.groupBy("b").explode();
 
         assertArrayEquals(
                 new Object[] {
@@ -153,7 +153,7 @@ public class DataFrameGroupByTest {
                     30.0, 70.0, 180.0,
                     30.0, 70.0, 180.0
                 },
-                df.convert().groupBy(new KeyFunction<Object>() {
+                df.groupBy(new KeyFunction<Object>() {
                     @Override
                     public Object apply(final List<Object> value) {
                         return value.get(1);
