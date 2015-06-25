@@ -21,6 +21,7 @@ package joinery;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -227,4 +228,30 @@ public class DataFrameConversionTest {
                 }
             );
     }
+    
+    @Test
+	public void testToModelMatrixWithIntercept() throws IOException {
+		DataFrame<Object> df = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization.csv"));
+		assertEquals(3, df.columns().size());
+		//System.out.println(df);
+		//System.out.println(df.types());
+		DataFrame<Number> mm = df.toModelMatrixDataFrame(0.0, null, true);
+		//System.out.println(mm);
+		// Intercept + {a,b,c}.size() + {alpha,bravo...}.size() + value
+		int expectedColNos = 1+2+5+1;
+		assertEquals(expectedColNos, mm.columns().size());
+	}
+    
+    @Test
+	public void testToModelMatrix() throws IOException {
+		DataFrame<Object> df = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization.csv"));
+		assertEquals(3, df.columns().size());
+		//System.out.println(df);
+		//System.out.println(df.types());
+		DataFrame<Number> mm = df.toModelMatrixDataFrame(0.0, null, false);
+		//System.out.println(mm);
+		// {a,b,c}.size() + {alpha,bravo...}.size() + value
+		int expectedColNos = 2+5+1;
+		assertEquals(expectedColNos, mm.columns().size());
+	}
 }
