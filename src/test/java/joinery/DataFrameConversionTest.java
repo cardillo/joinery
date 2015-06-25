@@ -233,16 +233,80 @@ public class DataFrameConversionTest {
 	public void testToModelMatrixWithIntercept() throws IOException {
 		DataFrame<Object> df = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization.csv"));
 		assertEquals(3, df.columns().size());
-		//System.out.println(df);
+		System.out.println(df);
 		//System.out.println(df.types());
 		DataFrame<Number> mm = df.toModelMatrixDataFrame(0.0, null, true);
-		//System.out.println(mm);
+		System.out.println(mm);
 		// Intercept + {a,b,c}.size() + {alpha,bravo...}.size() + value
 		int expectedColNos = 1+2+5+1;
+		System.out.println(mm.col(1));
 		assertEquals(expectedColNos, mm.columns().size());
+		// Intercept
+		assertEquals(1.0, mm.get(0, 0));
+		assertEquals(1.0, mm.get(1, 0));
+		assertEquals(1.0, mm.get(2, 0));
+		assertEquals(1.0, mm.get(3, 0));
+		assertEquals(1.0, mm.get(4, 0));
+		assertEquals(1.0, mm.get(5, 0));
+		// First category dummy variable i.e "b"
+		assertEquals(1.0, mm.get(0, 1));
+		assertEquals(1.0, mm.get(1, 1));
+		assertEquals(0.0, mm.get(2, 1));
+		assertEquals(0.0, mm.get(3, 1));
+		assertEquals(0.0, mm.get(4, 1));
+		assertEquals(0.0, mm.get(5, 1));
+		// Second category dummy variable i.e "c"	
+		assertEquals(0.0, mm.get(0, 2));
+		assertEquals(0.0, mm.get(1, 2));
+		assertEquals(1.0, mm.get(2, 2));
+		assertEquals(1.0, mm.get(3, 2));
+		assertEquals(0.0, mm.get(4, 2));
+		assertEquals(0.0, mm.get(5, 2));
+		// First name dummy variable i.e "alpha"	
+		assertEquals(1.0, mm.get(0, 3));
+		assertEquals(0.0, mm.get(1, 3));
+		assertEquals(0.0, mm.get(2, 3));
+		assertEquals(0.0, mm.get(3, 3));
+		assertEquals(0.0, mm.get(4, 3));
+		assertEquals(0.0, mm.get(5, 3));
+		// Second name dummy variable i.e "bravo"	
+		assertEquals(0.0, mm.get(0, 4));
+		assertEquals(1.0, mm.get(1, 4));
+		assertEquals(0.0, mm.get(2, 4));
+		assertEquals(0.0, mm.get(3, 4));
+		assertEquals(0.0, mm.get(4, 4));
+		assertEquals(0.0, mm.get(5, 4));
+		// Third name dummy variable i.e "charlie"	
+		assertEquals(0.0, mm.get(0, 5));
+		assertEquals(0.0, mm.get(1, 5));
+		assertEquals(1.0, mm.get(2, 5));
+		assertEquals(0.0, mm.get(3, 5));
+		assertEquals(0.0, mm.get(4, 5));
+		assertEquals(0.0, mm.get(5, 5));
+		// Forth name dummy variable i.e "delta"	
+		assertEquals(0.0, mm.get(0, 6));
+		assertEquals(0.0, mm.get(1, 6));
+		assertEquals(0.0, mm.get(2, 6));
+		assertEquals(1.0, mm.get(3, 6));
+		assertEquals(0.0, mm.get(4, 6));
+		assertEquals(0.0, mm.get(5, 6));
+		// Fifth name dummy variable i.e "echo"	
+		assertEquals(0.0, mm.get(0, 7));
+		assertEquals(0.0, mm.get(1, 7));
+		assertEquals(0.0, mm.get(2, 7));
+		assertEquals(0.0, mm.get(3, 7));
+		assertEquals(1.0, mm.get(4, 7));
+		assertEquals(0.0, mm.get(5, 7));
+		// Value column	
+		assertEquals(1L, mm.get(0, 8));
+		assertEquals(2L, mm.get(1, 8));
+		assertEquals(3L, mm.get(2, 8));
+		assertEquals(4L, mm.get(3, 8));
+		assertEquals(5L, mm.get(4, 8));
+		assertEquals(6L, mm.get(5, 8));
 	}
-    
-    @Test
+
+	@Test
 	public void testToModelMatrix() throws IOException {
 		DataFrame<Object> df = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization.csv"));
 		assertEquals(3, df.columns().size());
@@ -253,5 +317,61 @@ public class DataFrameConversionTest {
 		// {a,b,c}.size() + {alpha,bravo...}.size() + value
 		int expectedColNos = 2+5+1;
 		assertEquals(expectedColNos, mm.columns().size());
+		// First category dummy variable i.e "b"
+		assertEquals(1.0, mm.get(0, 0));
+		assertEquals(1.0, mm.get(1, 0));
+		assertEquals(0.0, mm.get(2, 0));
+		assertEquals(0.0, mm.get(3, 0));
+		assertEquals(0.0, mm.get(4, 0));
+		assertEquals(0.0, mm.get(5, 0));
+		// Second category dummy variable i.e "c"	
+		assertEquals(0.0, mm.get(0, 1));
+		assertEquals(0.0, mm.get(1, 1));
+		assertEquals(1.0, mm.get(2, 1));
+		assertEquals(1.0, mm.get(3, 1));
+		assertEquals(0.0, mm.get(4, 1));
+		assertEquals(0.0, mm.get(5, 1));
+		// First name dummy variable i.e "alpha"	
+		assertEquals(1.0, mm.get(0, 2));
+		assertEquals(0.0, mm.get(1, 2));
+		assertEquals(0.0, mm.get(2, 2));
+		assertEquals(0.0, mm.get(3, 2));
+		assertEquals(0.0, mm.get(4, 2));
+		assertEquals(0.0, mm.get(5, 2));
+		// Second name dummy variable i.e "bravo"	
+		assertEquals(0.0, mm.get(0, 3));
+		assertEquals(1.0, mm.get(1, 3));
+		assertEquals(0.0, mm.get(2, 3));
+		assertEquals(0.0, mm.get(3, 3));
+		assertEquals(0.0, mm.get(4, 3));
+		assertEquals(0.0, mm.get(5, 3));
+		// Third name dummy variable i.e "charlie"	
+		assertEquals(0.0, mm.get(0, 4));
+		assertEquals(0.0, mm.get(1, 4));
+		assertEquals(1.0, mm.get(2, 4));
+		assertEquals(0.0, mm.get(3, 4));
+		assertEquals(0.0, mm.get(4, 4));
+		assertEquals(0.0, mm.get(5, 4));
+		// Forth name dummy variable i.e "delta"	
+		assertEquals(0.0, mm.get(0, 5));
+		assertEquals(0.0, mm.get(1, 5));
+		assertEquals(0.0, mm.get(2, 5));
+		assertEquals(1.0, mm.get(3, 5));
+		assertEquals(0.0, mm.get(4, 5));
+		assertEquals(0.0, mm.get(5, 5));
+		// Fifth name dummy variable i.e "echo"	
+		assertEquals(0.0, mm.get(0, 6));
+		assertEquals(0.0, mm.get(1, 6));
+		assertEquals(0.0, mm.get(2, 6));
+		assertEquals(0.0, mm.get(3, 6));
+		assertEquals(1.0, mm.get(4, 6));
+		assertEquals(0.0, mm.get(5, 6));
+		// Value column	
+		assertEquals(1L, mm.get(0, 7));
+		assertEquals(2L, mm.get(1, 7));
+		assertEquals(3L, mm.get(2, 7));
+		assertEquals(4L, mm.get(3, 7));
+		assertEquals(5L, mm.get(4, 7));
+		assertEquals(6L, mm.get(5, 7));
 	}
 }
