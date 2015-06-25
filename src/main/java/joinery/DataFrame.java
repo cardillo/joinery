@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import joinery.impl.Aggregation;
 import joinery.impl.BlockManager;
@@ -1807,33 +1806,6 @@ implements Iterable<List<V>> {
     public DataFrame<V> describe() {
         return Aggregation.describe(
             groups.apply(this, new Aggregation.Describe<V>()));
-    }
-
-    public String summary() {
-    	StringBuilder sb = new StringBuilder();
-    	final List<Object> columns = new ArrayList<>(this.columns());
-    	
-    	List<Class<?>> colTypes = this.types();
-    	for (int i = 0; i < this.size(); i++) {
-    		List<V> col = this.col(i);
-			if(Number.class.isAssignableFrom(colTypes.get(i))) {
-				DataFrame<V> tmpdf = new DataFrame<V>();
-				tmpdf.addCol((String)columns.get(i), col);				
-				sb.append(Aggregation.describe(groups.apply(tmpdf, new Aggregation.Describe<V>())) + "\n");
-			} else if (Date.class.isAssignableFrom(colTypes.get(i))) {
-				DataFrame<V> tmpdf = new DataFrame<V>();
-				tmpdf.addCol((String)columns.get(i), col);				
-				sb.append(Aggregation.describe(groups.apply(tmpdf, new Aggregation.Describe<V>())) + "\n");
-			} else if (Boolean.class.isAssignableFrom(colTypes.get(i))) {
-				DataFrame<V> tmpdf = new DataFrame<V>();
-				tmpdf.addCol((String)columns.get(i), col);				
-				sb.append(Aggregation.describe(groups.apply(tmpdf, new Aggregation.Describe<V>())) + "\n");
-			} else if (String.class.isAssignableFrom(colTypes.get(i))) {
-            	TreeSet<V> colSet = new TreeSet<V>(col);
-				sb.append(columns.get(i) + "[" + colSet.size() +"]: " + colSet + "\n");
-            }
-		}
-    	return sb.toString();
     }
 
     public DataFrame<V> pivot(final Object row, final Object col, final Object ... values) {
