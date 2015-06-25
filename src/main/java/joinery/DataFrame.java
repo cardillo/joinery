@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import joinery.impl.Aggregation;
 import joinery.impl.BlockManager;
@@ -286,6 +288,13 @@ implements Iterable<List<V>> {
         return this;
     }
 
+    public DataFrame<V> addCol(final Object column, final List<V> values) {
+        columns.add(column, data.size());
+        index.extend(values.size());
+        data.add(values);
+        return this;
+    }
+    
     /**
      * Create a new data frame by leaving out the specified columns.
      *
@@ -1441,8 +1450,101 @@ implements Iterable<List<V>> {
 
         throw new IllegalArgumentException("class must be an array class");
     }
+    
+    public double[][] toModelMatrix(double fillValue) {
+    	return toModelMatrixDataFrame(0.0).fillna(fillValue).toArray(double[][].class);
+    }
 
-    /**
+    public double[][] toModelMatrix(double fillValue, boolean addIntercept) {
+    	return toModelMatrixDataFrame(0.0, null, addIntercept).fillna(fillValue).toArray(double[][].class);
+    }
+    
+    public double[][] toModelMatrix(double fillValue, DataFrame<Object> template) {
+    	return toModelMatrixDataFrame(0.0, template, false).fillna(fillValue).toArray(double[][].class);
+    }
+    
+    public double[][] toModelMatrix(double fillValue, DataFrame<Object> template, boolean addIntercept) {
+    	return toModelMatrixDataFrame(0.0, template, addIntercept).fillna(fillValue).toArray(double[][].class);
+    }
+    
+    public DataFrame<Number> toModelMatrixDataFrame(double fillValue) {
+    	return toModelMatrixDataFrame(fillValue, null, false);
+    }
+    
+    public DataFrame<Number> toModelMatrixDataFrame(double fillValue, DataFrame<Object> template, boolean addIntercept) {
+    	DataFrame<Number> df = new DataFrame<>();
+    	
+    	if(addIntercept) {
+    		// Add an intercept column
+    		df.add("DFMMAddedIntercept");
+    		for (int i = 0; i < this.length(); i++) {
+    			df.append(Arrays.asList(1.0));
+    		}
+    	}
+    	
+    	final List<Object> columns = new ArrayList<>(this.columns());
+    	
+    	// Now convert Nominals (String columns) to dummy variables
+    	// Keep all others as is
+    	List<Class<?>> colTypes = this.types();
+    	for (int i = 0; i < this.size(); i++) {
+    		List<V> col = this.col(i);
+			if(Number.class.isAssignableFrom(colTypes.get(i))) {
+                List<Number> nums = new ArrayList<>();
+                for (V num : col) {
+                	nums.add((Number)num);
+				}
+				df.addCol(columns.get(i),nums);
+			} else if (Date.class.isAssignableFrom(colTypes.get(i))) {
+                List<Number> dates = new ArrayList<>();
+                for (V date : col) {
+					dates.add(new Double(((Date)date).getTime()));
+				}
+                df.addCol(columns.get(i),dates);
+            } else if (Boolean.class.isAssignableFrom(colTypes.get(i))) {
+                List<Number> bools = new ArrayList<>();
+                for (V tVal : col) {
+                	bools.add((Boolean)tVal ? 1.0 : 0.0);
+				}
+                df.addCol(columns.get(i),bools);
+            } else if (String.class.isAssignableFrom(colTypes.get(i))) {
+            	List<Object> extra = template != null ? template.col(i) : null;
+            	List<List<Number>> variable = variableToDummy(col, extra);
+            	int cnt = 0;
+            	for(List<Number> var : variable) {
+            		String name = columns.get(i) + "-dummy" + cnt++;
+            		df.addCol(name, var);
+            	}
+            }
+		}
+    	
+		return df;
+	}
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	protected List<List<Number>> variableToDummy(List<V> col, List<Object> extra) {
+    	List<List<Number>> result = new ArrayList<List<Number>>();
+    	Set<V> factors = new HashSet<>(col);
+    	if(extra!=null)
+    		factors.addAll(new HashSet(extra));
+    	// Convert the variable to noFactors - 1
+    	Iterator<V> uniqueIter = factors.iterator();
+    	for (int u =0; u < factors.size()-1; u++) {
+    		V v = uniqueIter.next();
+			List<Number> newDummy = new ArrayList<Number>();
+			for (int i = 0; i < col.size(); i++) {
+				if(col.get(i).equals(v)) {
+					newDummy.add(1.0);
+				} else {
+					newDummy.add(0.0);
+				}
+			}
+			result.add(newDummy);
+		}
+		return result;
+	}
+
+	/**
      * Group the data frame rows by the specified column names.
      *
      * @param cols the column names
@@ -1703,6 +1805,33 @@ implements Iterable<List<V>> {
     public DataFrame<V> describe() {
         return Aggregation.describe(
             groups.apply(this, new Aggregation.Describe<V>()));
+    }
+
+    public String summary() {
+    	StringBuilder sb = new StringBuilder();
+    	final List<Object> columns = new ArrayList<>(this.columns());
+    	
+    	List<Class<?>> colTypes = this.types();
+    	for (int i = 0; i < this.size(); i++) {
+    		List<V> col = this.col(i);
+			if(Number.class.isAssignableFrom(colTypes.get(i))) {
+				DataFrame<V> tmpdf = new DataFrame<V>();
+				tmpdf.addCol((String)columns.get(i), col);				
+				sb.append(Aggregation.describe(groups.apply(tmpdf, new Aggregation.Describe<V>())) + "\n");
+			} else if (Date.class.isAssignableFrom(colTypes.get(i))) {
+				DataFrame<V> tmpdf = new DataFrame<V>();
+				tmpdf.addCol((String)columns.get(i), col);				
+				sb.append(Aggregation.describe(groups.apply(tmpdf, new Aggregation.Describe<V>())) + "\n");
+			} else if (Boolean.class.isAssignableFrom(colTypes.get(i))) {
+				DataFrame<V> tmpdf = new DataFrame<V>();
+				tmpdf.addCol((String)columns.get(i), col);				
+				sb.append(Aggregation.describe(groups.apply(tmpdf, new Aggregation.Describe<V>())) + "\n");
+			} else if (String.class.isAssignableFrom(colTypes.get(i))) {
+            	TreeSet<V> colSet = new TreeSet<V>(col);
+				sb.append(columns.get(i) + "[" + colSet.size() +"]: " + colSet + "\n");
+            }
+		}
+    	return sb.toString();
     }
 
     public DataFrame<V> pivot(final Object row, final Object col, final Object ... values) {
