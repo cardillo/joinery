@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import joinery.impl.Aggregation;
 import joinery.impl.BlockManager;
@@ -1525,9 +1526,9 @@ implements Iterable<List<V>> {
     @SuppressWarnings({ "rawtypes", "unchecked" })
 	protected List<List<Number>> variableToDummy(List<V> col, List<Object> extra) {
     	List<List<Number>> result = new ArrayList<List<Number>>();
-    	Set<V> factors = new HashSet<>(col);
+    	Set<V> factors = new TreeSet<>(col);
     	if(extra!=null)
-    		factors.addAll(new HashSet(extra));
+    		factors.addAll(new TreeSet(extra));
     	// Convert the variable to noFactors - 1
     	Iterator<V> uniqueIter = factors.iterator();
     	for (int u =0; u < factors.size()-1; u++) {
