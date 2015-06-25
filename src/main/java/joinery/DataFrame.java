@@ -1431,8 +1431,10 @@ implements Iterable<List<V>> {
         if (dim == 1) {
             @SuppressWarnings("unchecked")
             final U array = (U)Array.newInstance(type, size * len);
-            for (int i = 0; i < size * len; i++) {
-                Array.set(array, i, data.get(i / size, i % len));
+            for (int c = 0; c < size; c++) {
+                for (int r = 0; r < len; r++) {
+                    Array.set(array, c * len + r, data.get(c, r));
+                }
             }
             return array;
         } else if (dim == 2) {
@@ -2071,6 +2073,14 @@ implements Iterable<List<V>> {
 
     public DataFrame<V> percentChange(final int period) {
         return Timeseries.percentChange(this, period);
+    }
+
+    public DataFrame<V> rollapply(final Function<List<V>, V> function) {
+        return rollapply(function, 1);
+    }
+
+    public DataFrame<V> rollapply(final Function<List<V>, V> function, final int period) {
+        return Timeseries.rollapply(this, function, period);
     }
 
     /**
