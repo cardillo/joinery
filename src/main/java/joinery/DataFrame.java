@@ -1453,7 +1453,34 @@ implements Iterable<List<V>> {
         throw new IllegalArgumentException("class must be an array class");
     }
     
-	/**
+    /**
+     *  Encodes the DataFrame as a model matrix, converting nominal values 
+     *  to dummy variables but does not add an intercept column. 
+     *  
+     *   More methods with additional parameters to control the conversion to
+     *   the model matrix are available in the <code>Conversion</code> class. 
+     *   
+     * @param fillValue value to replace NA's with
+     * @return a model matrix
+     */
+    public double[][] toModelMatrix(double fillValue) {
+        return Conversion.toModelMatrix(this, fillValue);
+    }
+
+    /**
+     *  Encodes the DataFrame as a model matrix, converting nominal values 
+     *  to dummy variables but does not add an intercept column. 
+     *  
+     *   More methods with additional parameters to control the conversion to
+     *   the model matrix are available in the <code>Conversion</code> class.
+     *   
+     * @return a model matrix
+     */
+    public DataFrame<Number> toModelMatrixDataFrame() {
+        return Conversion.toModelMatrixDataFrame(this);
+    }
+
+    /**
      * Group the data frame rows by the specified column names.
      *
      * @param cols the column names
