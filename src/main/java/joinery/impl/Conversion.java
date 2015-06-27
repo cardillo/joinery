@@ -130,7 +130,7 @@ public class Conversion {
             }
         }
     }
-    
+
     public static <V> double[][] toModelMatrix(final DataFrame<V> df, double fillValue) {
         return toModelMatrixDataFrame(df).fillna(fillValue).toArray(double[][].class);
     }
@@ -150,7 +150,7 @@ public class Conversion {
     public static <V> DataFrame<Number> toModelMatrixDataFrame(final DataFrame<V> df) {
         return toModelMatrixDataFrame(df, null, false);
     }
-    
+
     /**
      *  Encodes the DataFrame as a model matrix, converting nominal values 
      *  to dummy variables and optionally adds an intercept column
@@ -183,26 +183,26 @@ public class Conversion {
                 for (V num : col) {
                     nums.add((Number)num);
                 }
-                newDf.addCol(columns.get(i),nums);
+                newDf.add(columns.get(i),nums);
             } else if (Date.class.isAssignableFrom(colTypes.get(i))) {
                 List<Number> dates = new ArrayList<>();
                 for (V date : col) {
                     dates.add(new Double(((Date)date).getTime()));
                 }
-                newDf.addCol(columns.get(i),dates);
+                newDf.add(columns.get(i),dates);
             } else if (Boolean.class.isAssignableFrom(colTypes.get(i))) {
                 List<Number> bools = new ArrayList<>();
                 for (V tVal : col) {
                     bools.add((Boolean)tVal ? 1.0 : 0.0);
                 }
-                newDf.addCol(columns.get(i),bools);
+                newDf.add(columns.get(i),bools);
             } else if (String.class.isAssignableFrom(colTypes.get(i))) {
                 List<Object> extra = template != null ? template.col(i) : null;
                 List<List<Number>> variable = variableToDummy(col, extra);
                 int cnt = 0;
                 for(List<Number> var : variable) {
                     String name = columns.get(i) + "-dummy" + cnt++;
-                    newDf.addCol(name, var);
+                    newDf.add(name, var);
                 }
             }
         }
@@ -263,7 +263,7 @@ public class Conversion {
 			return naString != null && String.valueOf(value).equals(naString) ? null : value;
 		}	
     }
-    
+
     private static final class StringConversion<V>
     implements Function<V, String> {
         @Override

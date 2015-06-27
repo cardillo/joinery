@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import joinery.impl.Aggregation;
 import joinery.impl.BlockManager;
@@ -288,13 +287,6 @@ implements Iterable<List<V>> {
         return this;
     }
 
-    public DataFrame<V> addCol(final Object column, final List<V> values) {
-        columns.add(column, data.size());
-        index.extend(values.size());
-        data.add(values);
-        return this;
-    }
-    
     /**
      * Create a new data frame by leaving out the specified columns.
      *
@@ -1452,7 +1444,7 @@ implements Iterable<List<V>> {
 
         throw new IllegalArgumentException("class must be an array class");
     }
-    
+
     /**
      *  Encodes the DataFrame as a model matrix, converting nominal values 
      *  to dummy variables but does not add an intercept column. 
