@@ -21,6 +21,9 @@ package joinery;
 import static org.junit.Assert.assertArrayEquals;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import joinery.DataFrame.Function;
@@ -29,6 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class DataFrameTimeseriesTest {
+    private DateFormat fmt = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
     private DataFrame<Object> df;
 
     @Before
@@ -38,16 +42,17 @@ public class DataFrameTimeseriesTest {
     }
 
     @Test
-    public void testOutOfWindowRowsAreNull() {
+    public void testOutOfWindowRowsAreNull()
+    throws ParseException {
         assertArrayEquals(
-                new Object[] { "Thu Feb 05 00:00:00 EST 2015", null },
+                new Object[] { fmt.parse("Thu Feb 05 00:00:00 EST 2015"), null },
                 df.retain("Date", "Close")
                   .diff()
                   .row(0)
                   .toArray()
           );
         assertArrayEquals(
-                new Object[] { "Wed Feb 11 00:00:00 EST 2015", null },
+                new Object[] { fmt.parse("Wed Feb 11 00:00:00 EST 2015"), null },
                 df.retain("Date", "Close")
                   .diff(5)
                   .row(4)
