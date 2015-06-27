@@ -21,11 +21,15 @@ package joinery.impl;
 import java.text.DateFormat;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import joinery.DataFrame;
 import joinery.DataFrame.Function;
@@ -126,6 +130,100 @@ public class Conversion {
             }
         }
     }
+    
+    public static <V> double[][] toModelMatrix(final DataFrame<V> df, double fillValue) {
+        return toModelMatrixDataFrame(df).fillna(fillValue).toArray(double[][].class);
+    }
+
+    public static <V> double[][] toModelMatrix(final DataFrame<V> df, double fillValue, boolean addIntercept) {
+        return toModelMatrixDataFrame(df, null, addIntercept).fillna(fillValue).toArray(double[][].class);
+    }
+
+    public static <V> double[][] toModelMatrix(final DataFrame<V> df, double fillValue, DataFrame<Object> template) {
+        return toModelMatrixDataFrame(df, template, false).fillna(fillValue).toArray(double[][].class);
+    }
+
+    public static <V> double[][] toModelMatrix(final DataFrame<V> df, double fillValue, DataFrame<Object> template, boolean addIntercept) {
+        return toModelMatrixDataFrame(df, template, addIntercept).fillna(fillValue).toArray(double[][].class);
+    }
+
+    public static <V> DataFrame<Number> toModelMatrixDataFrame(final DataFrame<V> df) {
+        return toModelMatrixDataFrame(df, null, false);
+    }
+
+    public static <V> DataFrame<Number> toModelMatrixDataFrame(final DataFrame<V> df, DataFrame<Object> template, boolean addIntercept) {
+        DataFrame<Number> newDf = new DataFrame<>();
+
+        if(addIntercept) {
+            // Add an intercept column
+            newDf.add("DFMMAddedIntercept");
+            for (int i = 0; i < df.length(); i++) {
+                newDf.append(Arrays.asList(1.0));
+            }
+        }
+
+        final List<Object> columns = new ArrayList<>(df.columns());
+
+        // Now convert Nominals (String columns) to dummy variables
+        // Keep all others as is
+        List<Class<?>> colTypes = df.types();
+        for (int i = 0; i < df.size(); i++) {
+            List<V> col = df.col(i);
+            if(Number.class.isAssignableFrom(colTypes.get(i))) {
+                List<Number> nums = new ArrayList<>();
+                for (V num : col) {
+                    nums.add((Number)num);
+                }
+                newDf.addCol(columns.get(i),nums);
+            } else if (Date.class.isAssignableFrom(colTypes.get(i))) {
+                List<Number> dates = new ArrayList<>();
+                for (V date : col) {
+                    dates.add(new Double(((Date)date).getTime()));
+                }
+                newDf.addCol(columns.get(i),dates);
+            } else if (Boolean.class.isAssignableFrom(colTypes.get(i))) {
+                List<Number> bools = new ArrayList<>();
+                for (V tVal : col) {
+                    bools.add((Boolean)tVal ? 1.0 : 0.0);
+                }
+                newDf.addCol(columns.get(i),bools);
+            } else if (String.class.isAssignableFrom(colTypes.get(i))) {
+                List<Object> extra = template != null ? template.col(i) : null;
+                List<List<Number>> variable = variableToDummy(col, extra);
+                int cnt = 0;
+                for(List<Number> var : variable) {
+                    String name = columns.get(i) + "-dummy" + cnt++;
+                    newDf.addCol(name, var);
+                }
+            }
+        }
+
+        return newDf;
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected static  <V> List<List<Number>> variableToDummy(List<V> col, List<Object> extra) {
+        List<List<Number>> result = new ArrayList<List<Number>>();
+        Set<V> factors = new TreeSet<>(col);
+        if(extra!=null)
+            factors.addAll(new TreeSet(extra));
+        // Convert the variable to noFactors - 1
+        Iterator<V> uniqueIter = factors.iterator();
+        for (int u =0; u < factors.size()-1; u++) {
+            V v = uniqueIter.next();
+            List<Number> newDummy = new ArrayList<Number>();
+            for (int i = 0; i < col.size(); i++) {
+                if(col.get(i).equals(v)) {
+                    newDummy.add(1.0);
+                } else {
+                    newDummy.add(0.0);
+                }
+            }
+            result.add(newDummy);
+        }
+        return result;
+    }
+
 
     public static <V> DataFrame<Boolean> isnull(final DataFrame<V> df) {
         return df.apply(new Function<V, Boolean>() {

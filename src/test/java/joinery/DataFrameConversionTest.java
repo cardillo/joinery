@@ -28,6 +28,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import joinery.impl.Conversion;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -235,7 +237,7 @@ public class DataFrameConversionTest {
 		assertEquals(3, df.columns().size());
 		System.out.println(df);
 		//System.out.println(df.types());
-		DataFrame<Number> mm = df.toModelMatrixDataFrame(0.0, null, true);
+		DataFrame<Number> mm = Conversion.toModelMatrixDataFrame(df, null, true);
 		System.out.println(mm);
 		// Intercept + {a,b,c}.size() + {alpha,bravo...}.size() + value
 		int expectedColNos = 1+2+5+1;
@@ -312,7 +314,7 @@ public class DataFrameConversionTest {
 		assertEquals(3, df.columns().size());
 		//System.out.println(df);
 		//System.out.println(df.types());
-		DataFrame<Number> mm = df.toModelMatrixDataFrame(0.0, null, false);
+		DataFrame<Number> mm = Conversion.toModelMatrixDataFrame(df, null, false);
 		//System.out.println(mm);
 		// {a,b,c}.size() + {alpha,bravo...}.size() + value
 		int expectedColNos = 2+5+1;
