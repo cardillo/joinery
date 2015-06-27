@@ -150,7 +150,16 @@ public class Conversion {
     public static <V> DataFrame<Number> toModelMatrixDataFrame(final DataFrame<V> df) {
         return toModelMatrixDataFrame(df, null, false);
     }
-
+    
+    /**
+     *  Encodes the DataFrame as a model matrix, converting nominal values 
+     *  to dummy variables and optionally adds an intercept column
+     *  
+     * @param df Dataframe to be converted
+     * @param template template DataFrame which has already been converted
+     * @param addIntercept
+     * @return a new DataFrame encoded as a model matrix
+     */
     public static <V> DataFrame<Number> toModelMatrixDataFrame(final DataFrame<V> df, DataFrame<Object> template, boolean addIntercept) {
         DataFrame<Number> newDf = new DataFrame<>();
 
