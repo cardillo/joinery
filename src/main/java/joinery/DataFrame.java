@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import joinery.impl.Aggregation;
 import joinery.impl.BlockManager;
@@ -286,6 +288,13 @@ implements Iterable<List<V>> {
         return this;
     }
 
+    public DataFrame<V> addCol(final Object column, final List<V> values) {
+        columns.add(column, data.size());
+        index.extend(values.size());
+        data.add(values);
+        return this;
+    }
+    
     /**
      * Create a new data frame by leaving out the specified columns.
      *
@@ -1442,6 +1451,33 @@ implements Iterable<List<V>> {
         }
 
         throw new IllegalArgumentException("class must be an array class");
+    }
+    
+    /**
+     *  Encodes the DataFrame as a model matrix, converting nominal values 
+     *  to dummy variables but does not add an intercept column. 
+     *  
+     *   More methods with additional parameters to control the conversion to
+     *   the model matrix are available in the <code>Conversion</code> class. 
+     *   
+     * @param fillValue value to replace NA's with
+     * @return a model matrix
+     */
+    public double[][] toModelMatrix(double fillValue) {
+        return Conversion.toModelMatrix(this, fillValue);
+    }
+
+    /**
+     *  Encodes the DataFrame as a model matrix, converting nominal values 
+     *  to dummy variables but does not add an intercept column. 
+     *  
+     *   More methods with additional parameters to control the conversion to
+     *   the model matrix are available in the <code>Conversion</code> class.
+     *   
+     * @return a model matrix
+     */
+    public DataFrame<Number> toModelMatrixDataFrame() {
+        return Conversion.toModelMatrixDataFrame(this);
     }
 
     /**
