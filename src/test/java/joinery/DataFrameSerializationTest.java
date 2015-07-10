@@ -271,7 +271,7 @@ public class DataFrameSerializationTest {
     @Test
     public void testToStringEmptyHeader() throws IOException {
         DataFrame<Object> dfEmptyHeader = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization_empty_header.csv"));
-        System.out.println(dfEmptyHeader.transpose().toString());
+        dfEmptyHeader.transpose().toString();
     }
 
 }
