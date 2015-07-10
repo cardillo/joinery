@@ -267,5 +267,11 @@ public class DataFrameSerializationTest {
                 df.toString().split("\n").length
             );
     }
+    
+    @Test
+    public void testToStringEmptyHeader() throws IOException {
+        DataFrame<Object> dfEmptyHeader = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization_empty_header.csv"));
+        System.out.println(dfEmptyHeader.transpose().toString());
+    }
 
 }
