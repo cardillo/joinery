@@ -80,10 +80,11 @@ public class Serialization {
         // determine index width
         width.put(INDEX_KEY, 0);
         for (final Object row : df.index()) {
+            Class<? extends Object> rowClass = row == null ? null : row.getClass();
             width.put(INDEX_KEY, clamp(
                     width.get(INDEX_KEY),
                     MAX_COLUMN_WIDTH,
-                    fmt(row.getClass(), row).length()));
+                    fmt(rowClass, row).length()));
         }
 
         // determine column widths
@@ -113,7 +114,8 @@ public class Serialization {
             // output row name
             int w = width.get(INDEX_KEY);
             final Object row = names.hasNext() ? names.next() : r;
-            sb.append(truncate(lpad(fmt(row.getClass(), row), w), w));
+            Class<? extends Object> rowClass = row == null ? null : row.getClass();
+            sb.append(truncate(lpad(fmt(rowClass, row), w), w));
 
             // output rows
             for (int c = 0; c < df.size(); c++) {
@@ -176,6 +178,7 @@ public class Serialization {
     }
 
     private static final String fmt(final Class<?> cls, final Object o) {
+        if(cls==null) return "null";
         String s;
         if (o instanceof Number) {
             if (Short.class.equals(cls) || Integer.class.equals(cls) ||
