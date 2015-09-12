@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -197,11 +198,13 @@ public class Conversion {
                 }
                 newDf.add(columns.get(i),bools);
             } else if (String.class.isAssignableFrom(colTypes.get(i))) {
+                Set<String> namesUsed = new HashSet<String>();
                 List<Object> extra = template != null ? template.col(i) : null;
-                List<List<Number>> variable = variableToDummy(col, extra);
+                VariableToDummyResult vr = variableToDummy(col, extra);
+                List<List<Number>> variable = vr.col;
                 int cnt = 0;
                 for(List<Number> var : variable) {
-                    String name = columns.get(i) + "-dummy" + cnt++;
+                    String name = columns.get(i) + "$" + nameToValidName(vr.names[cnt++],namesUsed);;
                     newDf.add(name, var);
                 }
             }
@@ -209,17 +212,43 @@ public class Conversion {
 
         return newDf;
     }
+    
+    private static Object nameToValidName(String string, Set<String> namesUsed) {
+        String result = string.replaceAll("[^\\p{Alpha}]", "");
+        result = result.substring(0,Math.min(result.length(),8));
+        int tryCnt = 0;
+        String tmp = result;
+        while(namesUsed.contains(result)) {
+            result = tmp + tryCnt++;
+        }
+        namesUsed.add(result);
+        return result;
+    }
+
+
+
+    protected static class VariableToDummyResult {
+        List<List<Number>> col;
+        String []names;
+        public VariableToDummyResult(List<List<Number>> col, String[] names) {
+            super();
+            this.col = col;
+            this.names = names;
+        }
+    }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected static  <V> List<List<Number>> variableToDummy(List<V> col, List<Object> extra) {
+    protected static  <V> VariableToDummyResult variableToDummy(List<V> col, List<Object> extra) {
         List<List<Number>> result = new ArrayList<List<Number>>();
         Set<V> factors = new TreeSet<>(col);
         if(extra!=null)
             factors.addAll(new TreeSet(extra));
         // Convert the variable to noFactors - 1
         Iterator<V> uniqueIter = factors.iterator();
+        String [] names = new String[factors.size()];
         for (int u =0; u < factors.size()-1; u++) {
             V v = uniqueIter.next();
+            names[u] = v.toString();
             List<Number> newDummy = new ArrayList<Number>();
             for (int i = 0; i < col.size(); i++) {
                 if(col.get(i).equals(v)) {
@@ -230,7 +259,7 @@ public class Conversion {
             }
             result.add(newDummy);
         }
-        return result;
+        return new VariableToDummyResult(result,names);
     }
 
 
