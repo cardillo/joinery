@@ -157,31 +157,31 @@ public class Conversion {
 
     public static <V> double[][] toModelMatrix(final DataFrame<V> df, double fillValue, 
             boolean addIntercept) {
-        return toModelMatrixDataFrame(df, null, addIntercept, null).fillna(fillValue).toArray(double[][].class);
+        return toModelMatrixDataFrame(df, null, addIntercept, null, null).fillna(fillValue).toArray(double[][].class);
     }
 
     public static <V> double[][] toModelMatrix(final DataFrame<V> df, double fillValue, 
             DataFrame<Object> template) {
-        return toModelMatrixDataFrame(df, template, false, null).fillna(fillValue).toArray(double[][].class);
+        return toModelMatrixDataFrame(df, template, false, null, null).fillna(fillValue).toArray(double[][].class);
     }
 
     public static <V> double[][] toModelMatrix(final DataFrame<V> df, double fillValue, 
             DataFrame<Object> template, boolean addIntercept) {
-        return toModelMatrixDataFrame(df, template, addIntercept, null).fillna(fillValue).toArray(double[][].class);
+        return toModelMatrixDataFrame(df, template, addIntercept, null, null).fillna(fillValue).toArray(double[][].class);
     }
 
     public static <V> double[][] toModelMatrix(final DataFrame<V> df, double fillValue, 
             DataFrame<Object> template, boolean addIntercept, Map<String, String> factorReferences) {
-        return toModelMatrixDataFrame(df, template, addIntercept, null).fillna(fillValue).toArray(double[][].class);
+        return toModelMatrixDataFrame(df, template, addIntercept, null, null).fillna(fillValue).toArray(double[][].class);
     }
 
     public static <V> DataFrame<Number> toModelMatrixDataFrame(final DataFrame<V> df) {
-        return toModelMatrixDataFrame(df, null, false, null);
+        return toModelMatrixDataFrame(df, null, false, null, null);
     }
     
     public static <V> DataFrame<Number> toModelMatrixDataFrame(final DataFrame<V> df, DataFrame<Object> template, 
             boolean addIntercept) {
-        return toModelMatrixDataFrame(df, template, addIntercept, null);
+        return toModelMatrixDataFrame(df, template, addIntercept, null, null);
     }
 
 
@@ -198,10 +198,11 @@ public class Conversion {
      * @param template template DataFrame which has already been converted
      * @param addIntercept
      * @param factorReferences a Map of reference factor for each variable (null if none)
+     * @param naString replaces null values in DF with this string (default if not supplied is NA)
      * @return a new DataFrame encoded as a model matrix
      */
     public static <V> DataFrame<Number> toModelMatrixDataFrame(final DataFrame<V> df, DataFrame<Object> template, 
-            boolean addIntercept, Map<String, String> factorReferences) {
+            boolean addIntercept, Map<String, String> factorReferences, String naString) {
         DataFrame<Number> newDf = new DataFrame<>();
 
         if(addIntercept) {
@@ -241,7 +242,7 @@ public class Conversion {
             } else if (String.class.isAssignableFrom(colTypes.get(column))) {
                 Set<String> namesUsed = new HashSet<String>();
                 List<Object> extra = template != null ? template.col(column) : null;
-                VariableToDummyResult vr = variableToDummy(col, extra, columnName, factorReferences);
+                VariableToDummyResult vr = variableToDummy(col, extra, columnName, factorReferences, naString);
                 List<List<Number>> variable = vr.col;
                 int cnt = 0;
                 for(List<Number> var : variable) {
@@ -280,26 +281,33 @@ public class Conversion {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected static  <V> VariableToDummyResult variableToDummy(List<V> col, List<Object> extra, 
-            String columnName, Map<String, String> references) {
+    protected static  <V> VariableToDummyResult variableToDummy(List<V> colVals, List<Object> extra, 
+            String columnName, Map<String, String> references, String naString) {
         List<List<Number>> result = new ArrayList<List<Number>>();
-        Set<V> factors = new TreeSet<>(col);
+        List<String> col = new ArrayList<String>();
+        for (V value : colVals) {
+            col.add(value == null ? (naString==null?"NA":naString) : value.toString());
+        }
+        Set<String> factors = new TreeSet<>(col);
         if(extra!=null)
             factors.addAll(new TreeSet(extra));
         if(references==null || references.get(columnName)==null) {
             factors.remove(col.get(col.size()-1));
         } else {
-            factors.remove(references.get(columnName));
+            String ref = references.get(columnName);
+            if(!factors.remove(references.get(columnName))) {
+                throw new IllegalArgumentException("You specified '" + ref + "' as a references for '" + columnName + "' but it did not exist in this column");
+            }
         }
         // Convert the variable to noFactors - 1
         // Since we have removed the reference from
         // factors we already have the -1 so it is
         // not needed below
-        Iterator<V> uniqueIter = factors.iterator();
+        Iterator<String> uniqueIter = factors.iterator();
         String [] names = new String[factors.size()];
         for (int u = 0; u < factors.size(); u++) {
-            V v = uniqueIter.next();
-            names[u] = v.toString();
+            String v = uniqueIter.next();
+            names[u] = v;
             List<Number> newDummy = new ArrayList<Number>();
             for (int i = 0; i < col.size(); i++) {
                 if(col.get(i).equals(v)) {

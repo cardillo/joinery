@@ -239,7 +239,7 @@ public class DataFrameConversionTest {
         assertEquals(3, df.columns().size());
         //System.out.println(df);
         //System.out.println(df.types());
-        DataFrame<Number> mm = Conversion.toModelMatrixDataFrame(df, null, true, null);
+        DataFrame<Number> mm = Conversion.toModelMatrixDataFrame(df, null, true, null, null);
         //System.out.println(mm);
         // Intercept + {a,b,c}.size() + {alpha,bravo...}.size() + value
         int expectedColNos = 1+2+5+1;
@@ -316,7 +316,7 @@ public class DataFrameConversionTest {
         assertEquals(3, df.columns().size());
         //System.out.println(df);
         //System.out.println(df.types());
-        DataFrame<Number> mm = Conversion.toModelMatrixDataFrame(df, null, false, null);
+        DataFrame<Number> mm = Conversion.toModelMatrixDataFrame(df, null, false, null, null);
         //System.out.println(mm);
         // {a,b,c}.size() + {alpha,bravo...}.size() + value
         int expectedColNos = 2+5+1;
@@ -389,7 +389,7 @@ public class DataFrameConversionTest {
         references.put("category","a");
         references.put("name","bravo");
         
-        DataFrame<Number> mm = Conversion.toModelMatrixDataFrame(df, null, false, references);
+        DataFrame<Number> mm = Conversion.toModelMatrixDataFrame(df, null, false, references, null);
         //System.out.println(mm);
         // {a,b,c}.size() + {alpha,bravo...}.size() + value
         int expectedColNos = 2+5+1;
@@ -461,7 +461,7 @@ public class DataFrameConversionTest {
         Map<String,String> references = new TreeMap<String,String>();
         references.put("name","bravo");
         
-        DataFrame<Number> mm = Conversion.toModelMatrixDataFrame(df, null, false, references);
+        DataFrame<Number> mm = Conversion.toModelMatrixDataFrame(df, null, false, references, null);
         //System.out.println(mm);
         // {a,b,c}.size() + {alpha,bravo...}.size() + value
         int expectedColNos = 2+5+1;
@@ -481,6 +481,162 @@ public class DataFrameConversionTest {
         assertEquals(0.0, mm.get(4, 1));
         assertEquals(0.0, mm.get(5, 1));
         // First name dummy variable i.e "alpha"
+        assertEquals(1.0, mm.get(0, 2));
+        assertEquals(0.0, mm.get(1, 2));
+        assertEquals(0.0, mm.get(2, 2));
+        assertEquals(0.0, mm.get(3, 2));
+        assertEquals(0.0, mm.get(4, 2));
+        assertEquals(0.0, mm.get(5, 2));
+        // Second name dummy variable i.e "charlie" since we use bravo as reference
+        assertEquals(0.0, mm.get(0, 3));
+        assertEquals(0.0, mm.get(1, 3));
+        assertEquals(1.0, mm.get(2, 3));
+        assertEquals(0.0, mm.get(3, 3));
+        assertEquals(0.0, mm.get(4, 3));
+        assertEquals(0.0, mm.get(5, 3));
+        // Third name dummy variable i.e "delta"
+        assertEquals(0.0, mm.get(0, 4));
+        assertEquals(0.0, mm.get(1, 4));
+        assertEquals(0.0, mm.get(2, 4));
+        assertEquals(1.0, mm.get(3, 4));
+        assertEquals(0.0, mm.get(4, 4));
+        assertEquals(0.0, mm.get(5, 4));
+        // Forth name dummy variable i.e "echo"
+        assertEquals(0.0, mm.get(0, 5));
+        assertEquals(0.0, mm.get(1, 5));
+        assertEquals(0.0, mm.get(2, 5));
+        assertEquals(0.0, mm.get(3, 5));
+        assertEquals(1.0, mm.get(4, 5));
+        assertEquals(0.0, mm.get(5, 5));
+        // Fifth name dummy variable i.e "foxtrot"
+        assertEquals(0.0, mm.get(0, 6));
+        assertEquals(0.0, mm.get(1, 6));
+        assertEquals(0.0, mm.get(2, 6));
+        assertEquals(0.0, mm.get(3, 6));
+        assertEquals(0.0, mm.get(4, 6));
+        assertEquals(1.0, mm.get(5, 6));
+        // Value column
+        assertEquals(1L, mm.get(0, 7));
+        assertEquals(2L, mm.get(1, 7));
+        assertEquals(3L, mm.get(2, 7));
+        assertEquals(4L, mm.get(3, 7));
+        assertEquals(5L, mm.get(4, 7));
+        assertEquals(6L, mm.get(5, 7));
+    }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public void testToModelMatrixWithWrongReference() throws IOException {
+        DataFrame<Object> df = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization.csv"));
+        assertEquals(3, df.columns().size());
+        //System.out.println(df);
+        //System.out.println(df.types());
+        Map<String,String> references = new TreeMap<String,String>();
+        references.put("name","gustav");
+        
+        Conversion.toModelMatrixDataFrame(df, null, false, references, null);
+    }
+    
+    @Test
+    public void testToModelMatrixWithReferenceFactorOnOneMissingData() throws IOException {
+        DataFrame<Object> df = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization_missing_data.csv"));
+        assertEquals(3, df.columns().size());
+        //System.out.println(df);
+        //System.out.println(df.types());
+        Map<String,String> references = new TreeMap<String,String>();
+        references.put("name","charlie");
+        
+        DataFrame<Number> mm = Conversion.toModelMatrixDataFrame(df, null, false, references, null);
+        //System.out.println(mm);
+        // {a,b,c}.size() + {alpha,bravo...}.size() + value
+        int expectedColNos = 2+5+1;
+        assertEquals(expectedColNos, mm.columns().size());
+        // First category dummy variable i.e "a"
+        assertEquals(1.0, mm.get(0, 0));
+        assertEquals(1.0, mm.get(1, 0));
+        assertEquals(0.0, mm.get(2, 0));
+        assertEquals(0.0, mm.get(3, 0));
+        assertEquals(0.0, mm.get(4, 0));
+        assertEquals(0.0, mm.get(5, 0));
+        // Second category dummy variable i.e "b"
+        assertEquals(0.0, mm.get(0, 1));
+        assertEquals(0.0, mm.get(1, 1));
+        assertEquals(1.0, mm.get(2, 1));
+        assertEquals(1.0, mm.get(3, 1));
+        assertEquals(0.0, mm.get(4, 1));
+        assertEquals(0.0, mm.get(5, 1));
+        // Second name dummy variable i.e "NA"
+        assertEquals(0.0, mm.get(0, 2));
+        assertEquals(1.0, mm.get(1, 2));
+        assertEquals(0.0, mm.get(2, 2));
+        assertEquals(0.0, mm.get(3, 2));
+        assertEquals(0.0, mm.get(4, 2));
+        assertEquals(0.0, mm.get(5, 2));
+        // First name dummy variable i.e "alpha"
+        assertEquals(1.0, mm.get(0, 3));
+        assertEquals(0.0, mm.get(1, 3));
+        assertEquals(0.0, mm.get(2, 3));
+        assertEquals(0.0, mm.get(3, 3));
+        assertEquals(0.0, mm.get(4, 3));
+        assertEquals(0.0, mm.get(5, 3));
+        // Third name dummy variable i.e "delta"
+        assertEquals(0.0, mm.get(0, 4));
+        assertEquals(0.0, mm.get(1, 4));
+        assertEquals(0.0, mm.get(2, 4));
+        assertEquals(1.0, mm.get(3, 4));
+        assertEquals(0.0, mm.get(4, 4));
+        assertEquals(0.0, mm.get(5, 4));
+        // Forth name dummy variable i.e "echo"
+        assertEquals(0.0, mm.get(0, 5));
+        assertEquals(0.0, mm.get(1, 5));
+        assertEquals(0.0, mm.get(2, 5));
+        assertEquals(0.0, mm.get(3, 5));
+        assertEquals(1.0, mm.get(4, 5));
+        assertEquals(0.0, mm.get(5, 5));
+        // Fifth name dummy variable i.e "foxtrot"
+        assertEquals(0.0, mm.get(0, 6));
+        assertEquals(0.0, mm.get(1, 6));
+        assertEquals(0.0, mm.get(2, 6));
+        assertEquals(0.0, mm.get(3, 6));
+        assertEquals(0.0, mm.get(4, 6));
+        assertEquals(1.0, mm.get(5, 6));
+        // Value column
+        assertEquals(1L, mm.get(0, 7));
+        assertEquals(2L, mm.get(1, 7));
+        assertEquals(3L, mm.get(2, 7));
+        assertEquals(4L, mm.get(3, 7));
+        assertEquals(5L, mm.get(4, 7));
+        assertEquals(6L, mm.get(5, 7));
+    }
+    
+    @Test
+    public void testToModelMatrixWithReferenceFactorNAOnOneMissingData() throws IOException {
+        DataFrame<Object> df = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization_missing_data.csv"));
+        assertEquals(3, df.columns().size());
+        //System.out.println(df);
+        //System.out.println(df.types());
+        Map<String,String> references = new TreeMap<String,String>();
+        references.put("name","NA");
+        
+        DataFrame<Number> mm = Conversion.toModelMatrixDataFrame(df, null, false, references, null);
+        //System.out.println(mm);
+        // {a,b,c}.size() + {alpha,bravo...}.size() + value
+        int expectedColNos = 2+5+1;
+        assertEquals(expectedColNos, mm.columns().size());
+        // First category dummy variable i.e "a"
+        assertEquals(1.0, mm.get(0, 0));
+        assertEquals(1.0, mm.get(1, 0));
+        assertEquals(0.0, mm.get(2, 0));
+        assertEquals(0.0, mm.get(3, 0));
+        assertEquals(0.0, mm.get(4, 0));
+        assertEquals(0.0, mm.get(5, 0));
+        // Second category dummy variable i.e "b"
+        assertEquals(0.0, mm.get(0, 1));
+        assertEquals(0.0, mm.get(1, 1));
+        assertEquals(1.0, mm.get(2, 1));
+        assertEquals(1.0, mm.get(3, 1));
+        assertEquals(0.0, mm.get(4, 1));
+        assertEquals(0.0, mm.get(5, 1));
+     // First name dummy variable i.e "alpha"
         assertEquals(1.0, mm.get(0, 2));
         assertEquals(0.0, mm.get(1, 2));
         assertEquals(0.0, mm.get(2, 2));
