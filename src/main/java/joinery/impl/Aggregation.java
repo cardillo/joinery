@@ -18,19 +18,21 @@
 
 package joinery.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import joinery.DataFrame;
-import joinery.DataFrame.Aggregate;
-
+import org.apache.commons.math3.stat.correlation.StorelessCovariance;
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 import org.apache.commons.math3.stat.descriptive.StorelessUnivariateStatistic;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.stat.descriptive.UnivariateStatistic;
+
+import joinery.DataFrame;
+import joinery.DataFrame.Aggregate;
 
 public class Aggregation {
     public static class Count<V>
@@ -258,5 +260,33 @@ public class Aggregation {
             }
         }
         return desc;
+    }
+
+    public static <V> DataFrame<Number> cov(final DataFrame<V> df) {
+        DataFrame<Number> num = df.numeric();
+        StorelessCovariance cov = new StorelessCovariance(num.size());
+
+        // row-wise copy to double array and increment
+        double[] data = new double[num.size()];
+        for (List<Number> row : num) {
+            for (int i = 0; i < row.size(); i++) {
+                data[i] = row.get(i).doubleValue();
+            }
+            cov.increment(data);
+        }
+
+        // row-wise copy results into new data frame
+        double[][] result = cov.getData();
+        DataFrame<Number> r = new DataFrame<>(num.columns());
+        List<Number> row = new ArrayList<>(num.size());
+        for (int i = 0; i < result.length; i++) {
+            row.clear();
+            for (int j = 0; j < result[i].length; j++) {
+                row.add(result[i][j]);
+            }
+            r.append(row);
+        }
+
+        return r;
     }
 }

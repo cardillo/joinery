@@ -1710,6 +1710,11 @@ implements Iterable<List<V>> {
     }
 
     @Timed
+    public DataFrame<Number> cov() {
+        return Aggregation.cov(this);
+    }
+
+    @Timed
     public DataFrame<V> cumsum() {
         return groups.apply(this, new Transforms.CumulativeSum<V>());
     }

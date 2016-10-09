@@ -207,6 +207,15 @@ public class DataFrameAggregationTest {
     }
 
     @Test
+    public void testCov() {
+        assertArrayEquals(
+                new double[] { 466.66667, 466.66667, 466.66667, 466.66667 },
+                df.cov().toArray(double[].class),
+                0.0001
+            );
+    }
+
+    @Test
     public void testStorelessStatisticWithNulls() {
         df.set(0, 2, null);
         df.set(1, 3, null);
