@@ -56,13 +56,13 @@ for the complete code.
 next steps
 ==========
 
-Get the [executable jar](https://bintray.com/artifact/download/cardillo/maven/joinery/joinery-dataframe/1.7/joinery-dataframe-1.7-jar-with-dependencies.jar)
+Get the [executable jar](https://bintray.com/artifact/download/cardillo/maven/joinery/joinery-dataframe/1.8/joinery-dataframe-1.8-jar-with-dependencies.jar)
 and try it for yourself.
 
 ```javascript
-$ java -jar joinery-dataframe-1.7-jar-with-dependencies.jar shell
-# Joinery -- Data frames for Java, 1.7-8e3c8cf
-# Java HotSpot(TM) 64-Bit Server VM, Oracle Corporation, 1.8.0_45
+$ java -jar joinery-dataframe-1.8-jar-with-dependencies.jar shell
+# Joinery -- Data frames for Java, 1.8-5feda86
+# Java HotSpot(TM) 64-Bit Server VM, Oracle Corporation, 1.8.0_91
 # Rhino 1.7 release 2 2009 03 22
 > df = new DataFrame()
 [empty data frame]
@@ -93,7 +93,7 @@ use JCenter, visit https://bintray.com/bintray/jcenter.
 <dependency>
   <groupId>joinery</groupId>
   <artifactId>joinery-dataframe</artifactId>
-  <version>1.7</version>
+  <version>1.8</version>
 </dependency>
 ```
 
@@ -142,8 +142,8 @@ Launches an interactive JavaScript shell for working with data frames.
 
 ```javascript
 $ java joinery.DataFrame shell
-# Joinery -- Data frames for Java, 1.7-8e3c8cf
-# Java HotSpot(TM) 64-Bit Server VM, Oracle Corporation, 1.8.0_45
+# Joinery -- Data frames for Java, 1.8-5feda86
+# Java HotSpot(TM) 64-Bit Server VM, Oracle Corporation, 1.8.0_91
 # Rhino 1.7 release 2 2009 03 22
 > df = DataFrame.readCsv("https://www.quandl.com/api/v1/datasets/GOOG/NASDAQ_AAPL.csv")
               Date	  Open	  High	   Low	        Close	             Volume
