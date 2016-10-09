@@ -19,6 +19,7 @@
 package joinery.impl;
 
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,9 +36,6 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 
-import joinery.DataFrame;
-import joinery.DataFrame.PlotType;
-
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import com.xeiam.xchart.Chart;
@@ -48,8 +46,11 @@ import com.xeiam.xchart.SeriesMarker;
 import com.xeiam.xchart.StyleManager.ChartType;
 import com.xeiam.xchart.XChartPanel;
 
+import joinery.DataFrame;
+import joinery.DataFrame.PlotType;
+
 public class Display {
-    public static <V> void plot(final DataFrame<V> df, final PlotType type) {
+    public static <C extends Container, V> C draw(final DataFrame<V> df, final C container, final PlotType type) {
         final List<XChartPanel> panels = new LinkedList<>();
         final DataFrame<Number> numeric = df.numeric().fillna(0);
         final int rows = (int)Math.ceil(Math.sqrt(numeric.size()));
@@ -107,17 +108,22 @@ public class Display {
             panels.add(new XChartPanel(chart));
         }
 
+        if (panels.size() > 1) {
+            container.setLayout(new GridLayout(rows, cols));
+        }
+        for (final XChartPanel p : panels) {
+            container.add(p);
+        }
+
+        return container;
+    }
+
+    public static <V> void plot(final DataFrame<V> df, final PlotType type) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                final JFrame frame = new JFrame(title(df));
+                final JFrame frame = draw(df, new JFrame(title(df)), type);
                 frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                if (panels.size() > 1) {
-                    frame.setLayout(new GridLayout(rows, cols));
-                }
-                for (final XChartPanel p : panels) {
-                    frame.add(p);
-                }
                 frame.pack();
                 frame.setVisible(true);
             }

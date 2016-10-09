@@ -18,6 +18,7 @@
 
 package joinery;
 
+import java.awt.Container;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -2017,10 +2018,31 @@ implements Iterable<List<V>> {
      * > );
      * > df.plot(PlotType.AREA);
      * } </pre>
-     *
+     * @param type the type of plot to display
      */
     public final void plot(final PlotType type) {
         Display.plot(this, type);
+    }
+
+    /**
+     * Draw the numeric columns of this data frame
+     * as a chart in the specified {@link Container}.
+     *
+     * @param container the container to use for the chart
+     */
+    public final void draw(final Container container) {
+        Display.draw(this, container, PlotType.LINE);
+    }
+
+    /**
+     * Draw the numeric columns of this data frame  as a chart
+     * in the specified {@link Container} using the specified type.
+     *
+     * @param container the container to use for the chart
+     * @param type the type of plot to draw
+     */
+    public final void draw(final Container container, final PlotType type) {
+        Display.draw(this, container, type);
     }
 
     public final void show() {
