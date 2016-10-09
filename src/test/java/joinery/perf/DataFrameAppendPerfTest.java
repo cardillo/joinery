@@ -18,11 +18,11 @@
 
 package joinery.perf;
 
-import joinery.DataFrame;
-
 import org.junit.After;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+
+import joinery.DataFrame;
 
 public class DataFrameAppendPerfTest {
     @After
@@ -35,7 +35,7 @@ public class DataFrameAppendPerfTest {
     @Category(PerformanceTests.class)
     public void test() {
         final DataFrame<Object> df = PerformanceTestUtils.randomData(0);
-        for (int i = 0; i < PerformanceTestUtils.MILLIONS || PerformanceTestUtils.memoryUtilization() < 0.95 && i < 20 * PerformanceTestUtils.MILLIONS; i++) {
+        for (int i = 0; i < PerformanceTestUtils.MILLIONS || PerformanceTestUtils.memoryUtilization() < 0.75 && i < 20 * PerformanceTestUtils.MILLIONS; i++) {
             df.append(PerformanceTestUtils.randomRow());
             if (df.length() % PerformanceTestUtils.MILLIONS == 0) {
                 System.out.printf("added %dm rows (memory utilization %4.2f%%)\n",
