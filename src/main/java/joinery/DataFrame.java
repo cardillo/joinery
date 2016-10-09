@@ -37,6 +37,8 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import com.codahale.metrics.annotation.Timed;
+
 import joinery.impl.Aggregation;
 import joinery.impl.BlockManager;
 import joinery.impl.Combining;
@@ -56,8 +58,6 @@ import joinery.impl.SparseBitSet;
 import joinery.impl.Timeseries;
 import joinery.impl.Transforms;
 import joinery.impl.Views;
-
-import com.codahale.metrics.annotation.Timed;
 
 /**
  * A data frame implementation in the spirit
@@ -1446,26 +1446,26 @@ implements Iterable<List<V>> {
     }
 
     /**
-     *  Encodes the DataFrame as a model matrix, converting nominal values 
-     *  to dummy variables but does not add an intercept column. 
-     *  
+     *  Encodes the DataFrame as a model matrix, converting nominal values
+     *  to dummy variables but does not add an intercept column.
+     *
      *   More methods with additional parameters to control the conversion to
-     *   the model matrix are available in the <code>Conversion</code> class. 
-     *   
+     *   the model matrix are available in the <code>Conversion</code> class.
+     *
      * @param fillValue value to replace NA's with
      * @return a model matrix
      */
-    public double[][] toModelMatrix(double fillValue) {
+    public double[][] toModelMatrix(final double fillValue) {
         return Conversion.toModelMatrix(this, fillValue);
     }
 
     /**
-     *  Encodes the DataFrame as a model matrix, converting nominal values 
-     *  to dummy variables but does not add an intercept column. 
-     *  
+     *  Encodes the DataFrame as a model matrix, converting nominal values
+     *  to dummy variables but does not add an intercept column.
+     *
      *   More methods with additional parameters to control the conversion to
      *   the model matrix are available in the <code>Conversion</code> class.
-     *   
+     *
      * @return a model matrix
      */
     public DataFrame<Number> toModelMatrixDataFrame() {
