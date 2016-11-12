@@ -59,6 +59,8 @@ import org.supercsv.prefs.CsvPreference;
 public class Serialization {
 
     private static final String EMPTY_DF_STRING = "[empty data frame]";
+    private static final String DATE_FORMAT_DEFAULT = "yyyy-MM-dd'T'HH:mm:ssXXX";
+    private static final String DATE_FORMAT_FULL = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
     private static final String ELLIPSES = "...";
     private static final String NEWLINE = "\n";
     private static final String DELIMITER = "\t";
@@ -194,8 +196,9 @@ public class Serialization {
             final DateFormat fmt = new SimpleDateFormat(
                     cal.get(Calendar.HOUR_OF_DAY) == 0 &&
                         cal.get(Calendar.MINUTE) == 0 &&
-                        cal.get(Calendar.SECOND) == 0 ?
-                    "yyyy-MM-dd" : "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"
+                        cal.get(Calendar.SECOND) == 0 &&
+                            cal.get(Calendar.MILLISECOND) == 0    ?
+                    "yyyy-MM-dd" : DATE_FORMAT_DEFAULT
                 );
             s = fmt.format(dt);
         } else {
@@ -282,11 +285,20 @@ public class Serialization {
     }
 
     public static <V> void writeCsv(final DataFrame<V> df, final String output)
-    throws IOException {
+            throws IOException {
         writeCsv(df, new FileOutputStream(output));
     }
 
-    public static <V> void writeCsv(final DataFrame<V> df, final OutputStream output)
+    public static <V> void writeCsv(final DataFrame<V> df, final String output, final String dateFormat)
+            throws IOException {
+        writeCsv(df, new FileOutputStream(output), dateFormat);
+    }
+
+    public static <V> void writeCsv(final DataFrame<V> df, final OutputStream output) throws IOException {
+        writeCsv(df, output, DATE_FORMAT_DEFAULT);
+    }
+
+    public static <V> void writeCsv(final DataFrame<V> df, final OutputStream output, final String dateFormat)
     throws IOException {
         try (CsvListWriter writer = new CsvListWriter(new OutputStreamWriter(output), CsvPreference.STANDARD_PREFERENCE)) {
             final String[] header = new String[df.size()];
@@ -300,7 +312,7 @@ public class Serialization {
             for (int c = 0; c < df.size(); c++) {
                 final Class<?> cls = types.get(c);
                 if (Date.class.isAssignableFrom(cls)) {
-                    procs[c] = new ConvertNullTo("", new FmtDate("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"));
+                    procs[c] = new ConvertNullTo("", new FmtDate(dateFormat));
                 } else {
                     procs[c] = new ConvertNullTo("");
                 }
