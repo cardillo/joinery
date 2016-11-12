@@ -76,14 +76,13 @@
       <artifactId>commons-math3</artifactId>
       <version>${commons-math3.version}</version>
     </dependency>
-
-    <!-- optional deps for additional functionality -->
     <dependency>
       <groupId>org.apache.poi</groupId>
       <artifactId>poi</artifactId>
       <version>${poi.version}</version>
-      <optional>true</optional>
     </dependency>
+    
+    <!-- optional deps for additional functionality -->
     <dependency>
       <groupId>com.xeiam.xchart</groupId>
       <artifactId>xchart</artifactId>
