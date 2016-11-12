@@ -195,7 +195,7 @@ public class Serialization {
                     cal.get(Calendar.HOUR_OF_DAY) == 0 &&
                         cal.get(Calendar.MINUTE) == 0 &&
                         cal.get(Calendar.SECOND) == 0 ?
-                    "yyyy-MM-dd" : "yyyy-MM-dd'T'HH:mm:ssXXX"
+                    "yyyy-MM-dd" : "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"
                 );
             s = fmt.format(dt);
         } else {
@@ -300,7 +300,7 @@ public class Serialization {
             for (int c = 0; c < df.size(); c++) {
                 final Class<?> cls = types.get(c);
                 if (Date.class.isAssignableFrom(cls)) {
-                    procs[c] = new ConvertNullTo("", new FmtDate("yyyy-MM-dd'T'HH:mm:ssXXX"));
+                    procs[c] = new ConvertNullTo("", new FmtDate("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"));
                 } else {
                     procs[c] = new ConvertNullTo("");
                 }
