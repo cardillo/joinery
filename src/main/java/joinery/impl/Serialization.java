@@ -59,13 +59,13 @@ import org.supercsv.prefs.CsvPreference;
 public class Serialization {
 
     private static final String EMPTY_DF_STRING = "[empty data frame]";
-    private static final String DATE_FORMAT_DEFAULT = "yyyy-MM-dd'T'HH:mm:ssXXX";
-    private static final String DATE_FORMAT_FULL = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
     private static final String ELLIPSES = "...";
     private static final String NEWLINE = "\n";
     private static final String DELIMITER = "\t";
     private static final Object INDEX_KEY = new Object();
     private static final int    MAX_COLUMN_WIDTH = 20;
+    private static final String DATE_FORMAT_DEFAULT = "yyyy-MM-dd'T'HH:mm:ssXXX";
+    public static final String DATE_FORMAT_FULL = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
     public static String toString(final DataFrame<?> df, final int limit) {
         final int len = df.length();
