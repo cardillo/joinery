@@ -212,11 +212,11 @@ implements Iterable<List<V>> {
      *
      * @param index the row names
      * @param columns the column names
-     * @param data the data
+     * @param dataIterator iterator on data
      */
     public DataFrame(final Collection<?> index, final Collection<?> columns,
-            final List<? extends List<? extends V>> data) {
-        final BlockManager<V> mgr = new BlockManager<V>(data);
+            final Iterator<? extends List<? extends V>> dataIterator) {
+        final BlockManager<V> mgr = new BlockManager<V>(dataIterator);
         mgr.reshape(
                 Math.max(mgr.size(), columns.size()),
                 Math.max(mgr.length(), index.size())
@@ -226,6 +226,18 @@ implements Iterable<List<V>> {
         this.columns = new Index(columns, mgr.size());
         this.index = new Index(index, mgr.length());
         this.groups = new Grouping();
+    }
+
+    /**
+     * Construct a new data frame using the specified data and indices.
+     *
+     * @param index the row names
+     * @param columns the column names
+     * @param data the data
+     */
+    public DataFrame(final Collection<?> index, final Collection<?> columns,
+                     final List<? extends List<? extends V>> data) {
+        this(index, columns, data.iterator());
     }
 
     private DataFrame(final Index index, final Index columns, final BlockManager<V> data, final Grouping groups) {

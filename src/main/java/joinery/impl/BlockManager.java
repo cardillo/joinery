@@ -18,22 +18,19 @@
 
 package joinery.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class BlockManager<V> {
     private final List<List<V>> blocks;
 
-    public BlockManager() {
-        this(Collections.<List<V>>emptyList());
+    public BlockManager(final Collection<? extends Collection<? extends V>> data) {
+        this(data.iterator());
     }
 
-    public BlockManager(final Collection<? extends Collection<? extends V>> data) {
+    public BlockManager(final Iterator<? extends Collection<? extends V>> iterator) {
         blocks = new LinkedList<>();
-        for (final Collection<? extends V> col : data) {
+        while(iterator.hasNext()) {
+            Collection<? extends V> col = iterator.next();
             add(new ArrayList<>(col));
         }
     }
