@@ -44,8 +44,8 @@ public class DataFrameGroupByTest {
     @Test
     public final void testGroupBy() {
         final DataFrame<Object> df = new DataFrame<>();
-        df.add("name", Arrays.<Object>asList("one", "two", "three", "four", "one", "two"));
-        df.add("value", Arrays.<Object>asList(1, 2, 3, 4, 5, 6));
+        df.addColumn("name", Arrays.<Object>asList("one", "two", "three", "four", "one", "two"));
+        df.addColumn("value", Arrays.<Object>asList(1, 2, 3, 4, 5, 6));
         final DataFrame<Object> grouped = df.groupBy(0).count();
         assertEquals(
                 "group by result has correct number of rows",
@@ -67,8 +67,8 @@ public class DataFrameGroupByTest {
     @Test(expected=IllegalArgumentException.class)
     public final void testGroupByInvalid() {
         new DataFrame<String>()
-            .add("name", Arrays.<String>asList("one", "two", "three", "four", "one", "two"))
-            .add("value", Arrays.<String>asList("1", "2", "3", "4", "1", "6"))
+            .addColumn("name", Arrays.<String>asList("one", "two", "three", "four", "one", "two"))
+            .addColumn("value", Arrays.<String>asList("1", "2", "3", "4", "1", "6"))
             .groupBy(0)
             .sum();
     }
@@ -76,9 +76,9 @@ public class DataFrameGroupByTest {
     @Test
     public final void testGroupByMultiple() {
         final DataFrame<Object> df = new DataFrame<>();
-        df.add("name", Arrays.<Object>asList("one", "two", "three", "four", "one", "two"));
-        df.add("category", Arrays.<Object>asList("alpha", "beta", "alpha", "beta", "alpha", "beta"));
-        df.add("value", Arrays.<Object>asList(1, 2, 3, 4, 5, 6));
+        df.addColumn("name", Arrays.<Object>asList("one", "two", "three", "four", "one", "two"));
+        df.addColumn("category", Arrays.<Object>asList("alpha", "beta", "alpha", "beta", "alpha", "beta"));
+        df.addColumn("value", Arrays.<Object>asList(1, 2, 3, 4, 5, 6));
         final Object[][] expected = new Object[][] {
                 new Object[] { "alpha", "one",   2 },
                 new Object[] { "beta",  "two",   2 },

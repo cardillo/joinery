@@ -37,7 +37,7 @@ public class DataFrameSelectionTest {
 
     @Before
     public void setUp()
-    throws Exception {
+            throws Exception {
         final List<List<Object>> data = new ArrayList<>();
         final Collection<Object> rows = new ArrayList<>();
         final Collection<Object> cols = Arrays.<Object>asList("name", "value");
@@ -64,7 +64,7 @@ public class DataFrameSelectionTest {
                         return new Integer(150).equals(row.get(1));
                     }
                 }).length()
-            );
+        );
     }
 
     @Test
@@ -77,60 +77,64 @@ public class DataFrameSelectionTest {
                         return false;
                     }
                 }).length()
-            );
+        );
     }
 
     @Test
     public void testSelectIndex() {
         assertArrayEquals(
-                new String[] { "row15" },
+                new String[]{"row15"},
                 df.select(new DataFrame.Predicate<Object>() {
                     @Override
                     public Boolean apply(final List<Object> row) {
                         return new Integer(150).equals(row.get(1));
                     }
                 }).index().toArray()
-            );
+        );
     }
 
     @Test
     public void testSlice() {
         System.out.println(df.slice(10, 16, 1, 2));
         assertArrayEquals(
-                new Object[] { 100, 110, 120, 130, 140 },
+                new Object[]{100, 110, 120, 130, 140},
                 df.slice(10, 15, 1, 2).toArray()
-            );
+        );
     }
 
     @Test
     public void testSliceIndex() {
         assertArrayEquals(
-                new String[] { "row15" },
+                new String[]{"row15"},
                 df.slice(15, 16).index().toArray()
-            );
+        );
     }
 
     @Test
     public void testDropNaRows() {
         df = new DataFrame<Object>()
-                    .add("one", "two", "three")
-                    .append(Arrays.asList("a", null, "c"))
-                    .append(Arrays.asList("aa", "bb", "cc"));
+                .add("one")
+                .add("two")
+                .add("three")
+                .append(Arrays.asList("a", null, "c"))
+                .append(Arrays.asList("aa", "bb", "cc"));
         assertArrayEquals(
-                new Object[] { "aa", "bb", "cc" },
+                new Object[]{"aa", "bb", "cc"},
                 df.dropna().toArray()
-            );
+        );
     }
 
     @Test
     public void testDropNaColumns() {
         df = new DataFrame<Object>()
-                    .add("one", "two", "three")
-                    .append(Arrays.asList("a", null, "c"))
-                    .append(Arrays.asList("aa", "bb", "cc"));
+                .add("one")
+                .add("two")
+                .add("three")
+                .append(Arrays.asList("a", null, "c"))
+                .append(Arrays.asList("aa", "bb", "cc"));
         assertArrayEquals(
-                new Object[] { "a", "aa", "c", "cc" },
+                new Object[]{"a", "aa", "c", "cc"},
                 df.dropna(Axis.COLUMNS).toArray()
-            );
+        );
     }
 }

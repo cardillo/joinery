@@ -122,7 +122,7 @@ extends ScriptableObject {
 
     public static Scriptable jsFunction_add(final Context ctx, final Scriptable object, final Object[] args, final Function func) {
         if (args.length == 2 && args[1] instanceof NativeArray) {
-            return new DataFrameAdapter(object, cast(object).df.add(args[0], asList(args[1])));
+            return new DataFrameAdapter(object, cast(object).df.addColumn(args[0], asList(args[1])));
         }
         if (args.length == 1 && args[0] instanceof NativeArray) {
             return new DataFrameAdapter(object, cast(object).df.add(asList(args[0])));

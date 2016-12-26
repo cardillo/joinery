@@ -18,15 +18,7 @@
 
 package joinery.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import joinery.DataFrame;
 import joinery.DataFrame.RowFunction;
@@ -36,7 +28,7 @@ public class Index {
     private final Map<Object, Integer> index;
 
     public Index() {
-        this(Collections.<Object>emptyList());
+        this(Collections.emptyList());
     }
 
     public Index(final Collection<?> names) {
@@ -50,6 +42,14 @@ public class Index {
             final Object name = it.hasNext() ? it.next() : i;
             add(name, i);
         }
+    }
+
+    public Map<Integer, Object> getFields(){
+        Map<Integer, Object> map = new HashMap<>();
+        for(Object column: index.keySet()){
+            map.put(index.get(column), column);
+        }
+        return map;
     }
 
     public void add(final Object name, final Integer value) {

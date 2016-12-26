@@ -219,10 +219,8 @@ extends Suite {
                         if (expected != null) {
                             org.junit.Assert.assertEquals(expected, String.valueOf(value));
                         }
-                    } catch (final AssertionError err) {
+                    } catch (final AssertionError | Exception err) {
                         notifier.fireTestFailure(new Failure(getDescription(), err));
-                    } catch (final Exception ex) {
-                        notifier.fireTestFailure(new Failure(getDescription(), ex));
                     } finally {
                         notifier.fireTestFinished(getDescription());
                     }

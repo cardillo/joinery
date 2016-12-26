@@ -226,19 +226,19 @@ public class Conversion {
                 for (V num : col) {
                     nums.add((Number)num);
                 }
-                newDf.add(columnName,nums);
+                newDf.addColumn(columnName,nums);
             } else if (Date.class.isAssignableFrom(colTypes.get(column))) {
                 List<Number> dates = new ArrayList<>();
                 for (V date : col) {
                     dates.add(new Double(((Date)date).getTime()));
                 }
-                newDf.add(columnName,dates);
+                newDf.addColumn(columnName,dates);
             } else if (Boolean.class.isAssignableFrom(colTypes.get(column))) {
                 List<Number> bools = new ArrayList<>();
                 for (V tVal : col) {
                     bools.add((Boolean)tVal ? 1.0 : 0.0);
                 }
-                newDf.add(columnName,bools);
+                newDf.addColumn(columnName, bools);
             } else if (String.class.isAssignableFrom(colTypes.get(column))) {
                 Set<String> namesUsed = new HashSet<String>();
                 List<Object> extra = template != null ? template.col(column) : null;
@@ -247,7 +247,7 @@ public class Conversion {
                 int cnt = 0;
                 for(List<Number> var : variable) {
                     String name = columnName + "$" + nameToValidName(vr.names[cnt++],namesUsed);;
-                    newDf.add(name, var);
+                    newDf.addColumn(name, var);
                 }
             }
         }
