@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import joinery.DataFrame;
+import joinery.LocalDataFrame;
 import joinery.impl.Shell;
 
 import org.junit.runner.Description;
@@ -69,7 +70,7 @@ extends Suite {
                                 String.format("tmp = frames[0]; df = frames[1]; %s;", expr).getBytes()));
                             try {
                                 final DataFrame<Object> df = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("grouping.csv"));
-                                final Object result = Shell.repl(Arrays.asList(new DataFrame<>(), df));
+                                final Object result = Shell.repl(Arrays.asList(new LocalDataFrame<>(), df));
                                 if (result instanceof WrappedException) {
                                     throw WrappedException.class.cast(result).getWrappedException();
                                 } else if (result instanceof Throwable) {

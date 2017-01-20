@@ -31,7 +31,7 @@ public class DataFramePlotTest {
     public static void main(final String[] args)
     throws IOException {
         final Random rnd = new Random();
-        final DataFrame<Object> df = new DataFrame<>(
+        final DataFrame<Object> df = new LocalDataFrame<>(
                 Arrays.<Object>asList("one", "two", "three"),
                 Arrays.<Object>asList("name", "value1", "value2", "value3", "value4"),
                 Arrays.asList(

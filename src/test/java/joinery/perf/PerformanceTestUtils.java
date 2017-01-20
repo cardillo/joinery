@@ -25,6 +25,7 @@ import java.util.Random;
 import java.util.UUID;
 
 import joinery.DataFrame;
+import joinery.LocalDataFrame;
 
 public class PerformanceTestUtils {
     public static final int MILLIONS = 1_000_000;
@@ -37,7 +38,7 @@ public class PerformanceTestUtils {
     private PerformanceTestUtils() { }
 
     public static DataFrame<Object> randomData(final int rows) {
-        final DataFrame<Object> df = new DataFrame<Object>("name", "value", "category");
+        final DataFrame<Object> df = new LocalDataFrame<Object>("name", "value", "category");
         for (int i = 0; i < rows; i++) {
             df.append(randomRow());
         }
@@ -45,7 +46,7 @@ public class PerformanceTestUtils {
     }
 
     public static DataFrame<Object> randomData(final double utilization) {
-        final DataFrame<Object> df = new DataFrame<Object>("name", "value", "category");
+        final DataFrame<Object> df = new LocalDataFrame<Object>("name", "value", "category");
         for (int i = 0; i < MILLIONS || memoryUtilization() < utilization; i++) {
             df.append(randomRow());
         }

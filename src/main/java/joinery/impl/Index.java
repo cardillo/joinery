@@ -30,6 +30,7 @@ import java.util.Set;
 
 import joinery.DataFrame;
 import joinery.DataFrame.RowFunction;
+import joinery.LocalDataFrame;
 
 
 public class Index {
@@ -110,7 +111,7 @@ public class Index {
     }
 
     public static <V> DataFrame<V> reindex(final DataFrame<V> df, final Integer ... cols) {
-        return new DataFrame<V>(
+        return new LocalDataFrame<V>(
                 df.transform(
                     cols.length == 1 ?
                         new RowFunction<V, Object>() {
@@ -149,7 +150,7 @@ public class Index {
             index.add(i);
         }
 
-        return new DataFrame<V>(
+        return new LocalDataFrame<V>(
                 index,
                 df.columns(),
                 new Views.ListView<V>(df, false)

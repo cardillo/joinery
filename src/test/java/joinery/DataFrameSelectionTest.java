@@ -51,7 +51,7 @@ public class DataFrameSelectionTest {
         data.add(names);
         data.add(values);
 
-        df = new DataFrame<>(rows, cols, data);
+        df = new LocalDataFrame<>(rows, cols, data);
     }
 
     @Test
@@ -112,7 +112,7 @@ public class DataFrameSelectionTest {
 
     @Test
     public void testDropNaRows() {
-        df = new DataFrame<Object>()
+        df = new LocalDataFrame<Object>()
                     .add("one", "two", "three")
                     .append(Arrays.asList("a", null, "c"))
                     .append(Arrays.asList("aa", "bb", "cc"));
@@ -124,7 +124,7 @@ public class DataFrameSelectionTest {
 
     @Test
     public void testDropNaColumns() {
-        df = new DataFrame<Object>()
+        df = new LocalDataFrame<Object>()
                     .add("one", "two", "three")
                     .append(Arrays.asList("a", null, "c"))
                     .append(Arrays.asList("aa", "bb", "cc"));

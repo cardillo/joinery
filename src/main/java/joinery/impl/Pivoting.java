@@ -28,6 +28,7 @@ import java.util.Set;
 import joinery.DataFrame;
 import joinery.DataFrame.Aggregate;
 import joinery.DataFrame.KeyFunction;
+import joinery.LocalDataFrame;
 import joinery.impl.Aggregation.Unique;
 
 public class Pivoting {
@@ -111,7 +112,7 @@ public class Pivoting {
         }
 
         // iterate over row, column pairs and apply aggregate functions
-        final DataFrame<O> pivot = new DataFrame<>(pivotData.keySet(), pivotCols);
+        final DataFrame<O> pivot = new LocalDataFrame<>(pivotData.keySet(), pivotCols);
         for (final Object col : pivot.columns()) {
             for (final Object row : pivot.index()) {
                 final List<I> data = pivotData.get(row).get(col);

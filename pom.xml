@@ -37,7 +37,7 @@
   <properties>
     <project.build.sourceEncoding>iso-8859-1</project.build.sourceEncoding>
     <project.reporting.outputEncoding>iso-8859-1</project.reporting.outputEncoding>
-    <java.version>1.7</java.version>
+    <java.version>1.8</java.version>
     <junit.version>4.12</junit.version>
     <supercsv.version>2.4.0</supercsv.version>
     <commons-math3.version>3.6.1</commons-math3.version>

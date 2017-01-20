@@ -37,8 +37,8 @@ public class DataFrameIterationTest {
 
     @Before
     public void setUp() {
-        empty = new DataFrame<>(Arrays.asList());
-        df = new DataFrame<>(
+        empty = new LocalDataFrame<>(Arrays.asList());
+        df = new LocalDataFrame<>(
                 Arrays.<Object>asList(),
                 Arrays.<Object>asList("name", "value"),
                 Arrays.asList(
@@ -139,7 +139,7 @@ public class DataFrameIterationTest {
 
     @Test
     public void testTranspose() {
-        final DataFrame<Integer> df = new DataFrame<>(
+        final DataFrame<Integer> df = new LocalDataFrame<>(
                 Arrays.asList(
                         Arrays.<Integer>asList(1, 2),
                         Arrays.<Integer>asList(3, 4)

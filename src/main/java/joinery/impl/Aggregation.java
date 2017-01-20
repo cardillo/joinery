@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import joinery.LocalDataFrame;
 import org.apache.commons.math3.stat.correlation.StorelessCovariance;
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 import org.apache.commons.math3.stat.descriptive.StorelessUnivariateStatistic;
@@ -232,7 +233,7 @@ public class Aggregation {
 
     @SuppressWarnings("unchecked")
     public static <V> DataFrame<V> describe(final DataFrame<V> df) {
-        final DataFrame<V> desc = new DataFrame<>();
+        final DataFrame<V> desc = new LocalDataFrame<>();
         for (final Object col : df.columns()) {
             for (final Object row : df.index()) {
                 final V value = df.get(row, col);
@@ -277,7 +278,7 @@ public class Aggregation {
 
         // row-wise copy results into new data frame
         double[][] result = cov.getData();
-        DataFrame<Number> r = new DataFrame<>(num.columns());
+        DataFrame<Number> r = new LocalDataFrame<>(num.columns());
         List<Number> row = new ArrayList<>(num.size());
         for (int i = 0; i < result.length; i++) {
             row.clear();

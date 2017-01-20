@@ -24,6 +24,7 @@ import java.util.List;
 
 import joinery.DataFrame;
 import joinery.DataFrame.Function;
+import joinery.LocalDataFrame;
 
 public class Timeseries {
     public static <V> DataFrame<V> rollapply(final DataFrame<V> df, final Function<List<V>, V> function, final int period) {
@@ -38,7 +39,7 @@ public class Timeseries {
             data.add(column);
             f.reset();
         }
-        return new DataFrame<>(df.index(), df.columns(), data);
+        return new LocalDataFrame<>(df.index(), df.columns(), data);
     }
 
     private static class WindowFunction<V>

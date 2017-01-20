@@ -23,10 +23,11 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import joinery.DataFrame;
+import joinery.LocalDataFrame;
 
 public class Shaping {
     public static final <V> DataFrame<V> reshape(final DataFrame<V> df, final int rows, final int cols) {
-        final DataFrame<V> reshaped = new DataFrame<>();
+        final DataFrame<V> reshaped = new LocalDataFrame<>();
         Iterator<Object> it;
 
         it = df.columns().iterator();
@@ -53,7 +54,7 @@ public class Shaping {
     }
 
     public static final <V> DataFrame<V> reshape(final DataFrame<V> df, final Collection<?> rows, final Collection<?> cols) {
-        final DataFrame<V> reshaped = new DataFrame<>();
+        final DataFrame<V> reshaped = new LocalDataFrame<>();
 
         for (final Object name : cols) {
             reshaped.add(name);

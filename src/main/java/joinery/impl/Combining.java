@@ -30,6 +30,7 @@ import java.util.Set;
 import joinery.DataFrame;
 import joinery.DataFrame.JoinType;
 import joinery.DataFrame.KeyFunction;
+import joinery.LocalDataFrame;
 
 public class Combining {
     public static <V> DataFrame<V> join(final DataFrame<V> left, final DataFrame<V> right, final JoinType how, final KeyFunction<V> on) {
@@ -73,7 +74,7 @@ public class Combining {
             columns.add(column);
         }
 
-        final DataFrame<V> df = new DataFrame<>(columns);
+        final DataFrame<V> df = new LocalDataFrame<>(columns);
         for (final Map.Entry<Object, List<V>> entry : how != JoinType.RIGHT ? leftMap.entrySet() : rightMap.entrySet()) {
             final List<V> tmp = new ArrayList<>(entry.getValue());
             final List<V> row = how != JoinType.RIGHT ? rightMap.get(entry.getKey()) : leftMap.get(entry.getKey());

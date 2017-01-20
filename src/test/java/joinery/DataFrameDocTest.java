@@ -27,5 +27,5 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(DocTestSuite.class)
 @DocTestSourceDirectory("src/main/java")
-@SuiteClasses({DataFrame.class})
+@SuiteClasses({LocalDataFrame.class})
 public class DataFrameDocTest { }

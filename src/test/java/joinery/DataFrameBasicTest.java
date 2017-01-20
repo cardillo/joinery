@@ -31,7 +31,7 @@ public class DataFrameBasicTest {
 
     @Before
     public final void setUp() {
-        df = new DataFrame<Object>(
+        df = new LocalDataFrame<Object>(
                 Arrays.<Object>asList("row1", "row2", "row3"),
                 Arrays.<Object>asList("category", "name", "value"),
                 Arrays.<List<Object>>asList(
@@ -44,7 +44,7 @@ public class DataFrameBasicTest {
 
     @Test(expected=IllegalArgumentException.class)
     public final void testDuplicateColumnsInConstructor() {
-        new DataFrame<String>(Arrays.<Object>asList("test", "test"));
+        new LocalDataFrame<String>(Arrays.<Object>asList("test", "test"));
     }
 
     @Test
