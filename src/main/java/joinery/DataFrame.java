@@ -80,19 +80,11 @@ import joinery.impl.Views;
  * >         11, 31, 2008       // end date
  * >     ))
  * >     .retain("Date", "Close")
- * >     .groupBy(new KeyFunction<Object>() {
- * >         public Object apply(List<Object> row) {
- * >             return Date.class.cast(row.get(0)).getMonth();
- * >         }
- * >     })
+ * >     .groupBy(row -> Date.class.cast(row.get(0)).getMonth())
  * >     .mean()
  * >     .sortBy("Close")
  * >     .tail(3)
- * >     .apply(new Function<Object, Number>() {
- * >         public Number apply(Object value) {
- * >             return Number.class.cast(value).intValue();
- * >         }
- * >     })
+ * >     .apply(value -> Number.class.cast(value).intValue())
  * >     .col("Close");
  * [1370, 1378, 1403] }</pre>
  *
