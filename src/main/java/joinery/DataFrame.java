@@ -72,13 +72,7 @@ import joinery.impl.Views;
  * the three top months of the year.</p>
  *
  * <pre> {@code
- * > DataFrame.readCsv(String.format(
- * >         "%s?s=%s&a=%d&b=%d&c=%d&d=%d&e=%d&f=%d",
- * >         "http://real-chart.finance.yahoo.com/table.csv",
- * >         "^GSPC",           // symbol for S&P 500
- * >         0, 2, 2008,        // start date
- * >         11, 31, 2008       // end date
- * >     ))
+ * > DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("gspc.csv"))
  * >     .retain("Date", "Close")
  * >     .groupBy(new KeyFunction<Object>() {
  * >         public Object apply(List<Object> row) {
