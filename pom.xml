@@ -426,7 +426,7 @@
     <profile>
       <id>build-doctest</id>
       <activation>
-        <jdk>[1.6,)</jdk>
+        <jdk>[1.6,1.8]</jdk>
       </activation>
       <dependencies>
         <dependency>
