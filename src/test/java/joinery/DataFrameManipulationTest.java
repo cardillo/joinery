@@ -42,16 +42,18 @@ public class DataFrameManipulationTest {
                 "size is equal to number of columns",
                 1,
                 df.size()
-            );
+        );
     }
 
     @Test
     public final void testAddMultiple() {
-        df.add("one", "two", "three");
+        df.add("one")
+                .add("two")
+                .add("three");
         assertArrayEquals(
-                new String[] { "one", "two", "three" },
+                new String[]{"one", "two", "three"},
                 df.columns().toArray()
-            );
+        );
     }
 
     @Test
@@ -60,19 +62,19 @@ public class DataFrameManipulationTest {
         df.append(Arrays.<Object>asList(1));
         df.add("two");
         assertArrayEquals(
-                new String[] { "one", "two" },
+                new String[]{"one", "two"},
                 df.columns().toArray()
-            );
+        );
         assertArrayEquals(
-                new Object[] { 1, null },
+                new Object[]{1, null},
                 df.toArray()
-            );
+        );
     }
 
-    @Test(expected=IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public final void testAddExisting() {
         df.add("test")
-          .add("test");
+                .add("test");
     }
 
     @Test
@@ -83,25 +85,25 @@ public class DataFrameManipulationTest {
                 "original size is equal to number of columns",
                 2,
                 df.size()
-            );
+        );
         assertArrayEquals(
                 "original column list is correct",
-                new Object[] { "test1", "test2" },
+                new Object[]{"test1", "test2"},
                 df.columns().toArray()
-            );
+        );
         assertEquals(
                 "new size is equal to number of columns",
                 1,
                 newDf.size()
-            );
+        );
         assertArrayEquals(
                 "new column list is correct",
-                new Object[] { "test2" },
+                new Object[]{"test2"},
                 newDf.columns().toArray()
-            );
+        );
     }
 
-    @Test(expected=IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public final void testDropInvalid() {
         df.drop("does-not-exist");
     }
@@ -113,23 +115,23 @@ public class DataFrameManipulationTest {
                 "size is equal to number of columns",
                 1,
                 df.size()
-            );
+        );
         assertEquals(
                 "length is equal to number of rows",
                 1,
                 df.length()
-            );
+        );
         assertArrayEquals(
                 "column values are correct",
-                new Object[] { 1 },
+                new Object[]{1},
                 df.col(0).toArray()
-            );
+        );
     }
 
-    @Test(expected=IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public final void testAppendExisting() {
         df.add("test")
-          .append("one", Collections.emptyList())
-          .append("one", Collections.emptyList());
+                .append("one", Collections.emptyList())
+                .append("one", Collections.emptyList());
     }
 }

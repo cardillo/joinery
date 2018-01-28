@@ -24,18 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.codahale.metrics.annotation.Timed;
 
@@ -206,11 +195,11 @@ implements Iterable<List<V>> {
      *
      * @param index the row names
      * @param columns the column names
-     * @param data the data
+     * @param dataIterator iterator on data
      */
     public DataFrame(final Collection<?> index, final Collection<?> columns,
-            final List<? extends List<? extends V>> data) {
-        final BlockManager<V> mgr = new BlockManager<V>(data);
+            final Iterator<? extends List<? extends V>> dataIterator) {
+        final BlockManager<V> mgr = new BlockManager<V>(dataIterator);
         mgr.reshape(
                 Math.max(mgr.size(), columns.size()),
                 Math.max(mgr.length(), index.size())
@@ -220,6 +209,18 @@ implements Iterable<List<V>> {
         this.columns = new Index(columns, mgr.size());
         this.index = new Index(index, mgr.length());
         this.groups = new Grouping();
+    }
+
+    /**
+     * Construct a new data frame using the specified data and indices.
+     *
+     * @param index the row names
+     * @param columns the column names
+     * @param data the data
+     */
+    public DataFrame(final Collection<?> index, final Collection<?> columns,
+                     final List<? extends List<? extends V>> data) {
+        this(index, columns, data.iterator());
     }
 
     private DataFrame(final Index index, final Index columns, final BlockManager<V> data, final Grouping groups) {
@@ -240,22 +241,20 @@ implements Iterable<List<V>> {
      * > df.columns();
      * [value] }</pre>
      *
-     * @param columns the new column names
+     * @param column the new column name
      * @return the data frame with the columns added
      */
-    public DataFrame<V> add(final Object ... columns) {
-        for (final Object column : columns) {
+    public DataFrame<V> add(final Object column) {
             final List<V> values = new ArrayList<V>(length());
             for (int r = 0; r < values.size(); r++) {
                 values.add(null);
             }
-            add(column, values);
-        }
+            addColumn(column, values);
         return this;
     }
 
     public DataFrame<V> add(final List<V> values) {
-        return add(length(), values);
+        return addColumn(length(), values);
     }
 
     /**
@@ -266,7 +265,7 @@ implements Iterable<List<V>> {
      *
      * <pre> {@code
      * > DataFrame<Object> df = new DataFrame<>();
-     * > df.add("value", Arrays.<Object>asList(1));
+     * > df.addColumn("value", Arrays.<Object>asList(1));
      * > df.columns();
      * [value] }</pre>
      *
@@ -274,7 +273,7 @@ implements Iterable<List<V>> {
      * @param values the new column values
      * @return the data frame with the column added
      */
-    public DataFrame<V> add(final Object column, final List<V> values) {
+    public DataFrame<V> addColumn(final Object column, final List<V> values) {
         columns.add(column, data.size());
         index.extend(values.size());
         data.add(values);
@@ -1253,6 +1252,21 @@ implements Iterable<List<V>> {
         return transformed;
     }
 
+    public <U> DataFrame<V> applyRows(Object newColumn, final SingleRowFunction<V> generate) {
+        final List<V> output = new ArrayList<>();
+        Map<Integer, Object> fields = columns.getFields();
+        for (final List<V> row : this) {
+            Map<Object, V> items = new HashMap<>();
+            for(Integer position: fields.keySet()){
+                items.put(fields.get(position), row.get(position));
+            }
+            V newValue = generate.apply(items);
+            output.add(newValue);
+        }
+        this.addColumn(newColumn, output);
+        return this;
+    }
+
     /**
      * Attempt to infer better types for object columns.
      *
@@ -2171,6 +2185,10 @@ implements Iterable<List<V>> {
 
     public interface RowFunction<I, O> {
         List<List<O>> apply(List<I> values);
+    }
+
+    public interface SingleRowFunction<I> {
+        I apply(Map<Object, I> values);
     }
 
     /**

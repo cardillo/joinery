@@ -76,19 +76,30 @@
       <artifactId>commons-math3</artifactId>
       <version>${commons-math3.version}</version>
     </dependency>
-
-    <!-- optional deps for additional functionality -->
     <dependency>
       <groupId>org.apache.poi</groupId>
       <artifactId>poi</artifactId>
       <version>${poi.version}</version>
-      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>aspectjweaver</artifactId>
+      <version>1.8.9</version>
+    </dependency>
+    <dependency>
+      <groupId>com.codahale.metrics</groupId>
+      <artifactId>metrics-core</artifactId>
+      <version>3.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>rhino</groupId>
+      <artifactId>js</artifactId>
+      <version>1.7R2</version>
     </dependency>
     <dependency>
       <groupId>com.xeiam.xchart</groupId>
       <artifactId>xchart</artifactId>
       <version>${xchart.version}</version>
-      <optional>true</optional>
       <exclusions>
         <exclusion>
           <groupId>de.erichseifert.vectorgraphics2d</groupId>
@@ -97,18 +108,10 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>rhino</groupId>
-      <artifactId>js</artifactId>
-      <version>1.7R2</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
       <groupId>jline</groupId>
       <artifactId>jline</artifactId>
       <version>${jline.version}</version>
-      <optional>true</optional>
     </dependency>
-
     <!-- test deps -->
     <dependency>
       <groupId>junit</groupId>

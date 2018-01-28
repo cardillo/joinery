@@ -38,8 +38,8 @@ public class DataFrameSortByTest {
         values = Arrays.<Object>asList(1, 2, 3, 4, 5, 6);
         Collections.shuffle(values);
 
-        df.add("name", Arrays.<Object>asList("one", "two", "three", "four", "one", "two"));
-        df.add("value", values);
+        df.addColumn("name", Arrays.<Object>asList("one", "two", "three", "four", "one", "two"));
+        df.addColumn("value", values);
     }
 
     @Test

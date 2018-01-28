@@ -25,6 +25,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 
 import joinery.DataFrame.Function;
 
@@ -38,6 +39,7 @@ public class DataFrameTimeseriesTest {
     @Before
     public void setUp()
     throws IOException {
+        Locale.setDefault(Locale.US);
         df = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("timeseries.csv"));
     }
 

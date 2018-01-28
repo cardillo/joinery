@@ -80,6 +80,6 @@ public class DataFramePlotTest {
             dates.add(cal.getTime());
             cal.add(Calendar.DATE, -1);
         }
-        df.add("date", dates).reindex("date").plot();
+        df.addColumn("date", dates).reindex("date").plot();
     }
 }
