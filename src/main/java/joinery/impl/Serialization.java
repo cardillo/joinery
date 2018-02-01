@@ -41,6 +41,7 @@ import java.util.Map;
 import joinery.DataFrame;
 import joinery.DataFrame.NumberDefault;
 
+import joinery.LocalDataFrame;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -261,7 +262,7 @@ public class Serialization {
         	if(hasHeader) {
         		header = Arrays.asList(reader.getHeader(true));
         		procs = new CellProcessor[header.size()];
-                df = new DataFrame<>(header);
+                df = new LocalDataFrame<>(header);
         	} else {
         		// Read the first row to figure out how many columns we have
         		reader.read();
@@ -270,7 +271,7 @@ public class Serialization {
 					header.add("V"+i);
 				}
         		procs = new CellProcessor[header.size()];
-        		df = new DataFrame<>(header);
+        		df = new LocalDataFrame<>(header);
         		// The following line executes the procs on the previously read row again
         		df.append(reader.executeProcessors(procs));
         	}
@@ -341,7 +342,7 @@ public class Serialization {
         }
 
         // create data frame
-        final DataFrame<Object> df = new DataFrame<>(columns);
+        final DataFrame<Object> df = new LocalDataFrame<>(columns);
         for (final List<Object> row : data) {
             df.append(row);
         }

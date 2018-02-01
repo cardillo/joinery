@@ -33,6 +33,7 @@ import joinery.DataFrame.KeyFunction;
 import joinery.DataFrame.PlotType;
 import joinery.DataFrame.Predicate;
 import joinery.DataFrame.RowFunction;
+import joinery.LocalDataFrame;
 import joinery.impl.Grouping;
 
 import org.mozilla.javascript.Context;
@@ -66,7 +67,7 @@ extends ScriptableObject {
 
     private static final long serialVersionUID = 1L;
     private final DataFrame<Object> df;
-    private static final DataFrame<Object> EMPTY_DF = new DataFrame<>();
+    private static final DataFrame<Object> EMPTY_DF = new LocalDataFrame<>();
 
     public DataFrameAdapter() {
         this.df = EMPTY_DF;
@@ -91,19 +92,19 @@ extends ScriptableObject {
                 data.add(asList(array.get((int)ids[i], null)));
             }
             return new DataFrameAdapter(
-                    new DataFrame<Object>(
+                    new LocalDataFrame<Object>(
                             asList(args[0]),
                             asList(args[1]),
                             data
                         )
                 );
         } else if (args.length == 2 && args[0] instanceof NativeArray) {
-            return new DataFrameAdapter(new DataFrame<Object>(
+            return new DataFrameAdapter(new LocalDataFrame<Object>(
                     asList(args[0]),
                     asList(args[1])
                 ));
         } else if (args.length == 1 && args[0] instanceof NativeArray) {
-            return new DataFrameAdapter(new DataFrame<Object>(
+            return new DataFrameAdapter(new LocalDataFrame<Object>(
                     asList(args[0])
                 ));
         } else if (args.length > 0) {
@@ -111,9 +112,9 @@ extends ScriptableObject {
             for (int i = 0; i < args.length; i++) {
                 columns[i] = Context.toString(args[i]);
             }
-            return new DataFrameAdapter(new DataFrame<>(columns));
+            return new DataFrameAdapter(new LocalDataFrame<>(columns));
         }
-        return new DataFrameAdapter(new DataFrame<>());
+        return new DataFrameAdapter(new LocalDataFrame<>());
     }
 
     private static DataFrameAdapter cast(final Scriptable object) {

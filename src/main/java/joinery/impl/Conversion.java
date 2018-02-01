@@ -35,6 +35,7 @@ import java.util.TreeSet;
 import joinery.DataFrame;
 import joinery.DataFrame.Function;
 import joinery.DataFrame.NumberDefault;
+import joinery.LocalDataFrame;
 
 public class Conversion {
     
@@ -203,7 +204,7 @@ public class Conversion {
      */
     public static <V> DataFrame<Number> toModelMatrixDataFrame(final DataFrame<V> df, DataFrame<Object> template, 
             boolean addIntercept, Map<String, String> factorReferences, String naString) {
-        DataFrame<Number> newDf = new DataFrame<>();
+        DataFrame<Number> newDf = new LocalDataFrame<>();
 
         if(addIntercept) {
             // Add an intercept column

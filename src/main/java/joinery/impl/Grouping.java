@@ -31,6 +31,7 @@ import joinery.DataFrame;
 import joinery.DataFrame.Aggregate;
 import joinery.DataFrame.Function;
 import joinery.DataFrame.KeyFunction;
+import joinery.LocalDataFrame;
 import joinery.impl.Transforms.CumulativeFunction;
 
 public class Grouping
@@ -174,7 +175,7 @@ implements Iterable<Map.Entry<Object, SparseBitSet>> {
                 );
         }
 
-        return new DataFrame<>(index, newcols, grouped);
+        return new LocalDataFrame<>(index, newcols, grouped);
     }
 
     public Set<Object> keys() {

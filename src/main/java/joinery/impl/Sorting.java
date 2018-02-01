@@ -26,6 +26,7 @@ import java.util.Map;
 
 import joinery.DataFrame;
 import joinery.DataFrame.SortDirection;
+import joinery.LocalDataFrame;
 
 public class Sorting {
     public static <V> DataFrame<V> sort(
@@ -53,7 +54,7 @@ public class Sorting {
 
     public static <V> DataFrame<V> sort(
             final DataFrame<V> df, final Comparator<List<V>> comparator) {
-        final DataFrame<V> sorted = new DataFrame<V>(df.columns());
+        final DataFrame<V> sorted = new LocalDataFrame<V>(df.columns());
         final Comparator<Integer> cmp = new Comparator<Integer>() {
             @Override
             public int compare(final Integer r1, final Integer r2) {

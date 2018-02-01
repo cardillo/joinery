@@ -32,7 +32,7 @@ public class DataFrameManipulationTest {
 
     @Before
     public final void setUp() {
-        df = new DataFrame<Object>();
+        df = new LocalDataFrame<Object>();
     }
 
     @Test

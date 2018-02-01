@@ -4,11 +4,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import joinery.DataFrame;
+import joinery.LocalDataFrame;
 
 public class FizzBuzz {
     public static void main(final String[] args) {
         // generate data frame with numbers 1-100
-        final DataFrame<Integer> input = new DataFrame<Integer>().add("number");
+        final DataFrame<Integer> input = new LocalDataFrame<Integer>().add("number");
         for (int i = 1; i <= 100; i++) {
             input.append(Arrays.asList(i));
         }

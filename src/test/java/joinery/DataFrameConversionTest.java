@@ -41,7 +41,7 @@ public class DataFrameConversionTest {
     @Before
     public void setUp()
     throws Exception {
-        df = new DataFrame<>(
+        df = new LocalDataFrame<>(
                 Arrays.<Object>asList("row1", "row2", "row3", "row4", "row5", "row6"),
                 Arrays.<Object>asList("string", "long", "double", "date", "bool", "null"),
                 Arrays.<List<Object>>asList(
@@ -105,7 +105,7 @@ public class DataFrameConversionTest {
 
     @Test(expected=ClassCastException.class)
     public void testConvertFails() {
-        final DataFrame<String> bad = new DataFrame<>(
+        final DataFrame<String> bad = new LocalDataFrame<>(
                 Arrays.<Object>asList("row1", "row2", "row3", "row4", "row5", "row6"),
                 Arrays.<Object>asList("string", "long", "double", "date"),
                 Arrays.<List<String>>asList(

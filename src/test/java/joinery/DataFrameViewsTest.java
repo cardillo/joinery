@@ -17,7 +17,7 @@ public class DataFrameViewsTest {
     @Before
     public void setUp()
     throws Exception {
-        df = new DataFrame<Object>("one", "two", "three")
+        df = new LocalDataFrame<Object>("one", "two", "three")
                 .append(Arrays.asList("a", null, "c"))
                 .append(Arrays.asList("aa", "bb", "cc"));
     }

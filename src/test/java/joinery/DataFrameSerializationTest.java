@@ -158,7 +158,7 @@ public class DataFrameSerializationTest {
     throws IOException {
         final File tmp = File.createTempFile(getClass().getName(), ".csv");
         tmp.deleteOnExit();
-        final DataFrame<Object> original = new DataFrame<>("date", "long", "double", "bool", "string");
+        final DataFrame<Object> original = new LocalDataFrame<>("date", "long", "double", "bool", "string");
         original.append(Arrays.asList(new Date(), 1L, 1.0, true, "test"));
         original.writeCsv(tmp.getPath());
         assertArrayEquals(
@@ -171,7 +171,7 @@ public class DataFrameSerializationTest {
     public void testWriteCsvNonStringIndex()
     throws IOException {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        final DataFrame<Object> df = new DataFrame<>(Arrays.asList(1L, 2L, 3L, 4L));
+        final DataFrame<Object> df = new LocalDataFrame<>(Arrays.asList(1L, 2L, 3L, 4L));
         df.append(Arrays.asList(1, 2, 3, 4));
         df.writeCsv(out);
         assertTrue("writeCsv does not throw due to non-string indices", true);
@@ -225,7 +225,7 @@ public class DataFrameSerializationTest {
     throws IOException {
         final File tmp = File.createTempFile(getClass().getName(), ".xls");
         tmp.deleteOnExit();
-        final DataFrame<Object> original = new DataFrame<>("date", "double", "bool", "string");
+        final DataFrame<Object> original = new LocalDataFrame<>("date", "double", "bool", "string");
         original.append(Arrays.asList(new Date(), 1.0, true, "test"));
         original.writeXls(tmp.getPath());
         assertArrayEquals(
@@ -238,7 +238,7 @@ public class DataFrameSerializationTest {
     public void testWriteXlsNonStringIndex()
     throws IOException {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        final DataFrame<Object> df = new DataFrame<>(Arrays.asList(1L, 2L, 3L, 4L));
+        final DataFrame<Object> df = new LocalDataFrame<>(Arrays.asList(1L, 2L, 3L, 4L));
         df.append(Arrays.asList(1, 2, 3, 4));
         df.writeXls(out);
         assertTrue("writeXls does not throw due to non-string indices", true);

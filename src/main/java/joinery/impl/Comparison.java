@@ -22,6 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import joinery.DataFrame;
+import joinery.LocalDataFrame;
 
 public class Comparison {
     public static final <V> DataFrame<String> compare(final DataFrame<V> df1, final DataFrame<V> df2) {
@@ -39,7 +40,7 @@ public class Comparison {
         // 3. reshape right to contain all rows and columns
         final DataFrame<V> right = df2.reshape(rows, cols);
 
-        final DataFrame<String> comp = new DataFrame<>(rows, cols);
+        final DataFrame<String> comp = new LocalDataFrame<>(rows, cols);
 
         // 4. perform comparison cell by cell
         for (int c = 0; c < left.size(); c++) {
