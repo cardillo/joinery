@@ -24,6 +24,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -2127,6 +2132,28 @@ implements Iterable<List<V>> {
     public final void writeXls(final OutputStream output)
     throws IOException {
         Serialization.writeXls(this, output);
+    }
+
+    public static final DataFrame<Object> readSql(final Connection c, final String sql)
+    throws SQLException {
+        try (Statement stmt = c.createStatement()) {
+            return readSql(stmt.executeQuery(sql));
+        }
+    }
+
+    public static final DataFrame<Object> readSql(final ResultSet rs)
+    throws SQLException {
+        return Serialization.readSql(rs);
+    }
+
+    public final void writeSql(final Connection c, final String sql)
+    throws SQLException {
+        writeSql(c.prepareStatement(sql));
+    }
+
+    public final void writeSql(final PreparedStatement stmt)
+    throws SQLException {
+        Serialization.writeSql(this, stmt);
     }
 
     public final String toString(final int limit) {

@@ -30,8 +30,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -68,7 +73,8 @@ public class DataFrameSerializationTest {
     }
     
     @Test
-    public void testReadCsvNAInputStream() throws IOException {
+    public void testReadCsvNAInputStream()
+    throws IOException {
     	DataFrame<Object> nadf = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization_wNA.csv"), ",", "NA");
         final Object[][] expected = new Object[][] {
                 new Object[] { "a", "a", "b", "b", "c", "c" },
@@ -85,7 +91,8 @@ public class DataFrameSerializationTest {
     }
     
     @Test
-    public void testReadCsvNoHeaderInputStream() throws IOException {
+    public void testReadCsvNoHeaderInputStream()
+    throws IOException {
     	DataFrame<Object> df_noHeader = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization_no_header.csv"), ",", "NA", false);
         final Object[][] expected = new Object[][] {
                 new Object[] { "a", "a", "b", "b", "c", "c" },
@@ -102,7 +109,8 @@ public class DataFrameSerializationTest {
     }
 
     @Test
-    public void testReadCsvSemicolonInputStream() throws IOException {
+    public void testReadCsvSemicolonInputStream()
+    throws IOException {
         DataFrame<Object> cdf = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization_semicolon.csv"), ";");
         final Object[][] expected = new Object[][] {
                 new Object[] { "a", "a", "b", "b", "c", "c" },
@@ -119,7 +127,8 @@ public class DataFrameSerializationTest {
     }
     
     @Test
-    public void testReadCsvTabInputStream() throws IOException {
+    public void testReadCsvTabInputStream()
+    throws IOException {
         DataFrame<Object> cdf = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization_tab.csv"), "\\t");
         final Object[][] expected = new Object[][] {
                 new Object[] { "a", "a", "b", "b", "c", "c" },
@@ -269,9 +278,32 @@ public class DataFrameSerializationTest {
     }
     
     @Test
-    public void testToStringEmptyHeader() throws IOException {
+    public void testToStringEmptyHeader()
+    throws IOException {
         DataFrame<Object> dfEmptyHeader = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization_empty_header.csv"));
         dfEmptyHeader.transpose().toString();
     }
 
+    @Test
+    public void testToFromSql()
+    throws Exception {
+        Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+        try (Connection dbc = DriverManager.getConnection("jdbc:derby:memory:testdb;create=true")) {
+            dbc.createStatement().executeUpdate("create table test (category varchar(32), name varchar(32), value int)");
+            PreparedStatement stmt = dbc.prepareStatement("insert into test values (?,?,?)");
+            df.writeSql(stmt);
+
+            Map<Object, Object> names = new HashMap<>();
+            names.put("CATEGORY", "category");
+            names.put("NAME", "name");
+            names.put("VALUE", "value");
+
+            DataFrame<Object> other = DataFrame.readSql(dbc, "select * from test").rename(names);
+            DataFrame<String> cmp = DataFrame.compare(df, other);
+            assertArrayEquals(
+                    cmp.col("value").toArray(),
+                    new String[] { "1 | 1", "2 | 2", "3 | 3", "4 | 4", "5 | 5", "6 | 6" }
+                );
+        }
+    }
 }

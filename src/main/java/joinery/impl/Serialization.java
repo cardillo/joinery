@@ -27,6 +27,11 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.math.BigInteger;
 import java.net.URL;
+import java.sql.ParameterMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,9 +42,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import joinery.DataFrame;
-import joinery.DataFrame.NumberDefault;
 
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -55,6 +57,9 @@ import org.supercsv.cellprocessor.ift.CellProcessor;
 import org.supercsv.io.CsvListReader;
 import org.supercsv.io.CsvListWriter;
 import org.supercsv.prefs.CsvPreference;
+
+import joinery.DataFrame;
+import joinery.DataFrame.NumberDefault;
 
 public class Serialization {
 
@@ -410,6 +415,53 @@ public class Serialization {
         } else {
             cell.setCellType(Cell.CELL_TYPE_STRING);
             cell.setCellValue(value != null ? String.valueOf(value) : "");
+        }
+    }
+
+    public static DataFrame<Object> readSql(final ResultSet rs)
+    throws SQLException {
+        try {
+            ResultSetMetaData md = rs.getMetaData();
+            List<String> columns = new ArrayList<>();
+            for (int i = 1; i <= md.getColumnCount(); i++) {
+                columns.add(md.getColumnLabel(i));
+            }
+
+            DataFrame<Object> df = new DataFrame<>(columns);
+            List<Object> row = new ArrayList<>(columns.size());
+            while (rs.next()) {
+                for (String c : columns) {
+                    row.add(rs.getString(c));
+                }
+                df.append(row);
+                row.clear();
+            }
+
+            return df;
+        } finally {
+            rs.close();
+        }
+    }
+
+    public static <V> void writeSql(final DataFrame<V> df, final PreparedStatement stmt)
+    throws SQLException {
+        try {
+            ParameterMetaData md = stmt.getParameterMetaData();
+            List<Integer> columns = new ArrayList<>();
+            for (int i = 1; i <= md.getParameterCount(); i++) {
+                columns.add(md.getParameterType(i));
+            }
+
+            for (int r = 0; r < df.length(); r++) {
+                for (int c = 1; c <= df.size(); c++) {
+                    stmt.setObject(c, df.get(r, c - 1));
+                }
+                stmt.addBatch();
+            }
+
+            stmt.executeBatch();
+        } finally {
+            stmt.close();
         }
     }
 }
