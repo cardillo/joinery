@@ -242,6 +242,7 @@ public class Serialization {
     throws IOException {
     	return readCsv(input,separator, numDefault,naString, true);
     }
+   
     
     public static DataFrame<Object> readCsv(final InputStream input, String separator, NumberDefault numDefault, String naString, boolean hasHeader)
     throws IOException {
@@ -256,6 +257,9 @@ public class Serialization {
             case ";":
                 csvPreference = CsvPreference.EXCEL_NORTH_EUROPE_PREFERENCE;
                 break;
+            case "|":
+            	csvPreference  = new CsvPreference.Builder('"', '|', "\n").build();
+                break;
             default:
                 throw new IllegalArgumentException("Separator: " + separator + " is not currently supported");
         }
@@ -268,7 +272,7 @@ public class Serialization {
         		procs = new CellProcessor[header.size()];
                 df = new DataFrame<>(header);
         	} else {
-        		// Read the first row to figure out how many columns we have
+        		// Read the first row to figure out how many columns we have        		
         		reader.read();
         		header = new ArrayList<String>();
         		for (int i = 0; i < reader.length(); i++) {
