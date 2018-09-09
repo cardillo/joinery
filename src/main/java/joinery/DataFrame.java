@@ -251,6 +251,12 @@ implements Iterable<List<V>> {
         return this;
     }
 
+    /**
+     * Add the list of values as a new column.
+     *
+     * @param values the new column values
+     * @return the data frame with the column added
+     */
     public DataFrame<V> add(final List<V> values) {
         return add(length(), values);
     }
@@ -276,6 +282,22 @@ implements Iterable<List<V>> {
         index.extend(values.size());
         data.add(values);
         return this;
+    }
+
+    /**
+     * Add the results of applying a row-wise
+     * function to the data frame as a new column.
+     *
+     * @param column the new column name
+     * @param function the function to compute the new column values
+     * @return the data frame with the column added
+     */
+    public DataFrame<V> add(final Object column, final Function<List<V>, V> function) {
+        final List<V> values = new ArrayList<>();
+        for (final List<V> row : this) {
+            values.add(function.apply(row));
+        }
+        return add(column, values);
     }
 
     /**
@@ -1287,7 +1309,6 @@ implements Iterable<List<V>> {
         Conversion.convert(this,numDefault,naString);
         return this;
     }
-
 
     /**
      * Convert columns based on the requested types.

@@ -69,6 +69,18 @@ public class DataFrameManipulationTest {
             );
     }
 
+    @Test
+    public final void testAddCalculated() {
+        DataFrame<Object> newDf = df
+                .add("value", Arrays.asList(1, 2, 3))
+                .add("squared", row -> Math.pow((Integer)row.get(0), 2));
+        assertArrayEquals(
+                "calculated column equals square of value",
+                new Object[] { 1.0, 4.0, 9.0 },
+                newDf.col(1).toArray()
+            );
+    }
+
     @Test(expected=IllegalArgumentException.class)
     public final void testAddExisting() {
         df.add("test")
