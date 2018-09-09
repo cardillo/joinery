@@ -145,6 +145,8 @@ extends Suite {
                             "import " + cls.qualifiedName() + ";\n" +
                             "import " + cls.qualifiedName() + ".*;\n" +
                             "import java.util.*;\n" +
+                            "import java.sql.Connection;\n" +
+                            "import java.sql.DriverManager;\n" +
                             "public class " + name + "\n" +
                             "implements java.util.concurrent.Callable<Object> {\n" +
                             "    public Object call() throws Exception {\n" +

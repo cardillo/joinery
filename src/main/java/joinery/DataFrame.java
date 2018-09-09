@@ -2049,11 +2049,27 @@ implements Iterable<List<V>> {
         return Comparison.compare(df1, df2);
     }
 
+    /**
+     * Read the specified csv file and
+     * return the data as a data frame.
+     *
+     * @param file the csv file
+     * @return a new data frame
+     * @throws IOException if an error reading the file occurs
+     */
     public static final DataFrame<Object> readCsv(final String file)
     throws IOException {
         return Serialization.readCsv(file);
     }
 
+    /**
+     * Read csv records from an input stream
+     * and return the data as a data frame.
+     *
+     * @param input the input stream
+     * @return a new data frame
+     * @throws IOException if an error reading the stream occurs
+     */
     public static final DataFrame<Object> readCsv(final InputStream input)
     throws IOException {
         return Serialization.readCsv(input);
@@ -2104,36 +2120,95 @@ implements Iterable<List<V>> {
         return Serialization.readCsv(input, separator, longDefault, null);
     }
 
+    /**
+     * Write the data from this data frame to
+     * the specified file as comma separated values.
+     *
+     * @param file the file to write
+     * @throws IOException if an error occurs writing the file
+     */
     public final void writeCsv(final String file)
     throws IOException {
         Serialization.writeCsv(this, new FileOutputStream(file));
     }
 
+    /**
+     * Write the data from this data frame to
+     * the provided output stream as comma separated values.
+     *
+     * @param output
+     * @throws IOException
+     */
     public final void writeCsv(final OutputStream output)
     throws IOException {
         Serialization.writeCsv(this, output);
     }
 
+    /**
+     * Read data from the specified excel
+     * workbook into a new data frame.
+     *
+     * @param file the excel workbook
+     * @return a new data frame
+     * @throws IOException if an error occurs reading the workbook
+     */
     public static final DataFrame<Object> readXls(final String file)
     throws IOException {
         return Serialization.readXls(file);
     }
 
+    /**
+     * Read data from the input stream as an
+     * excel workbook into a new data frame.
+     *
+     * @param input the input stream
+     * @return a new data frame
+     * @throws IOException if an error occurs reading the input stream
+     */
     public static final DataFrame<Object> readXls(final InputStream input)
     throws IOException {
         return Serialization.readXls(input);
     }
 
+    /**
+     * Write the data from the data frame
+     * to the specified file as an excel workbook.
+     *
+     * @param file the file to write
+     * @throws IOException if an error occurs writing the file
+     */
     public final void writeXls(final String file)
     throws IOException {
         Serialization.writeXls(this, new FileOutputStream(file));
     }
 
+    /**
+     * Write the data from the data frame
+     * to the provided output stream as an excel workbook.
+     *
+     * @param file the file to write
+     * @throws IOException if an error occurs writing the file
+     */
     public final void writeXls(final OutputStream output)
     throws IOException {
         Serialization.writeXls(this, output);
     }
 
+    /**
+     * Execute the SQL query and return the results as a new data frame.
+     *
+     * <pre> {@code
+     * > Connection c = DriverManager.getConnection("jdbc:derby:memory:testdb;create=true");
+     * > c.createStatement().executeUpdate("create table data (a varchar(8), b int)");
+     * > c.createStatement().executeUpdate("insert into data values ('test', 1)");
+     * > DataFrame.readSql(c, "select * from data").flatten();
+     * [test, 1] }</pre>
+     *
+     * @param c the database connection
+     * @param sql the SQL query
+     * @return a new data frame
+     * @throws SQLException if an error occurs execution the query
+     */
     public static final DataFrame<Object> readSql(final Connection c, final String sql)
     throws SQLException {
         try (Statement stmt = c.createStatement()) {
@@ -2141,16 +2216,38 @@ implements Iterable<List<V>> {
         }
     }
 
+    /**
+     * Read data from the provided query results into a new data frame.
+     *
+     * @param rs the query results
+     * @return a new data frame
+     * @throws SQLException if an error occurs reading the results
+     */
     public static final DataFrame<Object> readSql(final ResultSet rs)
     throws SQLException {
         return Serialization.readSql(rs);
     }
 
+    /**
+     * Write the data from the data frame to a database by
+     * executing the specified SQL statement.
+     *
+     * @param c the database connection
+     * @param sql the SQL statement
+     * @throws SQLException if an error occurs executing the statement
+     */
     public final void writeSql(final Connection c, final String sql)
     throws SQLException {
         writeSql(c.prepareStatement(sql));
     }
 
+    /**
+     * Write the data from the data frame to a database by
+     * executing the provided prepared SQL statement.
+     *
+     * @param stmt a prepared insert statement
+     * @throws SQLException if an error occurs executing the statement
+     */
     public final void writeSql(final PreparedStatement stmt)
     throws SQLException {
         Serialization.writeSql(this, stmt);
