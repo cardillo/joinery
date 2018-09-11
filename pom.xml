@@ -46,7 +46,7 @@
     <slf4j.version>1.7.7</slf4j.version>
 
     <!-- use property to allow redefining via profiles/command line -->
-    <groups>!joinery.perf.PerformanceTests</groups>
+    <test.groups>!joinery.perf.PerformanceTests</test.groups>
     <parallel>all</parallel>
   </properties>
 
@@ -155,7 +155,7 @@
             <!-- parallel tests -->
             <parallel>${parallel}</parallel>
             <threadCount>8</threadCount>
-            <groups>${groups}</groups>
+            <groups>${test.groups}</groups>
           </configuration>
         </plugin>
 
@@ -195,15 +195,15 @@
             <docletArtifact>
               <groupId>com.google.doclava</groupId>
               <artifactId>doclava</artifactId>
-              <version>1.0.5</version>
+              <version>1.0.6</version>
             </docletArtifact>
             <doclet>com.google.doclava.Doclava</doclet>
-            <additionalparam>
+            <additionalOptions>
               -quiet
               -hdf project.name "${project.name}"
               -d ${project.build.directory}/apidocs
               -templatedir ${basedir}/src/main/resources/templates
-            </additionalparam>
+            </additionalOptions>
             <useStandardDocletOptions>false</useStandardDocletOptions>
             <excludePackageNames>joinery.impl</excludePackageNames>
           </configuration>
@@ -353,7 +353,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <!-- exclude performance tests (they take a while) -->
-          <groups>${groups}</groups>
+          <groups>${test.groups}</groups>
         </configuration>
       </plugin>
 
@@ -473,7 +473,7 @@
     <profile>
       <id>release</id>
       <properties>
-        <groups />
+        <test.groups />
       </properties>
       <build>
         <plugins>
@@ -533,7 +533,7 @@
         </property>
       </activation>
       <properties>
-        <groups />
+        <test.groups />
         <parallel>none</parallel>
       </properties>
     </profile>
