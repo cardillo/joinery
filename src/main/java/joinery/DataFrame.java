@@ -19,10 +19,7 @@
 package joinery;
 
 import java.awt.Container;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.lang.reflect.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -2139,6 +2136,26 @@ implements Iterable<List<V>> {
     public static final DataFrame<Object> readCsv(final InputStream input, final String separator, final NumberDefault longDefault)
     throws IOException {
         return Serialization.readCsv(input, separator, longDefault, null);
+    }
+
+    public static final DataFrame<Object> readCsv(final File file)
+        throws IOException {
+        return Serialization.readCsv(file);
+    }
+
+    public static final DataFrame<Object> readCsv(final File file, final String separator)
+        throws IOException {
+        return Serialization.readCsv(file, separator, NumberDefault.LONG_DEFAULT, null);
+    }
+
+    public static final DataFrame<Object> readCsv(final File file, final String separator, final String naString)
+        throws IOException {
+        return Serialization.readCsv(file, separator, NumberDefault.LONG_DEFAULT, naString);
+    }
+
+    public static final DataFrame<Object> readCsv(final File file, final String separator, final String naString, final boolean hasHeader)
+        throws IOException {
+        return Serialization.readCsv(file, separator, NumberDefault.LONG_DEFAULT, naString, hasHeader);
     }
 
     /**

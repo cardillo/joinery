@@ -18,15 +18,11 @@
 
 package joinery.impl;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.math.BigInteger;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -231,6 +227,21 @@ public class Serialization {
     throws IOException {
         return readCsv(file.contains("://") ?
                 new URL(file).openStream() : new FileInputStream(file), separator, numDefault, naString, hasHeader);
+    }
+
+    public static DataFrame<Object> readCsv(final File file)
+        throws IOException {
+        return readCsv(Files.newInputStream(file.toPath(), StandardOpenOption.READ));
+    }
+
+    public static DataFrame<Object> readCsv(final File file, String separator, NumberDefault numDefault, String naString)
+        throws IOException {
+        return readCsv(Files.newInputStream(file.toPath(), StandardOpenOption.READ), separator, numDefault,naString, true);
+    }
+
+    public static DataFrame<Object> readCsv(final File file, String separator, NumberDefault numDefault, String naString, boolean hasHeader)
+        throws IOException {
+            return readCsv(Files.newInputStream(file.toPath(), StandardOpenOption.READ), separator, numDefault,naString, hasHeader);
     }
 
     public static DataFrame<Object> readCsv(final InputStream input) 
