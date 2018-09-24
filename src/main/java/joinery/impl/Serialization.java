@@ -27,6 +27,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.math.BigInteger;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -233,7 +236,27 @@ public class Serialization {
                 new URL(file).openStream() : new FileInputStream(file), separator, numDefault, naString, hasHeader);
     }
 
-    public static DataFrame<Object> readCsv(final InputStream input) 
+    public static DataFrame<Object> readCsv(final Path path)
+        throws IOException {
+        return readCsv(Files.newInputStream(path, StandardOpenOption.READ));
+    }
+
+    public static DataFrame<Object> readCsv(final Path path, String separator, NumberDefault numDefault)
+        throws IOException {
+        return readCsv(Files.newInputStream(path, StandardOpenOption.READ), separator, numDefault, null);
+    }
+
+    public static DataFrame<Object> readCsv(final Path path, String separator, NumberDefault numDefault, String naString)
+        throws IOException {
+        return readCsv(Files.newInputStream(path, StandardOpenOption.READ), separator, numDefault, naString);
+    }
+
+    public static DataFrame<Object> readCsv(final Path path, String separator, NumberDefault numDefault, String naString, boolean hasHeader)
+        throws IOException {
+        return readCsv(Files.newInputStream(path, StandardOpenOption.READ), separator, numDefault,naString, hasHeader);
+    }
+
+    public static DataFrame<Object> readCsv(final InputStream input)
     throws IOException {
         return readCsv(input, ",", NumberDefault.LONG_DEFAULT, null);
     }
