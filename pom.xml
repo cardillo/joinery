@@ -35,14 +35,14 @@
     <project.build.sourceEncoding>iso-8859-1</project.build.sourceEncoding>
     <project.reporting.outputEncoding>iso-8859-1</project.reporting.outputEncoding>
     <java.version>1.8</java.version>
-    <junit.version>4.12</junit.version>
+    <junit.version>4.13</junit.version>
     <supercsv.version>2.4.0</supercsv.version>
     <commons-math3.version>3.6.1</commons-math3.version>
-    <poi.version>3.17</poi.version>
+    <poi.version>4.1.2</poi.version>
     <aspectj.version>1.8.2</aspectj.version>
-    <metrics.version>4.0.3</metrics.version>
+    <metrics.version>4.1.5</metrics.version>
     <xchart.version>2.5.1</xchart.version>
-    <jline.version>2.14.6</jline.version>
+    <jline.version>3.14.0</jline.version>
     <slf4j.version>1.7.7</slf4j.version>
 
     <!-- use property to allow redefining via profiles/command line -->
@@ -100,7 +100,7 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>jline</groupId>
+      <groupId>org.jline</groupId>
       <artifactId>jline</artifactId>
       <version>${jline.version}</version>
       <optional>true</optional>

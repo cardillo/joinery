@@ -27,8 +27,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 
-import jline.console.ConsoleReader;
-import jline.console.completer.Completer;
+import org.jline.reader.Completer;
+import org.jline.reader.Candidate;
+import org.jline.reader.EndOfFileException;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.ParsedLine;
 import joinery.DataFrame;
 import joinery.impl.js.DataFrameAdapter;
 
@@ -266,55 +270,53 @@ public class Shell {
 
         private class JLineConsole
         extends Console
-        implements Runnable, Completer {
-            private final ConsoleReader console;
+        implements Completer {
+            private final LineReader console;
 
             private JLineConsole()
             throws IOException {
-                console = new ConsoleReader();
-                console.addCompleter(this);
-                console.setExpandEvents(false);
-                Runtime.getRuntime().addShutdownHook(new Thread(this));
+                String name = DataFrame.class.getPackage().getName();
+                console = LineReaderBuilder.builder()
+                            .appName(name)
+                            .completer(this)
+                            .build();
             }
 
             @Override
             public String readLine(final String prompt)
             throws IOException {
-                console.setPrompt(prompt);
-                return console.readLine();
-            }
-
-            @Override
-            public void run() {
                 try {
-                    console.getTerminal().restore();
-                } catch (final Exception ignored) { }
+                    return console.readLine(prompt);
+                } catch (EndOfFileException eof) {
+                    return null;
+                }
             }
 
             @Override
-            public int complete(final String buffer, final int cursor, final List<CharSequence> candidates) {
-                final String expr = buffer.substring(buffer.lastIndexOf(' ') + 1);
+            public void complete(final LineReader reader,
+                    final ParsedLine line, final List<Candidate> candidates) {
+                final String expr = line.word().substring(0, line.wordCursor());
                 final int dot = expr.lastIndexOf('.') + 1;
                 if (dot > 1) {
-                    final String var = expr.substring(0, dot - 1);
-                    final String prefix = expr.substring(dot);
-                    final Object value = get(var, Repl.this);
-                    if (value != NOT_FOUND) {
-                        if (value instanceof ScriptableObject) {
-                            final Object[] ids = ScriptableObject.class.cast(value).getAllIds();
-                            Arrays.sort(ids);
-                            for (final Object id : ids) {
-                                if (id instanceof String && String.class.cast(id).startsWith(prefix)) {
-                                    candidates.add(String.class.cast(id));
-                                }
-                            }
-                        }
-                        if (!candidates.isEmpty()) {
-                            return dot;
+                    final String sym = expr.substring(0, dot - 1);
+                    final Object value = get(sym, Repl.this);
+                    if (value instanceof ScriptableObject) {
+                        ScriptableObject so = (ScriptableObject)value;
+                        final Object[] ids = so.getAllIds();
+                        for (final Object id : ids) {
+                            final String candidate = sym + "." + id;
+                            candidates.add(new Candidate(
+                                    candidate,
+                                    candidate,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    false
+                                ));
                         }
                     }
                 }
-                return buffer.length();
             }
         }
     }

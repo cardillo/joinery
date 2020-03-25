@@ -47,6 +47,7 @@ import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -391,12 +392,12 @@ public class Serialization {
 
     private static final Object readCell(final Cell cell) {
         switch (cell.getCellType()) {
-            case Cell.CELL_TYPE_NUMERIC:
+            case NUMERIC:
                 if (DateUtil.isCellDateFormatted(cell)) {
                     return DateUtil.getJavaDate(cell.getNumericCellValue());
                 }
                 return cell.getNumericCellValue();
-            case Cell.CELL_TYPE_BOOLEAN:
+            case BOOLEAN:
                 return cell.getBooleanCellValue();
             default:
                 return cell.getStringCellValue();
@@ -405,18 +406,18 @@ public class Serialization {
 
     private static final void writeCell(final Cell cell, final Object value) {
         if (value instanceof Number) {
-            cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+            cell.setCellType(CellType.NUMERIC);
             cell.setCellValue(Number.class.cast(value).doubleValue());
         } else if (value instanceof Date) {
             final CellStyle style = cell.getSheet().getWorkbook().createCellStyle();
             style.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
             cell.setCellStyle(style);
-            cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+            cell.setCellType(CellType.NUMERIC);
             cell.setCellValue(Date.class.cast(value));
         } else if (value instanceof Boolean) {
-            cell.setCellType(Cell.CELL_TYPE_BOOLEAN);
+            cell.setCellType(CellType.BOOLEAN);
         } else {
-            cell.setCellType(Cell.CELL_TYPE_STRING);
+            cell.setCellType(CellType.STRING);
             cell.setCellValue(value != null ? String.valueOf(value) : "");
         }
     }
