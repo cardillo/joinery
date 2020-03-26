@@ -19,6 +19,7 @@
 package joinery.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -135,5 +136,38 @@ public class Combining {
                 }
             }
         }
+    }
+
+    @SafeVarargs
+    public static <V> DataFrame<V> concat(
+            final DataFrame<V> first, final DataFrame<? extends V> ... others) {
+        List<DataFrame<? extends V>> dfs = new ArrayList<>(others.length + 1);
+        dfs.add(first);
+        dfs.addAll(Arrays.asList(others));
+
+        int rows = 0;
+        Set<Object> columns = new LinkedHashSet<>();
+        for (DataFrame<? extends V> df : dfs) {
+            rows += df.length();
+            for (Object c : df.columns()) {
+                columns.add(c);
+            }
+        }
+
+        List<Object> newcols = new ArrayList<>(columns);
+        DataFrame<V> combined = new DataFrame<V>(columns).reshape(rows, columns.size());
+        int offset = 0;
+        for (DataFrame<? extends V> df : dfs) {
+            List<Object> cols = new ArrayList<>(df.columns());
+            for (int c = 0; c < cols.size(); c++) {
+                int newc = newcols.indexOf(cols.get(c));
+                for (int r = 0; r < df.length(); r++) {
+                    combined.set(offset + r, newc, df.get(r, c));
+                }
+            }
+            offset += df.length();
+        }
+
+        return combined;
     }
 }

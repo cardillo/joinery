@@ -307,4 +307,17 @@ public class DataFrameCombiningTest {
                 left.coalesce(right).toArray()
             );
     }
+
+    @Test
+    public void testConcat() {
+        assertArrayEquals(
+                new Object[] {
+                    1L, 2L, 3L, 1L, 2L, 4L,
+                    "a", "a", "a", null, null, null,
+                    10.0, 20.0, 30.0, 30.0, 40.0, 80.0,
+                    null, null, null, "b", "b", "b"
+                },
+                left.concat(right).toArray()
+            );
+    }
 }

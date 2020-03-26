@@ -794,6 +794,30 @@ implements Iterable<List<V>> {
     }
 
     /**
+     * Concatenate the specified data frames with this data frame
+     * and return the result.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> left = new DataFrame<>("a", "b", "c");
+     * > left.append("one", Arrays.asList(1, 2, 3));
+     * > left.append("two", Arrays.asList(4, 5, 6));
+     * > left.append("three", Arrays.asList(7, 8, 9));
+     * > DataFrame<Object> right = new DataFrame<>("a", "b", "d");
+     * > right.append("one", Arrays.asList(10, 20, 30));
+     * > right.append("two", Arrays.asList(40, 50, 60));
+     * > right.append("four", Arrays.asList(70, 80, 90));
+     * > left.concat(right).length();
+     * 6 }</pre>
+     *
+     * @param others the other data frames
+     * @return the data frame containing all the values
+     */
+    @SafeVarargs
+    public final DataFrame<V> concat(final DataFrame<? extends V> ... others) {
+        return Combining.concat(this, others);
+    }
+
+    /**
      * Update the data frame in place by overwriting any null values with
      * any non-null values provided by the data frame arguments.
      *
@@ -831,7 +855,7 @@ implements Iterable<List<V>> {
      * > df.length();
      * 3 }</pre>
      *
-     * @return the number of columns
+     * @return the number of rows
      */
     public int length() {
         return data.length();
