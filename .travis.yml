@@ -8,6 +8,9 @@ install: mvn install -DskipTests=true
 
 jdk:
     - oraclejdk8
+    - oraclejdk11
+    - openjdk10
+    - openjdk11
 
 before_install:
     - "export DISPLAY=:99.0"
