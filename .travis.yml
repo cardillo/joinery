@@ -12,7 +12,6 @@ jdk:
     - openjdk8
     - openjdk10
     - openjdk11
-    - oraclejdk10
     - oraclejdk11
 
 services:
