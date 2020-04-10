@@ -330,6 +330,22 @@ public class Serialization {
     throws IOException {
         final Workbook wb = new HSSFWorkbook(input);
         final Sheet sheet = wb.getSheetAt(0);
+        return readXls(sheet);
+    }
+
+    public static DataFrame<Object> readXls(final Workbook wb)
+            throws IOException {
+        final Sheet sheet = wb.getSheetAt(0);
+        return readXls(sheet);
+    }
+
+    public static DataFrame<Object> readXls(final Workbook wb, int sheetNum)
+            throws IOException {
+        final Sheet sheet = wb.getSheetAt(sheetNum);
+        return readXls(sheet);
+    }
+
+    public static DataFrame<Object> readXls(final Sheet sheet) {
         final List<Object> columns = new ArrayList<>();
         final List<List<Object>> data = new ArrayList<>();
 
@@ -368,7 +384,14 @@ public class Serialization {
         final Workbook wb = new HSSFWorkbook();
         final Sheet sheet = wb.createSheet();
 
-        // add header
+        writeXls(df, sheet);
+
+        //  write to stream
+        wb.write(output);
+        output.close();
+    }
+
+    public static <V> void writeXls(final DataFrame<V> df, final Sheet sheet) {
         Row row = sheet.createRow(0);
         final Iterator<Object> it = df.columns().iterator();
         for (int c = 0; c < df.size(); c++) {
@@ -384,10 +407,6 @@ public class Serialization {
                 writeCell(cell, df.get(r, c));
             }
         }
-
-        //  write to stream
-        wb.write(output);
-        output.close();
     }
 
     private static final Object readCell(final Cell cell) {
