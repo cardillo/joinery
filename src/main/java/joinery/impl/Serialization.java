@@ -359,13 +359,13 @@ public class Serialization {
                 // read data values
                 final List<Object> values = new ArrayList<>();
 
-                int i = 0;
-                for (final Cell cell : row) {
-                    if (cell.getColumnIndex() != i){
+                for (int i=0; i < columns.size(); i++) {
+                    final Cell cell = row.getCell(i);
+                    if (cell == null) {
                         values.add(null);
+                        continue;
                     }
                     values.add(readCell(cell));
-                    i ++;
                 }
 
                 data.add(values);
