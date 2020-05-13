@@ -220,13 +220,13 @@ public class DataFrameSerializationTest {
 
         System.out.println("print col ...");
 
-        for (int i=0; i < row; i++) {
-            System.out.println(df.row(i));
+        for (int i=0; i < col; i++) {
+            System.out.println(df.col(i));
         }
 
         System.out.println("\nprint row ...");
-        for (int i=0; i < col; i++) {
-            System.out.println(df.col(i));
+        for (int i=0; i < row; i++) {
+            System.out.println(df.row(i));
         }
     }
 
@@ -242,13 +242,13 @@ public class DataFrameSerializationTest {
 
         System.out.println("print col ...");
 
-        for (int i=0; i < row; i++) {
-            System.out.println(df.row(i));
+        for (int i=0; i < col; i++) {
+            System.out.println(df.col(i));
         }
 
         System.out.println("\nprint row ...");
-        for (int i=0; i < col; i++) {
-            System.out.println(df.col(i));
+        for (int i=0; i < row; i++) {
+            System.out.println(df.row(i));
         }
     }
 
