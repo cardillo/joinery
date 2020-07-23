@@ -36,23 +36,22 @@ public class Combining {
     public static <V> DataFrame<V> join(final DataFrame<V> left, final DataFrame<V> right, final JoinType how, final KeyFunction<V> on) {
         final Iterator<Object> leftIt = left.index().iterator();
         final Iterator<Object> rightIt = right.index().iterator();
-        final Map<Object, List<V>> leftMap = new LinkedHashMap<>();
-        final Map<Object, List<V>> rightMap = new LinkedHashMap<>();
-
+        final Map<Object, List<List<V>>> leftMap = new LinkedHashMap<>();
+        final Map<Object, List<List<V>>> rightMap = new LinkedHashMap<>();
         for (final List<V> row : left) {
             final Object name = leftIt.next();
             final Object key = on == null ? name : on.apply(row);
-            if (leftMap.put(key, row) != null) {
-                throw new IllegalArgumentException("generated key is not unique: " + key);
-            }
+            List<List<V>> orDefault = leftMap.getOrDefault(key, new ArrayList<>());
+            leftMap.put(key, orDefault);
+            orDefault.add(row);
         }
 
         for (final List<V> row : right) {
             final Object name = rightIt.next();
             final Object key = on == null ? name : on.apply(row);
-            if (rightMap.put(key, row) != null) {
-                throw new IllegalArgumentException("generated key is not unique: " + key);
-            }
+            List<List<V>> orDefault = rightMap.getOrDefault(key, new ArrayList<>());
+            rightMap.put(key, orDefault);
+            orDefault.add(row);
         }
 
         final List<Object> columns = new ArrayList<>(how != JoinType.RIGHT ? left.columns() : right.columns());
@@ -75,25 +74,36 @@ public class Combining {
         }
 
         final DataFrame<V> df = new DataFrame<>(columns);
-        for (final Map.Entry<Object, List<V>> entry : how != JoinType.RIGHT ? leftMap.entrySet() : rightMap.entrySet()) {
-            final List<V> tmp = new ArrayList<>(entry.getValue());
-            final List<V> row = how != JoinType.RIGHT ? rightMap.get(entry.getKey()) : leftMap.get(entry.getKey());
-            if (row != null || how != JoinType.INNER) {
-                tmp.addAll(row != null ? row : Collections.<V>nCopies(right.columns().size(), null));
-                df.append(entry.getKey(), tmp);
+        int counter = 0;
+        for (final Map.Entry<Object, List<List<V>>> entry : how != JoinType.RIGHT ? leftMap.entrySet() : rightMap.entrySet()) {
+            List<List<V>> values = entry.getValue();
+            for(final List<V> tmp : values){
+                final List<List<V>> rows = how != JoinType.RIGHT ? rightMap.get(entry.getKey()) : leftMap.get(entry.getKey());
+                if ((rows != null && rows.size() > 0) || how != JoinType.INNER) {
+                    for(List<V> row: rows) {
+                        List<V> ttmp = new ArrayList<>();
+                        ttmp.addAll(tmp);
+                        ttmp.addAll(row != null ? row : Collections.<V>nCopies(right.columns().size(), null));
+                        df.append(counter++, ttmp);  // ?????index??
+                    }
+                }
             }
         }
 
         if (how == JoinType.OUTER) {
-            for (final Map.Entry<Object, List<V>> entry : how != JoinType.RIGHT ? rightMap.entrySet() : leftMap.entrySet()) {
-                final List<V> row = how != JoinType.RIGHT ? leftMap.get(entry.getKey()) : rightMap.get(entry.getKey());
-                if (row == null) {
-                    final List<V> tmp = new ArrayList<>(Collections.<V>nCopies(
-                        how != JoinType.RIGHT ? left.columns().size() : right.columns().size(), null));
-                    tmp.addAll(entry.getValue());
-                    df.append(entry.getKey(), tmp);
+            for (final Map.Entry<Object, List<List<V>>> entry : how != JoinType.RIGHT ? rightMap.entrySet() : leftMap.entrySet()) {
+                List<List<V>> values = entry.getValue();
+                for(final List<V> tmp : values){
+                    final List<List<V>> rows = how != JoinType.RIGHT ? leftMap.get(entry.getKey()) : rightMap.get(entry.getKey());
+                    if ((rows != null && rows.size() > 0) || how != JoinType.INNER) {
+                        for(List<V> row: rows) {
+                            List<V> ttmp = new ArrayList<>();
+                            ttmp.addAll(tmp);
+                            ttmp.addAll(row != null ? row : Collections.<V>nCopies(right.columns().size(), null));
+                            df.append(counter++, ttmp);
+                        }
+                    }
                 }
-            }
         }
 
         return df;
