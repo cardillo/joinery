@@ -160,10 +160,10 @@ public class Combining {
         if (how == JoinType.OUTER) {
             for (final Map.Entry<Object, List<List<V>>> entry : how != JoinType.RIGHT ? rightMap.entrySet() : leftMap.entrySet()) {
                 List<List<V>> values = entry.getValue();
-                for(final List<V> tmp : values){
+                for (final List<V> tmp : values) {
                     final List<List<V>> rows = how != JoinType.RIGHT ? leftMap.get(entry.getKey()) : rightMap.get(entry.getKey());
                     if ((rows != null && rows.size() > 0) || how != JoinType.INNER) {
-                        for(List<V> row: rows) {
+                        for (List<V> row : rows) {
                             List<V> ttmp = new ArrayList<>();
                             ttmp.addAll(tmp);
                             ttmp.addAll(row != null ? row : Collections.<V>nCopies(right.columns().size(), null));
@@ -171,6 +171,7 @@ public class Combining {
                         }
                     }
                 }
+            }
         }
 
         return df;
