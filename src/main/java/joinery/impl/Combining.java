@@ -84,7 +84,7 @@ public class Combining {
                         List<V> ttmp = new ArrayList<>();
                         ttmp.addAll(tmp);
                         ttmp.addAll(row != null ? row : Collections.<V>nCopies(right.columns().size(), null));
-                        df.append(counter++, ttmp);  // ?????index??
+                        df.append(counter++, ttmp);  // nonstrict join, key can be not unique
                     }
                 }
             }
