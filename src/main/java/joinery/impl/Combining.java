@@ -33,7 +33,74 @@ import joinery.DataFrame.JoinType;
 import joinery.DataFrame.KeyFunction;
 
 public class Combining {
+
     public static <V> DataFrame<V> join(final DataFrame<V> left, final DataFrame<V> right, final JoinType how, final KeyFunction<V> on) {
+        final Iterator<Object> leftIt = left.index().iterator();
+        final Iterator<Object> rightIt = right.index().iterator();
+        final Map<Object, List<V>> leftMap = new LinkedHashMap<>();
+        final Map<Object, List<V>> rightMap = new LinkedHashMap<>();
+
+        for (final List<V> row : left) {
+            final Object name = leftIt.next();
+            final Object key = on == null ? name : on.apply(row);
+            if (leftMap.put(key, row) != null) {
+                throw new IllegalArgumentException("generated key is not unique: " + key);
+            }
+        }
+
+        for (final List<V> row : right) {
+            final Object name = rightIt.next();
+            final Object key = on == null ? name : on.apply(row);
+            if (rightMap.put(key, row) != null) {
+                throw new IllegalArgumentException("generated key is not unique: " + key);
+            }
+        }
+
+        final List<Object> columns = new ArrayList<>(how != JoinType.RIGHT ? left.columns() : right.columns());
+        for (Object column : how != JoinType.RIGHT ? right.columns() : left.columns()) {
+            final int index = columns.indexOf(column);
+            if (index >= 0) {
+                if (column instanceof List) {
+                    @SuppressWarnings("unchecked")
+                    final List<Object> l1 = List.class.cast(columns.get(index));
+                    l1.add(how != JoinType.RIGHT ? "left" : "right");
+                    @SuppressWarnings("unchecked")
+                    final List<Object> l2= List.class.cast(column);
+                    l2.add(how != JoinType.RIGHT ? "right" : "left");
+                } else {
+                    columns.set(index, String.format("%s_%s", columns.get(index), how != JoinType.RIGHT ? "left" : "right"));
+                    column = String.format("%s_%s", column, how != JoinType.RIGHT ? "right" : "left");
+                }
+            }
+            columns.add(column);
+        }
+
+        final DataFrame<V> df = new DataFrame<>(columns);
+        for (final Map.Entry<Object, List<V>> entry : how != JoinType.RIGHT ? leftMap.entrySet() : rightMap.entrySet()) {
+            final List<V> tmp = new ArrayList<>(entry.getValue());
+            final List<V> row = how != JoinType.RIGHT ? rightMap.get(entry.getKey()) : leftMap.get(entry.getKey());
+            if (row != null || how != JoinType.INNER) {
+                tmp.addAll(row != null ? row : Collections.<V>nCopies(right.columns().size(), null));
+                df.append(entry.getKey(), tmp);
+            }
+        }
+
+        if (how == JoinType.OUTER) {
+            for (final Map.Entry<Object, List<V>> entry : how != JoinType.RIGHT ? rightMap.entrySet() : leftMap.entrySet()) {
+                final List<V> row = how != JoinType.RIGHT ? leftMap.get(entry.getKey()) : rightMap.get(entry.getKey());
+                if (row == null) {
+                    final List<V> tmp = new ArrayList<>(Collections.<V>nCopies(
+                            how != JoinType.RIGHT ? left.columns().size() : right.columns().size(), null));
+                    tmp.addAll(entry.getValue());
+                    df.append(entry.getKey(), tmp);
+                }
+            }
+        }
+
+        return df;
+    }
+
+    public static <V> DataFrame<V> nonStrictJoin(final DataFrame<V> left, final DataFrame<V> right, final JoinType how, final KeyFunction<V> on) {
         final Iterator<Object> leftIt = left.index().iterator();
         final Iterator<Object> rightIt = right.index().iterator();
         final Map<Object, List<List<V>>> leftMap = new LinkedHashMap<>();
