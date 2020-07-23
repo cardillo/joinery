@@ -176,6 +176,19 @@ public class Combining {
         return df;
     }
 
+    public static <V> DataFrame<V> nonStrictJoinOn(final DataFrame<V> left, final DataFrame<V> right, final JoinType how, final Integer ... cols) {
+        return nonStrictJoin(left, right, how, new KeyFunction<V>() {
+            @Override
+            public Object apply(final List<V> value) {
+                final List<V> key = new ArrayList<>(cols.length);
+                for (final int col : cols) {
+                    key.add(value.get(col));
+                }
+                return Collections.unmodifiableList(key);
+            }
+        });
+    }
+
     public static <V> DataFrame<V> joinOn(final DataFrame<V> left, final DataFrame<V> right, final JoinType how, final Integer ... cols) {
         return join(left, right, how, new KeyFunction<V>() {
             @Override
