@@ -147,11 +147,20 @@ public class Combining {
             for(final List<V> tmp : values){
                 final List<List<V>> rows = how != JoinType.RIGHT ? rightMap.get(entry.getKey()) : leftMap.get(entry.getKey());
                 if ((rows != null && rows.size() > 0) || how != JoinType.INNER) {
-                    for(List<V> row: rows) {
+                    if(rows == null) {
+                        System.out.println("rows is null for " + entry.getKey());
                         List<V> ttmp = new ArrayList<>();
                         ttmp.addAll(tmp);
-                        ttmp.addAll(row != null ? row : Collections.<V>nCopies(right.columns().size(), null));
-                        df.append(counter++, ttmp);  // nonstrict join, key can be not unique
+                        ttmp.addAll(Collections.<V>nCopies(right.columns().size(), null));
+                        df.append(counter++, ttmp);
+                        continue;
+                    } else {
+                        for (List<V> row : rows) {
+                            List<V> ttmp = new ArrayList<>();
+                            ttmp.addAll(tmp);
+                            ttmp.addAll(row != null ? row : Collections.<V>nCopies(right.columns().size(), null));
+                            df.append(counter++, ttmp);  // nonstrict join, key can be not unique
+                        }
                     }
                 }
             }
@@ -163,6 +172,10 @@ public class Combining {
                 for (final List<V> tmp : values) {
                     final List<List<V>> rows = how != JoinType.RIGHT ? leftMap.get(entry.getKey()) : rightMap.get(entry.getKey());
                     if ((rows != null && rows.size() > 0) || how != JoinType.INNER) {
+                        if(rows == null) {
+                            System.out.println("rows is null for " + entry.getKey());
+                            continue;
+                        }
                         for (List<V> row : rows) {
                             List<V> ttmp = new ArrayList<>();
                             ttmp.addAll(tmp);
