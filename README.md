@@ -13,6 +13,11 @@ joinery
   </dd>
 </dl>
 
+----------
+
+![Build Status](https://github.com/cardillo/joinery/actions/workflows/build.yml/badge.svg)
+
+
 quick start
 ==========
 
@@ -56,13 +61,12 @@ for the complete code.
 next steps
 ==========
 
-Get the [executable jar](https://bintray.com/artifact/download/cardillo/maven/joinery/joinery-dataframe/1.9/joinery-dataframe-1.9-jar-with-dependencies.jar)
-and try it for yourself.
+Get the [executable jar](https://s01.oss.sonatype.org/service/local/repositories/releases/content/sh/joinery/joinery-dataframe/1.10/joinery-dataframe-1.10-jar-with-dependencies.jar) and try it for yourself.
 
 ```javascript
-$ java -jar joinery-dataframe-1.9-jar-with-dependencies.jar shell
-# Joinery -- Data frames for Java, 1.9-3ea7d54
-# Java HotSpot(TM) 64-Bit Server VM, Oracle Corporation, 1.8.0_181
+$ java -jar joinery-dataframe-1.10-jar-with-dependencies.jar shell
+# Joinery -- Data frames for Java, 1.10-deb702e
+# OpenJDK 64-Bit Server VM, Oracle Corporation, 1.8.0_92-internal
 # Rhino 1.7 release 2 2009 03 22
 > df = new DataFrame()
 [empty data frame]
@@ -84,26 +88,15 @@ $ java -jar joinery-dataframe-1.9-jar-with-dependencies.jar shell
 maven
 ==========
 
-A maven repository for **joinery** is hosted on
-[JCenter](http://jcenter.bintray.com/).  For
-instructions on setting up your maven profile to
-use JCenter, visit https://bintray.com/bintray/jcenter.
+Since version 1.10, joinery is included in the central repo.  If you are upgrading from a prior version, note the new group id.
 
 ```xml
 <dependency>
-  <groupId>joinery</groupId>
+  <groupId>sh.joinery</groupId>
   <artifactId>joinery-dataframe</artifactId>
-  <version>1.9</version>
+  <version>1.10</version>
 </dependency>
 ```
-
-
-download
-==========
-
-JCenter also allows for direct download using the button below.
-
-[![Download](https://api.bintray.com/packages/cardillo/maven/joinery/images/download.svg)](https://bintray.com/cardillo/maven/joinery/_latestVersion)
 
 utilities
 ==========
@@ -142,8 +135,8 @@ Launches an interactive JavaScript shell for working with data frames.
 
 ```javascript
 $ java joinery.DataFrame shell
-# Joinery -- Data frames for Java, 1.9-3ea7d54
-# Java HotSpot(TM) 64-Bit Server VM, Oracle Corporation, 1.8.0_181
+# Joinery -- Data frames for Java, 1.10-deb702e
+# OpenJDK 64-Bit Server VM, Oracle Corporation, 1.8.0_92-internal
 # Rhino 1.7 release 2 2009 03 22
 > df = DataFrame.readCsv("https://www.quandl.com/api/v1/datasets/GOOG/NASDAQ_AAPL.csv")
               Date	  Open	  High	   Low	        Close	             Volume
@@ -218,8 +211,5 @@ documentation
 ==========
 
 The complete api documentation for the `DataFrame` class is available
-at http://cardillo.github.io/joinery
+at https://joinery.sh
 
-----------
-
-[![Build Status](https://travis-ci.org/cardillo/joinery.svg?branch=master)](https://travis-ci.org/cardillo/joinery)
