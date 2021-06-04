@@ -1,14 +1,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>joinery</groupId>
+  <groupId>sh.joinery</groupId>
   <artifactId>joinery-dataframe</artifactId>
   <version>1.10-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Joinery</name>
   <description>Data frames for Java</description>
-  <url>https://cardillo.github.io/joinery</url>
+  <url>https://joinery.sh/</url>
 
   <licenses>
     <license>
@@ -25,8 +25,8 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git@github.com:cardillo/joinery.git</connection>
-    <developerConnection>scm:git:git@github.com:cardillo/joinery.git</developerConnection>
+    <connection>scm:git:https://github.com/cardillo/joinery.git</connection>
+    <developerConnection>scm:git:https://github.com/cardillo/joinery.git</developerConnection>
     <url>git@github.com:cardillo/joinery.git</url>
     <tag>HEAD</tag>
   </scm>
@@ -263,7 +263,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-gpg-plugin</artifactId>
-          <version>1.6</version>
+          <version>3.0.1</version>
         </plugin>
 
         <plugin>
@@ -390,8 +390,8 @@
 
   <distributionManagement>
     <repository>
-      <id>bintray</id>
-      <url>https://api.bintray.com/maven/cardillo/maven/joinery</url>
+      <id>central</id>
+      <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
   </distributionManagement>
 
@@ -516,6 +516,12 @@
                 <goals>
                   <goal>sign</goal>
                 </goals>
+                <configuration>
+                  <gpgArguments>
+                    <arg>--pinentry-mode</arg>
+                    <arg>loopback</arg>
+                  </gpgArguments>
+                </configuration>
               </execution>
             </executions>
           </plugin>
