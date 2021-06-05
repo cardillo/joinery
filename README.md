@@ -16,8 +16,9 @@ joinery
 
 ----------
 
-![Build Status](https://github.com/cardillo/joinery/actions/workflows/build.yml/badge.svg)
-![Maven Central](https://img.shields.io/maven-central/v/sh.joinery/joinery-dataframe)
+[![Build Status](https://img.shields.io/github/workflow/status/cardillo/joinery/build%20and%20test)](https://github.com/cardillo/joinery/actions/workflows/build.yml)
+[![Codecov](https://img.shields.io/codecov/c/github/cardillo/joinery)](https://codecov.io/gh/cardillo/joinery)
+[![Maven Central](https://img.shields.io/maven-central/v/sh.joinery/joinery-dataframe)](https://search.maven.org/artifact/sh.joinery/joinery-dataframe/1.10/jar)
 
 
 quick start
