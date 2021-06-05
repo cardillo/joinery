@@ -15,12 +15,12 @@ jobs:
     steps:
     - name: checkout
       uses: actions/checkout@v2
-    - name: xvfb-action
-      uses: GabrielBB/xvfb-action@v1
     - name: setup-java
       uses: actions/setup-java@v2
       with:
         java-version: ${{ matrix.java }}
         distribution: 'adopt'
     - name: maven
-      run: mvn --batch-mode test verify
+      uses: GabrielBB/xvfb-action@v1
+      with:
+        run: mvn --batch-mode test verify
