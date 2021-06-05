@@ -20,6 +20,12 @@ jobs:
       with:
         java-version: ${{ matrix.java }}
         distribution: 'adopt'
+    - name: cache repo
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
     - name: maven
       uses: GabrielBB/xvfb-action@v1
       with:
@@ -28,6 +34,7 @@ jobs:
       uses: dorny/test-reporter@v1
       if: ${{ runner.os == 'Linux' && matrix.java == 11 }}
       with:
+        name: junit tests
         reporter: java-junit
         path: 'target/surefire-reports/TEST-*.xml'
     - name: coverage report
