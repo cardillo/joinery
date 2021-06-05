@@ -1,0 +1,136 @@
+/*
+ * color scheme (dark -> light)
+ *   orange: #c30
+ *   blues #009, #069
+ *   greens: #060, #090
+ *   greys: #333, #ccc, #eee
+ */
+html, body {
+  color: #333;
+  background: #333;
+  font-size: 100%;
+  overflow: visible;
+}
+
+#api-info-block,
+#inhmethods,
+table.jd-inheritance-table {
+  display: none;
+}
+
+#doc-content {
+  width: 960px;
+  margin: 0 auto;
+  padding: 16px;
+  background: #fff;
+  line-height: 1.4em;
+  overflow: visible;
+}
+
+#doc-content pre {
+  line-height: 1em;
+}
+
+#header {
+  width: 960px;
+  padding: 16px;
+  margin: 0 auto;
+  background: #fff;
+  border-bottom: 4px solid #090;
+}
+
+#headerLeft {
+  padding: 0;
+  bottom: 12px;
+}
+
+#headerRight {
+  right: 32px;
+  bottom: 24px;
+}
+
+#jd-header,
+#jd-header a,
+#jd-header a:hover,
+#jd-header a:visited {
+  color: #fff;
+  background: #c30;
+}
+
+table.jd-sumtable > tbody > tr > th {
+  background: #ccc;
+}
+
+table.jd-sumtable > tbody > tr {
+  border-top: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  border-left: 6px solid #090;
+}
+
+table.jd-sumtable > tbody> tr.api {
+  border-top: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  border-left: 6px solid #ccc;
+}
+
+table.jd-sumtable td {
+  background: #fff;
+}
+
+table.jd-sumtable .alt-color td {
+  background: #eee;
+}
+
+#jd-content h2 {
+  border-top: 2px dotted #ccc;
+}
+
+#jd-content h4 {
+  color: #333;
+  background: #fff;
+  border-top: 2px dotted #ccc;
+}
+
+#jd-content h4 .sympad {
+  color: #060;
+}
+
+#jd-content h4 a,
+#jd-content h4 a:visited {
+  color: #060;
+}
+
+#jd-content h4 a:hover {
+  color: #090;
+}
+
+#jd-content a,
+#jd-content a:visited {
+  color: #009;
+}
+
+#jd-content a:hover {
+  color: #00f;
+}
+
+#jd-content table {
+  margin: 0 0 1em 0;
+  width: auto;
+}
+
+#footer {
+  margin: 0;
+  padding: 8px;
+  width: auto;
+  float: none;
+}
+
+#footer,
+#footer a,
+#footer a:hover,
+#footer a:visited {
+  color: #fff;
+  background: #069;
+}
