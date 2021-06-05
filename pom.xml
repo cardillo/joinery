@@ -44,6 +44,7 @@
     <xchart.version>2.5.1</xchart.version>
     <jline.version>3.14.0</jline.version>
     <slf4j.version>1.7.7</slf4j.version>
+    <rhino.version>1.7.13</rhino.version>
 
     <!-- use property to allow redefining via profiles/command line -->
     <test.groups>!joinery.perf.PerformanceTests</test.groups>
@@ -94,9 +95,9 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>rhino</groupId>
-      <artifactId>js</artifactId>
-      <version>1.7R2</version>
+      <groupId>org.mozilla</groupId>
+      <artifactId>rhino</artifactId>
+      <version>${rhino.version}</version>
       <optional>true</optional>
     </dependency>
     <dependency>
@@ -226,11 +227,15 @@
           <version>3.1.0</version>
           <configuration>
             <archive>
+              <manifest>
+                <mainClass>joinery.DataFrame</mainClass>
+              </manifest>
               <manifestEntries>
-                <Name>${project.groupId}/</Name>
-                <Specification-Title>${project.description}</Specification-Title>
+                <Name>joinery/</Name>
+                <Specification-Title>${project.name} - ${project.description}</Specification-Title>
                 <Specification-Version>${project.version}</Specification-Version>
-                <Implementation-Version>${buildNumber}</Implementation-Version>
+                <Implementation-Title>${project.name}</Implementation-Title>
+                <Implementation-Version>${project.version}.${buildNumber}</Implementation-Version>
               </manifestEntries>
             </archive>
           </configuration>
@@ -250,12 +255,22 @@
                 <mainClass>joinery.DataFrame</mainClass>
               </manifest>
               <manifestEntries>
-                <Name>${project.groupId}/</Name>
-                <Specification-Title>${project.name}</Specification-Title>
+                <Name>joinery/</Name>
+                <Specification-Title>${project.name} - ${project.description}</Specification-Title>
                 <Specification-Version>${project.version}</Specification-Version>
-                <Implementation-Title>${project.description}</Implementation-Title>
-                <Implementation-Version>${buildNumber}</Implementation-Version>
+                <Implementation-Title>${project.name}</Implementation-Title>
+                <Implementation-Version>${project.version}.${buildNumber}</Implementation-Version>
               </manifestEntries>
+              <manifestSections>
+                <!-- add rhino section to uberjar for version reporting -->
+                <manifestSection>
+                  <Name>org/mozilla/javascript/</Name>
+                  <manifestEntries>
+                    <Implementation-Title>Rhino</Implementation-Title>
+                    <Implementation-Version>${rhino.version}</Implementation-Version>
+                  </manifestEntries>
+                </manifestSection>
+              </manifestSections>
             </archive>
           </configuration>
         </plugin>

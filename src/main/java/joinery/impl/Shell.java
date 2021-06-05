@@ -88,15 +88,15 @@ public class Shell {
 
             if (interactive) {
                 final Package pkg = DataFrame.class.getPackage();
-                System.out.printf("# %s -- %s, %s-%s\n# %s, %s, %s\n# %s\n",
-                        pkg.getSpecificationTitle(),
+                final Package rhino = Context.class.getPackage();
+                System.out.printf("# %s %s\n# %s, %s, %s\n# %s %s\n",
                         pkg.getImplementationTitle(),
-                        pkg.getSpecificationVersion(),
                         pkg.getImplementationVersion(),
                         System.getProperty("java.vm.name"),
                         System.getProperty("java.vendor"),
                         System.getProperty("java.version"),
-                        ctx.getImplementationVersion()
+                        rhino.getImplementationTitle(),
+                        rhino.getImplementationVersion()
                     );
             }
 
