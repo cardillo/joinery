@@ -3,6 +3,7 @@ joinery
 
 <dl>
   <dt>joinery [joi-nuh-ree]</dt>
+  <dd></dd>
   <dd>
     1. In woodworking, the craft of joining together
     pieces of wood to produce more complex items.
@@ -16,6 +17,7 @@ joinery
 ----------
 
 ![Build Status](https://github.com/cardillo/joinery/actions/workflows/build.yml/badge.svg)
+![Maven Central](https://img.shields.io/maven-central/v/sh.joinery/joinery-dataframe)
 
 
 quick start
@@ -61,7 +63,7 @@ for the complete code.
 next steps
 ==========
 
-Get the [executable jar](https://s01.oss.sonatype.org/service/local/repositories/releases/content/sh/joinery/joinery-dataframe/1.10/joinery-dataframe-1.10-jar-with-dependencies.jar) and try it for yourself.
+Get the [executable jar](https://repo.maven.apache.org/maven2/sh/joinery/joinery-dataframe/1.10/joinery-dataframe-1.10-jar-with-dependencies.jar) and try it for yourself.
 
 ```javascript
 $ java -jar joinery-dataframe-1.10-jar-with-dependencies.jar shell
