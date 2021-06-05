@@ -24,3 +24,14 @@ jobs:
       uses: GabrielBB/xvfb-action@v1
       with:
         run: mvn --batch-mode test verify
+    - name: test report
+      uses: dorny/test-reporter@v1
+      if: ${{ runner.os == 'Linux' && matrix.java == 11 }}
+      with:
+        reporter: java-junit
+        path: 'target/surefire-reports/TEST-*.xml'
+    - name: coverage report
+      uses: codecov/codecov-action@v1.5.0
+      if: ${{ runner.os == 'Linux' && matrix.java == 11 }}
+      with:
+        file: target/site/jacoco/jacoco.xml
