@@ -63,6 +63,8 @@ import joinery.impl.SparseBitSet;
 import joinery.impl.Timeseries;
 import joinery.impl.Transforms;
 import joinery.impl.Views;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 
 /**
  * A data frame implementation in the spirit
@@ -2216,6 +2218,40 @@ implements Iterable<List<V>> {
     }
 
     /**
+     * Read data from workbook into a new data frame
+     * @param wb workbook
+     * @return a new data frame
+     * @throws IOException
+     */
+    public static final DataFrame<Object> readXls(final Workbook wb)
+            throws IOException {
+        return Serialization.readXls(wb);
+    }
+
+    /**
+     * Read data from workbook into a new data frame
+     * @param wb workbook
+     * @param sheetNum sheet index
+     * @return a new data frame
+     * @throws IOException
+     */
+    public static final DataFrame<Object> readXls(final Workbook wb, int sheetNum)
+            throws IOException {
+        return Serialization.readXls(wb, sheetNum);
+    }
+
+    /**
+     * Read data from sheet into a new data frame
+     * @param sheet sheet
+     * @return a new data frame
+     * @throws IOException
+     */
+    public static final DataFrame<Object> readXls(final Sheet sheet)
+            throws IOException {
+        return Serialization.readXls(sheet);
+    }
+
+    /**
      * Write the data from the data frame
      * to the specified file as an excel workbook.
      *
@@ -2231,12 +2267,22 @@ implements Iterable<List<V>> {
      * Write the data from the data frame
      * to the provided output stream as an excel workbook.
      *
-     * @param file the file to write
      * @throws IOException if an error occurs writing the file
      */
     public final void writeXls(final OutputStream output)
     throws IOException {
         Serialization.writeXls(this, output);
+    }
+
+    /**
+     * Write the data from the data frame
+     * to the provided sheet as an excel workbook.
+     * @param sheet
+     * @throws IOException
+     */
+    public final void writeXls(final Sheet sheet)
+            throws IOException {
+        Serialization.writeXls(this, sheet);
     }
 
     /**
