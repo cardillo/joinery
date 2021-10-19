@@ -1,4 +1,4 @@
-joinery test
+joinery
 ==========
 
 <dl>
