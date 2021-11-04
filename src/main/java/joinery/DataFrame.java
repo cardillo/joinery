@@ -2175,9 +2175,10 @@ implements Iterable<List<V>> {
      * @param file the file to write
      * @throws IOException if an error occurs writing the file
      */
+    //TODO Qin: Add separator here
     public final void writeCsv(final String file)
     throws IOException {
-        Serialization.writeCsv(this, new FileOutputStream(file));
+        Serialization.writeCsv(this, new FileOutputStream(file),",");
     }
 
 
@@ -2188,20 +2189,21 @@ implements Iterable<List<V>> {
      * @param output
      * @throws IOException
      */
+    //TODO Qin: Add separator here need test 2
     public final void writeCsv(final OutputStream output)
     throws IOException {
-        Serialization.writeCsv(this, output);
+        Serialization.writeCsv(this, output, ",");
     }
 
     // TODO : QQIN Edit here
-    public final DataFrame<Object> writeCsv(final String file, final String separator)
+    public final void writeCsv(final String file, final String separator)
             throws IOException {
-        return Serialization.writeCsv(this, new FileOutputStream(file), separator);
+            Serialization.writeCsv(this, new FileOutputStream(file), separator);
     }
 
-    public final DataFrame<Object> writeCsv(final OutputStream output, final String separator)
+    public final void writeCsv(final OutputStream output, final String separator)
             throws IOException {
-        return Serialization.writeCsv(this,  output, separator);
+            Serialization.writeCsv(this,  output, separator);
     }
 
     /**
