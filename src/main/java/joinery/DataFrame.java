@@ -2115,6 +2115,9 @@ implements Iterable<List<V>> {
      * @return a new data frame
      * @throws IOException if an error reading the stream occurs
      */
+    //TODO: this is related with my issue, at least I need to understand this.
+    // Can the writecsv() function specify a separator?
+    //author said "Looks like this was missed when adding the separator parameter to the readCsv methods."
     public static final DataFrame<Object> readCsv(final InputStream input)
     throws IOException {
         return Serialization.readCsv(input);
@@ -2177,9 +2180,10 @@ implements Iterable<List<V>> {
         Serialization.writeCsv(this, new FileOutputStream(file));
     }
 
+
     /**
      * Write the data from this data frame to
-     * the provided output stream as comma separated values.
+     * the provided output stream as delimiter specified separated values.
      *
      * @param output
      * @throws IOException
@@ -2187,6 +2191,17 @@ implements Iterable<List<V>> {
     public final void writeCsv(final OutputStream output)
     throws IOException {
         Serialization.writeCsv(this, output);
+    }
+
+    // TODO : QQIN Edit here
+    public final DataFrame<Object> writeCsv(final String file, final String separator)
+            throws IOException {
+        return Serialization.writeCsv(this, new FileOutputStream(file), separator);
+    }
+
+    public final DataFrame<Object> writeCsv(final OutputStream output, final String separator)
+            throws IOException {
+        return Serialization.writeCsv(this,  output, separator);
     }
 
     /**

@@ -68,6 +68,9 @@ extends Suite {
                             System.setIn(new ByteArrayInputStream(
                                 String.format("tmp = frames[0]; df = frames[1]; %s;", expr).getBytes()));
                             try {
+                                //TODO Figure out what is the csv here meaning and if it is related with my issue?
+                                //  It seems like Dataframe.readCsv is related with my issue
+                                //  good start then I located Dataframe.readCsv
                                 final DataFrame<Object> df = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("grouping.csv"));
                                 final Object result = Shell.repl(Arrays.asList(new DataFrame<>(), df));
                                 if (result instanceof WrappedException) {

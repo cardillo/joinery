@@ -54,11 +54,10 @@ public class Aggregation {
             return values.get(0);
         }
     }
-
+    //TODO Here it mentions delimiter, could it be the place I need to edit? No, this is for construct a dataframe by coding/typing in
     public static class Collapse<V>
     implements Aggregate<V, String> {
         private final String delimiter;
-
         public Collapse() {
             this(",");
         }
