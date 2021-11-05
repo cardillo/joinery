@@ -606,10 +606,13 @@ implements Iterable<List<V>> {
      * Concatenate two dataframes with same column types and column numbers, developed by Dongming Xia
      * if either the numbers of columns or type of columns does not match, return the main dataframe
      * otherwise, return the dataframe after concatenation
+     *
      * @param df2 - the dataframe to be concatenated after the main dataframe
+     *
      */
 
-    public DataFrame<V> concat(final DataFrame<V> df2){
+    // more potential functionalities to add:
+    public final DataFrame<V> concatenate(final DataFrame<? extends V> df2, int axis){
         // check if df2 has the same number of columns as the main df
         if (this.size() != df2.size()){
             System.out.println("The numbers of columns between two dataframes does not match");
@@ -622,12 +625,14 @@ implements Iterable<List<V>> {
         }
 
         // the main body of the function, Time Complexity is O(n) where n is the number of rows in df2
-        for(List<V> row: df2){
+        for(List<? extends V> row: df2){
             this.append(row);
         }
 
         return this;
     }
+
+
 
 
     /**
