@@ -603,6 +603,34 @@ implements Iterable<List<V>> {
     }
 
     /**
+     * Concatenate two dataframes with same column types and column numbers, developed by Dongming Xia
+     * if either the numbers of columns or type of columns does not match, return the main dataframe
+     * otherwise, return the dataframe after concatenation
+     * @param df2 - the dataframe to be concatenated after the main dataframe
+     */
+
+    public DataFrame<V> concat(final DataFrame<V> df2){
+        // check if df2 has the same number of columns as the main df
+        if (this.size() != df2.size()){
+            System.out.println("The numbers of columns between two dataframes does not match");
+            return this;
+        }
+        // check if df2 has the same column types as the main df
+        else if (!Arrays.equals(this.types().toArray(), df2.types().toArray())){
+            System.out.println("The column types between two dataframes does not match");
+            return this;
+        }
+
+        // the main body of the function, Time Complexity is O(n) where n is the number of rows in df2
+        for(List<V> row: df2){
+            this.append(row);
+        }
+
+        return this;
+    }
+
+
+    /**
      * Reshape a data frame to the specified dimensions.
      *
      * <pre> {@code
@@ -2231,7 +2259,7 @@ implements Iterable<List<V>> {
      * Write the data from the data frame
      * to the provided output stream as an excel workbook.
      *
-     * @param file the file to write
+     * @param output the file to write
      * @throws IOException if an error occurs writing the file
      */
     public final void writeXls(final OutputStream output)
@@ -2471,4 +2499,6 @@ implements Iterable<List<V>> {
             );
         System.exit(255);
     }
+
+
 }
