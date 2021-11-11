@@ -603,37 +603,65 @@ implements Iterable<List<V>> {
     }
 
     /**
-     * Concatenate two dataframes with same column types and column numbers, developed by Dongming Xia
-     * if either the numbers of columns or type of columns does not match, return the main dataframe
-     * otherwise, return the dataframe after concatenation
+     * Concatenate two dataframes, either vertically or horizontally (Developed by Dongming Xia)
      *
-     * @param df2 - the dataframe to be concatenated after the main dataframe
-     *
+     * @param df2 - The dataframe to be concatenated after the main dataframe
+     * @param axis - The axis to concatenate along, default is 0
      */
 
     // more potential functionalities to add:
-    public final DataFrame<V> concatenate(final DataFrame<? extends V> df2, int axis){
+    public final DataFrame<V> concatenate(final DataFrame<V> df2, final int axis){
         // check if df2 has the same number of columns as the main df
+        if (axis == 0){
+            return this.verticalConcat(df2);
+        }
+        else if (axis == 1){
+            return this.horizontalConcat(df2);
+        }
+        else{
+            System.out.println("Please put 0 or 1 for the value of axis");
+            return this;
+        }
+    }
+
+    public final DataFrame<V> concatenate(final DataFrame<V> df2){
+        return this.concatenate(df2, 0);
+    }
+
+    private DataFrame<V> verticalConcat(final DataFrame<V> df2) {
+        // check if df2 has the same number of column as the main df, if not, return the main dataframe
         if (this.size() != df2.size()){
             System.out.println("The numbers of columns between two dataframes does not match");
             return this;
         }
-        // check if df2 has the same column types as the main df
+        // check if df2 has the same column types as the main df, if not, return the main dataframe
         else if (!Arrays.equals(this.types().toArray(), df2.types().toArray())){
             System.out.println("The column types between two dataframes does not match");
             return this;
         }
 
         // the main body of the function, Time Complexity is O(n) where n is the number of rows in df2
-        for(List<? extends V> row: df2){
+        for(List<V> row: df2){
             this.append(row);
         }
 
         return this;
     }
 
+    private DataFrame<V> horizontalConcat(final DataFrame<V> df2) {
+        // check if df2 has the same number of rows as the main df, if not, return the main dataframe
+        if (this.length() != df2.length()) {
+            return this;
+        }
 
+        DataFrame<V> temp_df1 = new DataFrame<>();
+        DataFrame<V> temp_df2 = new DataFrame<>();
 
+        temp_df1 = this.resetIndex();
+        temp_df2 = df2.resetIndex();
+
+        return temp_df1.join(temp_df2);
+    }
 
     /**
      * Reshape a data frame to the specified dimensions.
