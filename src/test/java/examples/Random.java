@@ -22,6 +22,7 @@ public class Random {
 
         System.out.println(df1);
 
+
         DataFrame<Object> df3 = new DataFrame<>("a", "b", "c");
         df3.append(Arrays.asList(1, 2, 3));
         df3.append(Arrays.asList(4, 5, 6));
@@ -31,7 +32,7 @@ public class Random {
         df4.append(Arrays.asList(40, 50, 60));
 
         df3 = df3.concatenate(df4, 1);
-        System.out.println(df3);
+        // System.out.println(df3);
 
     }
 }
