@@ -615,11 +615,11 @@ implements Iterable<List<V>> {
      */
 
     public final DataFrame<V> concatenate(final DataFrame<V> df2, final int axis){
-        // concatenate horizontally
+        // concatenate horizontally by calling the verticalConcat() function
         if (axis == 0){
             return this.verticalConcat(df2);
         }
-        // concatenate vertically
+        // concatenate vertically by calling the horizontalConcat() function
         else if (axis == 1){
             return this.horizontalConcat(df2);
         }
@@ -635,13 +635,11 @@ implements Iterable<List<V>> {
      *
      * @param df2 - The dataframe to be concatenated vertically after the main dataframe
      */
-    public final DataFrame<V> concatenate(final DataFrame<V> df2){
-        return this.concatenate(df2, 0);
-    }
+    public final DataFrame<V> concatenate(final DataFrame<V> df2){ return this.concatenate(df2, 0); }
 
 
     private DataFrame<V> verticalConcat(final DataFrame<V> df2) {
-        // check if df2 has the same number of column as the main df, if not, return the main dataframe
+        // check if df2 has the same number of columns as the main df, if not, return the main dataframe
         if (this.size() != df2.size()){
             System.out.println("The numbers of columns between two dataframes does not match");
             return this;
