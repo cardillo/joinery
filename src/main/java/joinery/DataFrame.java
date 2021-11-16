@@ -610,8 +610,20 @@ implements Iterable<List<V>> {
      * For horizontal concatenate, if the number of rows does not match,
      * print out error message and return the main dataframe
      *
+     * <pre> {@code
+     * > DataFrame<Object> df1 = new DataFrame<>("a", "b", "c");
+     * > df1.append(Arrays.asList(1, 2, 3));
+     * > df1.append(Arrays.asList(4, 5, 6));
+     * > df1.append(Arrays.asList(7, 8, 9));
+     * > DataFrame<Object> df2 = new DataFrame<>("d", "e", "f");
+     * > df2.append(Arrays.asList(10, 20, 30));
+     * > df2.append(Arrays.asList(40, 50, 60));
+     * > df2.append(Arrays.asList(70, 80, 90));
+     * > df1.concatenate(df2, 0).length();
+     * 6 }</pre>
+     *
      * @param df2 - The dataframe to be concatenated after the main dataframe
-     * @param axis - The axis to concatenate along, default is 0
+     * @param axis - The axis to concatenate along
      */
 
     public final DataFrame<V> concatenate(final DataFrame<V> df2, final int axis){
@@ -631,7 +643,7 @@ implements Iterable<List<V>> {
     }
 
     /**
-     * Concatenate two dataframes vertically
+     * Concatenate two dataframes vertically, if the input axis value is not given by the user
      *
      * @param df2 - The dataframe to be concatenated vertically after the main dataframe
      */
@@ -665,13 +677,16 @@ implements Iterable<List<V>> {
             return this;
         }
 
+        /*
         DataFrame<V> temp_df1 = new DataFrame<>();
         DataFrame<V> temp_df2 = new DataFrame<>();
 
         temp_df1 = this.resetIndex();
         temp_df2 = df2.resetIndex();
 
-        return temp_df1.join(temp_df2);
+         */
+
+        return this.resetIndex().join(df2.resetIndex());
     }
 
     /**
@@ -2260,6 +2275,15 @@ implements Iterable<List<V>> {
     throws IOException {
         Serialization.writeCsv(this, output);
     }
+
+    public final void writeCsv(final String file, boolean rowName){
+        if (rowName == false){
+            
+        }
+
+    }
+
+
 
     /**
      * Read data from the specified excel
