@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -1668,6 +1669,119 @@ implements Iterable<List<V>> {
     @Timed
     public DataFrame<V> mean() {
         return groups.apply(this, new Aggregation.Mean<V>());
+    }
+
+
+    /**
+     * Compute the data with the highest occurrence for each group
+     * or the entire data frame if the data is not grouped.
+     *
+     * Basic intuition for implementation: Since there's no mode object defined in imported libs like mean above
+     * we need to go through each element in a column, store into a map used as counter
+     * output the integer with the maximum count as the mode of the column and moving on the next column
+     *
+     * all possible results: NULL, VALUE
+     *
+     * NULL  for all objects with equal no of existence
+     * VALUE for mode existing and catch as output
+     *
+     * EXAMPLE
+     * <pre> {@code}
+     * > DataFrame<Integer> df = new DataFrame<>("Name", "DateOfBirth", "Age");
+     * > df.append("one"          ,Arrays.asList("Cody",          1024,   23));
+     * > df.append("two"          ,Arrays.asList("Cody",          1024,   19));
+     * > df.append("three"        ,Arrays.asList("Elena",         0827,   29));
+     * > df.mode();>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>0,        1,       2
+     * >>>>>>>>>>>>>>>>>>>>>>>>>>>>>mode_result         Cody      1024
+     * >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+     * * }
+     * </pre>
+     *
+     *
+     * @return the new data frame
+     */
+    @Timed
+    public DataFrame<V> mode() {
+        int length = this.size();
+        int width = this.length();
+
+
+        ArrayList<V> to_return = new ArrayList<V> ();
+//        DataFrame<V> to_return = new DataFrame<>();
+
+        for (int indx = 0; indx < length; indx++) {
+
+            HashMap<V, Integer> counter = new HashMap<>();
+            for (int indx_2 = 0; indx_2 < width; indx_2++) {
+                counter.merge((this.get(indx_2, indx)), 1, Integer::sum);
+            }
+            to_return.add(max_helper(counter));
+
+        }
+        DataFrame<V> to_ret = new DataFrame<V> ();
+        //to_return = to_return;
+        to_ret.append("mode_result", to_return);
+        return to_ret;
+    }
+
+
+    /**
+     * Compute the Mode according to which specific column/category/group
+     * much faster as aim is specific and no need to loop through all columns
+     *
+     * > DataFrame<Integer> df = new DataFrame<>("value");
+     * > df.append("one", Arrays.asList(1));
+     * > df.append("two", Arrays.asList(3));
+     * > df.append("three", Arrays.asList(3));
+     * > df.append("four",  Arrays.asList(7));
+     * > df.mode(0);
+     * [3.0] }</pre>
+     */
+    @Timed
+    public DataFrame<V> mode(int col_no) {
+
+        int length = this.size();
+        int width = this.length();
+
+
+        ArrayList<V> to_return = new ArrayList<V> ();
+
+        HashMap<V, Integer> counter = new HashMap<>();
+        for (int indx = 0; indx < width; indx++) {
+            counter.merge((this.get(indx, col_no)), 1, Integer::sum);
+        }
+        to_return.add(max_helper(counter));
+
+        DataFrame<V> to_ret = new DataFrame<V> ();
+        to_ret.append("mode_result", to_return);
+        return to_ret;
+    }
+
+
+    /**
+     * Compute the key in a map with maximum value corresponding to it
+     * helper for mode function
+     *
+     * <pre>{@code
+     * Map<V, Integer> counter = new HashMap<>();
+     * V to_append = max(counter) = max_helper(counter);
+     * </pre>
+     *
+     * @return the single data to be added to to_return
+     */
+    @Timed
+    public V max_helper(HashMap<V, Integer> input) {
+        V to_return = null;
+        int currently_max = 0;
+        for (Map.Entry<V, Integer> currentEntry : input.entrySet()) {
+            if (currentEntry.getValue().compareTo(currently_max) > 0) {
+                to_return = currentEntry.getKey();
+                currently_max = currentEntry.getValue();
+            }
+        }
+
+        if (currently_max == 1) return null;
+        else return to_return;
     }
 
     /**

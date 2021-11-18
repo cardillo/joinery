@@ -371,6 +371,10 @@ extends ScriptableObject {
         return new DataFrameAdapter(this, df.mean());
     }
 
+    public DataFrameAdapter jsFunction_mode() { return new DataFrameAdapter(this, df.mode().cast(Object.class)); }
+
+//    public DataFrameAdapter jsFunction_mode(int col_no) {return new DataFrameAdapter(this, df.mode(col_no));}
+
     public DataFrameAdapter jsFunction_stddev() {
         return new DataFrameAdapter(this, df.stddev());
     }
@@ -395,9 +399,7 @@ extends ScriptableObject {
         return new DataFrameAdapter(this, df.max());
     }
 
-    public DataFrameAdapter jsFunction_median() {
-        return new DataFrameAdapter(this, df.median());
-    }
+    public DataFrameAdapter jsFunction_median() {return new DataFrameAdapter(this, df.median()); }
 
     public DataFrameAdapter jsFunction_cumsum() {
         return new DataFrameAdapter(this, df.cumsum());
