@@ -1825,6 +1825,10 @@ implements Iterable<List<V>> {
         return Sorting.sort(this, comparator);
     }
 
+    public DataFrame<V> sortIndex(final SortDirection direction) {
+        return Sorting.sortIndex(this, direction);
+    }
+
     /**
      * Return the types for each of the data frame columns.
      *
