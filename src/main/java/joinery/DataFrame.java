@@ -1715,7 +1715,17 @@ implements Iterable<List<V>> {
             for (int indx_2 = 0; indx_2 < width; indx_2++) {
                 counter.merge((this.get(indx_2, indx)), 1, Integer::sum);
             }
-            to_return.add(max_helper(counter));
+            V to_ret = null;
+            int currently_max = 0;
+            for (Map.Entry<V, Integer> currentEntry : counter.entrySet()) {
+                if (currentEntry.getValue().compareTo(currently_max) > 0) {
+                    to_ret = currentEntry.getKey();
+                    currently_max = currentEntry.getValue();
+                }
+            }
+
+            if (currently_max == 1) to_return.add(null);
+            else to_return.add(to_ret);
 
         }
         DataFrame<V> to_ret = new DataFrame<V> ();
@@ -1737,25 +1747,25 @@ implements Iterable<List<V>> {
      * > df.mode(0);
      * [3.0] }</pre>
      */
-    @Timed
-    public DataFrame<V> mode(int col_no) {
-
-        int length = this.size();
-        int width = this.length();
-
-
-        ArrayList<V> to_return = new ArrayList<V> ();
-
-        HashMap<V, Integer> counter = new HashMap<>();
-        for (int indx = 0; indx < width; indx++) {
-            counter.merge((this.get(indx, col_no)), 1, Integer::sum);
-        }
-        to_return.add(max_helper(counter));
-
-        DataFrame<V> to_ret = new DataFrame<V> ();
-        to_ret.append("mode_result", to_return);
-        return to_ret;
-    }
+//    @Timed
+//    public DataFrame<V> mode(int col_no) {
+//
+//        int length = this.size();
+//        int width = this.length();
+//
+//
+//        ArrayList<V> to_return = new ArrayList<V> ();
+//
+//        HashMap<V, Integer> counter = new HashMap<>();
+//        for (int indx = 0; indx < width; indx++) {
+//            counter.merge((this.get(indx, col_no)), 1, Integer::sum);
+//        }
+//        to_return.add(max_helper(counter));
+//
+//        DataFrame<V> to_ret = new DataFrame<V> ();
+//        to_ret.append("mode_result", to_return);
+//        return to_ret;
+//    }
 
 
     /**
@@ -1769,20 +1779,20 @@ implements Iterable<List<V>> {
      *
      * @return the single data to be added to to_return
      */
-    @Timed
-    public V max_helper(HashMap<V, Integer> input) {
-        V to_return = null;
-        int currently_max = 0;
-        for (Map.Entry<V, Integer> currentEntry : input.entrySet()) {
-            if (currentEntry.getValue().compareTo(currently_max) > 0) {
-                to_return = currentEntry.getKey();
-                currently_max = currentEntry.getValue();
-            }
-        }
-
-        if (currently_max == 1) return null;
-        else return to_return;
-    }
+//    @Timed
+//    public V max_helper(HashMap<V, Integer> counter) {
+//        V to_ret = null;
+//        int currently_max = 0;
+//        for (Map.Entry<V, Integer> currentEntry : counter.entrySet()) {
+//            if (currentEntry.getValue().compareTo(currently_max) > 0) {
+//                to_ret = currentEntry.getKey();
+//                currently_max = currentEntry.getValue();
+//            }
+//        }
+//
+//        if (currently_max == 1) to_return.add(null);
+//        else to_return.add(to_ret);
+//    }
 
     /**
      * Compute the percentile of the numeric columns for each group
