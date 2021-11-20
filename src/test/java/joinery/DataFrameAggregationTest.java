@@ -34,6 +34,194 @@ public class DataFrameAggregationTest {
     }
 
     @Test
+    public void testMode1() {
+        DataFrame<Object> DF = new DataFrame<Object>();
+        DF.add("Name", "DOB", "Age");
+        DF.append("row1", Arrays.asList("Cody", 1024, 23));
+        DF.append("row2", Arrays.asList("Elena", 826, 26));
+        DF.append("row3", Arrays.asList("Cody", 1024, 18));
+
+        assertArrayEquals(
+                new Object[] {"Cody", 1024, null},
+                DF.mode().toArray()
+        );
+    }
+
+    @Test
+    public void testMode2() {
+        DataFrame<Object> DF = new DataFrame<Object>();
+        DF.add("Name", "DOB", "Age");
+        DF.append("row1", Arrays.asList("Cody", 1024, 23));
+        DF.append("row2", Arrays.asList("Elena", 826, 26));
+        DF.append("row3", Arrays.asList("Emma", 917, 18));
+
+        assertArrayEquals(
+                new Object[] {null, null, null},
+                DF.mode().toArray()
+        );
+    }
+
+    @Test
+    public void testMode3() {
+        DataFrame<Object> DF = new DataFrame<Object>();
+        DF.add("Name", "DOB", "Age");
+        DF.append("row1", Arrays.asList("Cody", 1024, 23));
+        DF.append("row2", Arrays.asList("Elena", 826, 26));
+        DF.append("row3", Arrays.asList("Emma", 917, 18));
+        DF.append("row4", Arrays.asList("John", 1112, 22));
+        DF.append("row5", Arrays.asList("Elena", 917, 23));
+        DF.append("row6", Arrays.asList("Emma", 922, 18));
+
+        assertArrayEquals(
+                new Object[] {"Emma", 917, 18},
+                DF.mode().toArray()
+        );
+    }
+
+    @Test
+    public void testMode4() {
+        DataFrame<Object> DF = new DataFrame<Object>();
+        DF.add("Value");
+        DF.append("row1", Arrays.asList(10));
+
+        assertArrayEquals(
+                new Object[] {null},
+                DF.mode().toArray()
+        );
+    }
+
+    @Test
+    public void testMode5() {
+        DataFrame<Object> DF = new DataFrame<Object>();
+        DF.add("Value");
+        DF.append("row1", Arrays.asList(10));
+        DF.append("row2", Arrays.asList(10));
+        DF.append("row3", Arrays.asList(20));
+
+        assertArrayEquals(
+                new Object[] {10},
+                DF.mode().toArray()
+        );
+    }
+
+    @Test
+    public void testMode6() {
+        DataFrame<Object> DF = new DataFrame<Object>();
+        DF.add("Value");
+        DF.append("row1", Arrays.asList(10));
+        DF.append("row2", Arrays.asList(10));
+        DF.append("row3", Arrays.asList(20));
+        DF.append("row4", Arrays.asList(20));
+
+        assertArrayEquals(
+                new Object[] {20},
+                DF.mode().toArray()
+        );
+    }
+
+    @Test
+    public void testMode7() {
+        DataFrame<Object> DF = new DataFrame<Object>();
+        DF.add("Value");
+        DF.append("row1", Arrays.asList(10));
+        DF.append("row2", Arrays.asList(10));
+        DF.append("row3", Arrays.asList(20));
+        DF.append("row4", Arrays.asList(20));
+        DF.append("row5", Arrays.asList(30));
+        DF.append("row6", Arrays.asList(30));
+
+        assertArrayEquals(
+                new Object[] {20},
+                DF.mode().toArray()
+        );
+    }
+
+    @Test
+    public void testMode8() {
+        DataFrame<Object> DF = new DataFrame<Object>();
+        DF.add("Value");
+        DF.append("row1", Arrays.asList(10));
+        DF.append("row2", Arrays.asList(20));
+        DF.append("row3", Arrays.asList(30));
+        DF.append("row4", Arrays.asList(40));
+        DF.append("row5", Arrays.asList(50));
+        DF.append("row6", Arrays.asList(60));
+
+        assertArrayEquals(
+                new Object[] {null},
+                DF.mode().toArray()
+        );
+    }
+
+    @Test
+    public void testMode9() {
+        DataFrame<Object> DF = new DataFrame<Object>();
+        DF.add("Value");
+        DF.append("row1", Arrays.asList(10));
+        DF.append("row2", Arrays.asList(20));
+        DF.append("row3", Arrays.asList(30));
+        DF.append("row4", Arrays.asList(30));
+        DF.append("row5", Arrays.asList(50));
+        DF.append("row6", Arrays.asList(60));
+
+        assertArrayEquals(
+                new Object[] {30},
+                DF.mode().toArray()
+        );
+    }
+
+    @Test
+    public void testMode10() {
+        DataFrame<Object> DF = new DataFrame<Object>();
+        DF.add("Name");
+        DF.append("row1", Arrays.asList("Cody"));
+        DF.append("row2", Arrays.asList("Elena"));
+        DF.append("row3", Arrays.asList("Emma"));
+        DF.append("row4", Arrays.asList("John"));
+        DF.append("row5", Arrays.asList("ELENA"));
+        DF.append("row6", Arrays.asList("Emma"));
+
+        assertArrayEquals(
+                new Object[] {"Emma"},
+                DF.mode().toArray()
+        );
+    }
+
+    @Test
+    public void testMode11() {
+        DataFrame<Object> DF = new DataFrame<Object>();
+        DF.add("Name", "Age");
+        DF.append("row1", Arrays.asList("Cody", 22));
+        DF.append("row2", Arrays.asList("Elena", 23));
+        DF.append("row3", Arrays.asList("Emma", 24));
+        DF.append("row4", Arrays.asList("John", 16));
+        DF.append("row5", Arrays.asList("ELENA", 25));
+        DF.append("row6", Arrays.asList("Emma", 26));
+
+        assertArrayEquals(
+                new Object[] {"Emma", null},
+                DF.mode().toArray()
+        );
+    }
+
+    @Test
+    public void testMode12() {
+        DataFrame<Object> DF = new DataFrame<Object>();
+        DF.add("Name", "Age");
+        DF.append("row1", Arrays.asList("Cody", 22));
+        DF.append("row2", Arrays.asList("Elena", 23));
+        DF.append("row3", Arrays.asList("Emma", 22));
+        DF.append("row4", Arrays.asList("John", 14));
+        DF.append("row5", Arrays.asList("ELENA", 25));
+        DF.append("row6", Arrays.asList("Emily", 25));
+
+        assertArrayEquals(
+                new Object[] {null, 22},
+                DF.mode().toArray()
+        );
+    }
+
+    @Test
     public void testSum() {
         assertArrayEquals(
                 new Double[] { 280.0, 280.0 },
