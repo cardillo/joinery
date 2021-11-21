@@ -2174,7 +2174,19 @@ implements Iterable<List<V>> {
      */
     public final void writeCsv(final String file)
     throws IOException {
-        Serialization.writeCsv(this, new FileOutputStream(file));
+        Serialization.writeCsv(this, file);
+    }
+
+    /**
+     * Write the data from this data frame to the specified file as csv.
+     *
+     * @param file the file to write
+     * @param writeRowNames whether to include row names
+     * @throws IOException if an error occurs writing the file
+     */
+    public final void writeCsv(final String file, final boolean writeRowNames)
+            throws IOException {
+        Serialization.writeCsv(this, file, writeRowNames);
     }
 
     /**
@@ -2187,6 +2199,18 @@ implements Iterable<List<V>> {
     public final void writeCsv(final OutputStream output)
     throws IOException {
         Serialization.writeCsv(this, output);
+    }
+
+    /**
+     * Write the data from this data frame to the provided output stream as csv.
+     *
+     * @param output
+     * * @param writeRowNames whether to include row names
+     * @throws IOException
+     */
+    public final void writeCsv(final OutputStream output, final boolean writeRowNames)
+            throws IOException {
+        Serialization.writeCsv(this, output, writeRowNames);
     }
 
     /**
