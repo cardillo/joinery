@@ -12,7 +12,9 @@ public class Random_Export {
         DataFrame<Object> df1 = new DataFrame<>("0", "1", "2");
         df1.append("a",Arrays.asList(1, 2, 3));
         df1.append("b",Arrays.asList(4, 5, 6));
-
+        df1.append("c",Arrays.asList(7, 8, 9));
+        String filename1 = "df1_origin.csv";
+        String filename2 = "df1_rowname.csv";
 
         /*
         The output in the csv file is
@@ -22,7 +24,8 @@ public class Random_Export {
          */
 
         try{
-            df1.writeCsv("df1.csv");
+            df1.writeCsv(filename1);
+            df1.add("labels", df1.index()).writeCsv(filename2);
         }
         catch (Exception e){
             e.printStackTrace();
