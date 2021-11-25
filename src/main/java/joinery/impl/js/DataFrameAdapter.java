@@ -246,6 +246,16 @@ extends ScriptableObject {
         return df.get(row, col);
     }
 
+    public Object jsFunction_getEntryByObject(final Object row, final Object col) {
+
+        return df.getEntryByObject(row, col);
+
+    }
+
+    public int jsFunction_getIndxByObject(final Object name, final int indicator) {
+        return df.getIndxByObject(name, indicator);
+    }
+
     public DataFrameAdapter jsFunction_slice(final Integer rowStart, final Integer rowEnd, final Integer colStart, final Integer colEnd) {
         return new DataFrameAdapter(this, df.slice(rowStart, rowEnd, colStart, colEnd));
     }

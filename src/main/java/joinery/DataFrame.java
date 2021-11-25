@@ -905,6 +905,47 @@ implements Iterable<List<V>> {
         return columns.names();
     }
 
+
+    /**
+     *
+     * @param name is the row/column name you're interested in to get index
+     * @param indicator indicates whether row or column{row: 0, col:other int values}
+     * @return index of row/col if valid input, -1 otherwise
+     *
+     * EXAMPLE
+     * <pre> {@code}
+     * > DataFrame<Integer> df = new DataFrame<>("Name", "DateOfBirth", "Age");
+     * > df.append("one"          ,Arrays.asList("Cody",          1024,   23));
+     * > df.append("two"          ,Arrays.asList("Cody",          1024,   19));
+     * > df.append("three"        ,Arrays.asList("Elena",         0827,   29));
+     * > df.getIndxByObject("Name", 0);>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>-1
+     * > df.getIndxByObject("Name", 1);>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>0
+     * > df.getIndxByObject("row1", 0);>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>0
+     * > df.getIndxByObject("Age",  1);>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>2
+     * >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+     * </pre>
+     */
+    public int getIndxByObject(final Object name, final int indicator) {
+//        List<Object> arrays = null;
+
+
+         if (indicator == 0)   {
+             try{
+                 return this.index.get(name);
+             } catch(IllegalArgumentException e) {
+                 return -1;
+             }
+         }
+        else {
+            try {
+                return this.columns.get(name);
+            } catch (IllegalArgumentException e) {
+                return -1;
+            }
+         }
+
+    }
+
     /**
      * Return the value located by the (row, column) names.
      *
@@ -925,6 +966,33 @@ implements Iterable<List<V>> {
      * @return the value
      */
     public V get(final Object row, final Object col) {
+        return get(index.get(row), columns.get(col));
+    }
+
+    /**
+     * Return the value located by the (row, column) names.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<Object>(
+     * >     Arrays.asList("row1", "row2", "row3"),
+     * >     Arrays.asList("name", "value"),
+     * >     Arrays.asList(
+     * >         Arrays.asList("alpha", "bravo", "charlie"),
+     * >         Arrays.asList(10, 20, 30)
+     * >     )
+     * > );
+     * > df.getEntryByObject("row2", "name");
+     * bravo }</pre>
+     *
+     * ANOTHER VERSION of df.get(Object, Object) function but with different name
+     * since without since re-declaration with new name, jsFunctions would report
+     * function re-definition error
+     *
+     * @param row the row name
+     * @param col the column name
+     * @return the value
+     */
+    public V getEntryByObject(final Object row, final Object col) {
         return get(index.get(row), columns.get(col));
     }
 
