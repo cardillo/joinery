@@ -34,14 +34,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -296,7 +289,7 @@ public class Serialization {
     }
 
     public static <V> void writeCsv(final DataFrame<V> df, final OutputStream output)
-    throws IOException {
+            throws IOException {
         try (CsvListWriter writer = new CsvListWriter(new OutputStreamWriter(output), CsvPreference.STANDARD_PREFERENCE)) {
             final String[] header = new String[df.size()];
             final Iterator<Object> it = df.columns().iterator();
@@ -318,6 +311,49 @@ public class Serialization {
                 writer.write(row, procs);
             }
         }
+    }
+
+    public static <V> void writeCsvWithRowName(final DataFrame<V> df, final String output)
+            throws IOException {
+        writeCsvWithRowName(df, new FileOutputStream(output));
+    }
+
+    public static <V> void writeCsvWithRowName(final DataFrame<V> df, final OutputStream output)
+    throws IOException {
+            try (CsvListWriter writer = new CsvListWriter(new OutputStreamWriter(output), CsvPreference.STANDARD_PREFERENCE)) {
+                final String[] header = new String[df.size() + 1];
+                header[0] = "RowName";
+                final Iterator<Object> it = df.columns().iterator();
+                for (int c = 1; c < df.size() + 1; c++) {
+                    header[c] = String.valueOf(it.hasNext() ? it.next() : c);
+                }
+                writer.writeHeader(header);
+
+                final CellProcessor[] procs = new CellProcessor[df.size() + 1];
+                final List<Class<?>> types = df.types();
+                procs[0] = new ConvertNullTo("");
+                for (int c = 1; c < df.size() + 1; c++) {
+                    final Class<?> cls = types.get(c - 1);
+                    if (Date.class.isAssignableFrom(cls)) {
+                        procs[c] = new ConvertNullTo("", new FmtDate("yyyy-MM-dd'T'HH:mm:ssXXX"));
+                    } else {
+                        procs[c] = new ConvertNullTo("");
+                    }
+                }
+
+                Set<Object> index_list = df.index();
+
+                int index = 0;
+
+                for (final List<V> row : df) {
+                    List<V> tempRow = new ArrayList<V>();
+                    tempRow.add((V) index_list.toArray()[index]);
+                    index ++;
+                    tempRow.addAll(row);
+                    writer.write(tempRow, procs);
+                }
+            }
+
     }
 
     public static DataFrame<Object> readXls(final String file)
