@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
+import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -2262,6 +2263,7 @@ implements Iterable<List<V>> {
     public final void writeCsv(final String file)
     throws IOException {
         Serialization.writeCsv(this, new FileOutputStream(file));
+
     }
 
     /**
@@ -2276,11 +2278,42 @@ implements Iterable<List<V>> {
         Serialization.writeCsv(this, output);
     }
 
-    public final void writeCsv(final String file, boolean rowName){
-        if (rowName == false){
-            
+    /**
+     * Write the data from this data frame to
+     * the specified file as comma separated values.
+     * The user can specify if row names should also be written as the first column in the csv file
+     *
+     * @param file the file to write
+     * @param withColName if row names should also be written in the csv file
+     * @throws IOException if an error occurs writing the file
+     */
+    public final void writeCsv(final String file, final boolean withColName)
+            throws IOException {
+        if (withColName == false) {
+            Serialization.writeCsv(this, new FileOutputStream(file));
         }
+        else {
+            Serialization.writeCsvWithRowName(this, new FileOutputStream(file));
+        }
+    }
 
+    /**
+     * Write the data from this data frame to
+     * the provided output stream as comma separated values.
+     * The user can specify if row names should also be written as the first column in the csv file
+     *
+     * @param output
+     * @param withColName
+     * @throws IOException
+     */
+    public final void writeCsv(final OutputStream output, final boolean withColName)
+            throws IOException {
+        if (withColName == false) {
+            Serialization.writeCsv(this, output);
+        }
+        else {
+            Serialization.writeCsvWithRowName(this, output);
+        }
     }
 
 
