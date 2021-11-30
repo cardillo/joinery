@@ -468,4 +468,39 @@ public class Serialization {
             stmt.close();
         }
     }
+
+    public static <V> void writeSql(final DataFrame<V> df, final PreparedStatement stmt, int chunkSize)
+    throws SQLException {
+        try {
+            ParameterMetaData md = stmt.getParameterMetaData();
+            List<Integer> columns = new ArrayList<>();
+            for (int i = 1; i <= md.getParameterCount(); i++) {
+                columns.add(md.getParameterType(i));
+            }
+            int length = df.length();
+            int parts = (int) Math.ceil((double) length / chunkSize);
+//            int remainder = parts*chunkSize - length;
+            System.out.println(parts);
+            for (int i = 0; i < parts; i++) {
+                if (i != parts - 1) {
+                    for (int r = i * chunkSize; r < (i + 1) * chunkSize; r++) {
+                        for (int c = 1; c <= df.size(); c++) {
+                            stmt.setObject(c, df.get(r, c - 1));
+                        }
+                        stmt.addBatch();
+                    }
+                } else {
+                    for (int r = i * chunkSize; r < (i*chunkSize) + ((parts*chunkSize) - (i*chunkSize)); r++) {
+                        for (int c = 1; c <= df.size(); c++) {
+                            stmt.setObject(c, df.get(r, c - 1));
+                        }
+                        stmt.addBatch();
+                    }
+                }
+                stmt.executeBatch();
+            }
+        } finally {
+            stmt.close();
+        }
+    }
 }
