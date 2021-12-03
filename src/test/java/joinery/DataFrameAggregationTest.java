@@ -19,6 +19,7 @@
 package joinery;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.junit.Before;
@@ -221,6 +222,67 @@ public class DataFrameAggregationTest {
                 new Object[] {null, 22},
                 DF.mode().toArray()
         );
+    }
+
+
+
+    @Test
+    public final void test_get_entry_by_object() {
+        DataFrame<Object> DF = new DataFrame<>("Name", "DateOfBirth", "Age");
+        DF.append("one" ,Arrays.asList("Cody",1024,23));
+        DF.append("two" ,Arrays.asList("Cody",1024,19));
+        DF.append("three",Arrays.asList("Elena",827,29));
+
+        //normal cases
+        assertEquals(DF.getEntryByObject("one", "Name"), "Cody");
+        assertEquals(DF.getEntryByObject("one", "DateOfBirth"), 1024);
+        assertEquals(DF.getEntryByObject("one", "Age"), 23);
+
+        assertEquals(DF.getEntryByObject("two", "Name"), "Cody");
+        assertEquals(DF.getEntryByObject("two", "DateOfBirth"), 1024);
+        assertEquals(DF.getEntryByObject("two", "Age"), 19);
+
+        assertEquals(DF.getEntryByObject("three", "Name"), "Elena");
+        assertEquals(DF.getEntryByObject("three", "DateOfBirth"), 827);
+        assertEquals(DF.getEntryByObject("three", "Age"), 29);
+
+        //abnormal cases
+        assertEquals(DF.getEntryByObject("one", "Nam"), null);
+        assertEquals(DF.getEntryByObject("on", "DateOfBith"), null);
+        assertEquals(DF.getEntryByObject("oneq", "Age"), null);
+        assertEquals(DF.getEntryByObject("two", "Nae"), null);
+        assertEquals(DF.getEntryByObject("two", "DateOfBrth"), null);
+        assertEquals(DF.getEntryByObject("wo", "Age"), null);
+        assertEquals(DF.getEntryByObject("thee", "Nam"), null);
+        assertEquals(DF.getEntryByObject("te", "DateOfBirth"), null);
+        assertEquals(DF.getEntryByObject("three", "Ag"), null);
+
+    }
+
+    @Test
+    public final void test_get_indx_by_object() {
+        DataFrame<Object> DF = new DataFrame<>("Name", "DateOfBirth", "Age");
+        DF.append("one" ,Arrays.asList("Cody",1024,23));
+        DF.append("two" ,Arrays.asList("Cody",1024,19));
+        DF.append("three",Arrays.asList("Elena",827,29));
+
+        //normal working cases
+        assertEquals(DF.getIndxByObject("Name", 1), 0);
+        assertEquals(DF.getIndxByObject("DateOfBirth", 1), 1);
+        assertEquals(DF.getIndxByObject("Age", 1), 2);
+
+        assertEquals(DF.getIndxByObject("one", 0), 0);
+        assertEquals(DF.getIndxByObject("two", 0), 1);
+        assertEquals(DF.getIndxByObject("three", 0), 2);
+
+        //abnormal cases
+        assertEquals(DF.getIndxByObject("Nae", 1), -1);
+        assertEquals(DF.getIndxByObject("DaeOfBirth", 1), -1);
+        assertEquals(DF.getIndxByObject("Age", 0), -1);
+        assertEquals(DF.getIndxByObject("On", 0), -1);
+        assertEquals(DF.getIndxByObject("to", 0), -1);
+        assertEquals(DF.getIndxByObject("three", 1), -1);
+
     }
 
     @Test

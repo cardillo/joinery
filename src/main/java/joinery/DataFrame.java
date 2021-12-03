@@ -993,7 +993,11 @@ implements Iterable<List<V>> {
      * @return the value
      */
     public V getEntryByObject(final Object row, final Object col) {
-        return get(index.get(row), columns.get(col));
+        try {
+            return get(index.get(row), columns.get(col));
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     /**
