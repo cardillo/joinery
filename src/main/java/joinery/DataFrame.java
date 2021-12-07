@@ -2177,9 +2177,31 @@ implements Iterable<List<V>> {
         Serialization.writeCsv(this, new FileOutputStream(file), '\0');
     }
 
+    /**
+     * Write the data from this data frame to
+     * the specified file as comma separated values.
+     *
+     * @param file the file to write
+     * @param separator the character to use as the separator when writing the CSV
+     * @throws IOException if an error occurs writing the file
+     */
+
     public final void writeCsv(final String file, final char separator)
     throws IOException {
         Serialization.writeCsv(this, new FileOutputStream(file), separator);
+    }
+
+    /**
+     * Write the data from this data frame to
+     * the provided output stream as comma separated values.
+     *
+     * @param output
+     * @param separator the character to use as the separator when writing the CSV
+     * @throws IOException
+     */
+    public final void writeCsv(final OutputStream output, final char separator)
+    throws IOException {
+        Serialization.writeCsv(this, output, separator);
     }
 
     /**

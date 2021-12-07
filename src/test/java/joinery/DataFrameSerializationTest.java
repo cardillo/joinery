@@ -187,7 +187,7 @@ public class DataFrameSerializationTest {
     }
 
     @Test 
-    public void testWriteCsvWithDelimiter() 
+    public void testWriteCsvWithSeparator() 
     throws IOException {
         final File tmp = File.createTempFile(getClass().getName(), ".csv");
         tmp.deleteOnExit();
