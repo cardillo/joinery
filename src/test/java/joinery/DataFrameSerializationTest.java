@@ -186,6 +186,15 @@ public class DataFrameSerializationTest {
         assertTrue("writeCsv does not throw due to non-string indices", true);
     }
 
+    @Test 
+    public void testWriteCsvWithDelimiter() 
+    throws IOException {
+        final File tmp = File.createTempFile(getClass().getName(), ".csv");
+        tmp.deleteOnExit();
+        df.writeCsv(tmp.getPath(), '|');
+        assertTrue(tmp.length() > 64); 
+    }
+
     @Test(expected=FileNotFoundException.class)
     public void testReadXlsString()
     throws IOException {

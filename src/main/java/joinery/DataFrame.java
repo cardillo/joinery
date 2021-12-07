@@ -2174,7 +2174,12 @@ implements Iterable<List<V>> {
      */
     public final void writeCsv(final String file)
     throws IOException {
-        Serialization.writeCsv(this, new FileOutputStream(file));
+        Serialization.writeCsv(this, new FileOutputStream(file), '\0');
+    }
+
+    public final void writeCsv(final String file, final char separator)
+    throws IOException {
+        Serialization.writeCsv(this, new FileOutputStream(file), separator);
     }
 
     /**
@@ -2186,7 +2191,7 @@ implements Iterable<List<V>> {
      */
     public final void writeCsv(final OutputStream output)
     throws IOException {
-        Serialization.writeCsv(this, output);
+        Serialization.writeCsv(this, output, '\0');
     }
 
     /**
