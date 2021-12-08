@@ -1825,8 +1825,10 @@ implements Iterable<List<V>> {
         return Sorting.sort(this, comparator);
     }
 
-    public DataFrame<V> sortIndex(final SortDirection direction) {
-        return Sorting.sortIndex(this, direction);
+    public DataFrame<V> sortIndex(final Integer direction) {
+        final SortDirection dir = direction < 0 ?
+            SortDirection.DESCENDING : SortDirection.ASCENDING;
+        return Sorting.sortIndex(this, dir);
     }
 
     /**
