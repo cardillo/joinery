@@ -1825,6 +1825,20 @@ implements Iterable<List<V>> {
         return Sorting.sort(this, comparator);
     }
 
+    /**
+     * Sort the data frame by the order of the indices.
+     *
+     * * <pre> {@code
+     * > DataFrame<Integer> df = new DataFrame<>("name", "value");
+     * > df.append("row3", Arrays.asList("charlie", 3));
+     * > df.append("row1", Arrays.asList("alpha", 1));
+     * > df.append("row2", Arrays.asList("bravo", 2));
+     * > df.sortIndex(-1).index();
+     * ["row3", "row2", "row1"] }</pre>
+     * 
+     * @param direction the sorting direction.
+     * @return a new data frame
+     */
     public DataFrame<V> sortIndex(final Integer direction) {
         final SortDirection dir = direction < 0 ?
             SortDirection.DESCENDING : SortDirection.ASCENDING;
