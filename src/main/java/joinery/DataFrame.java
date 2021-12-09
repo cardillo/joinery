@@ -2281,9 +2281,9 @@ implements Iterable<List<V>> {
      * @param sql the SQL statement
      * @throws SQLException if an error occurs executing the statement
      */
-    public final void writeSql(final Connection c, final String sql)
+    public final void writeSql(final Connection c, final String sql, final int chunkSize)
     throws SQLException {
-        writeSql(c.prepareStatement(sql));
+        writeSql(c.prepareStatement(sql), chunkSize);
     }
 
     /**
@@ -2293,9 +2293,9 @@ implements Iterable<List<V>> {
      * @param stmt a prepared insert statement
      * @throws SQLException if an error occurs executing the statement
      */
-    public final void writeSql(final PreparedStatement stmt)
+    public final void writeSql(final PreparedStatement stmt, final int chunkSize)
     throws SQLException {
-        Serialization.writeSql(this, stmt);
+        Serialization.writeSql(this, stmt, chunkSize);
     }
 
     public final String toString(final int limit) {

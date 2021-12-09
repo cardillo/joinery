@@ -447,7 +447,7 @@ public class Serialization {
         }
     }
 
-    public static <V> void writeSql(final DataFrame<V> df, final PreparedStatement stmt)
+    public static <V> void writeSql(final DataFrame<V> df, final PreparedStatement stmt, int chunkSize)
     throws SQLException {
         try {
             ParameterMetaData md = stmt.getParameterMetaData();
@@ -456,12 +456,50 @@ public class Serialization {
                 columns.add(md.getParameterType(i));
             }
 
-            for (int r = 0; r < df.length(); r++) {
-                for (int c = 1; c <= df.size(); c++) {
-                    stmt.setObject(c, df.get(r, c - 1));
-                }
-                stmt.addBatch();
+            if (chunkSize <= 0 | chunkSize >= df.length())
+            {
+                chunkSize = 1;
             }
+
+            int split = df.length() / chunkSize;
+
+
+
+            if (chunkSize == 1)
+            {
+                for (int r = 0; r < df.length(); r++) {
+                    for (int c = 1; c <= df.size(); c++) {
+                        stmt.setObject(c, df.get(r, c - 1));
+                    }
+                    stmt.addBatch();
+                }
+            }
+
+            else
+            {
+                int index = 0;
+
+                for (int z = 0; z < chunkSize-1; z++) {
+                    for (int r = 0; r < split; r++) {
+                        for (int c = 1; c <= df.size(); c++) {
+                            stmt.setObject(c, df.get(index, c - 1));
+                        }
+                        ++index;
+                        stmt.addBatch();
+                    }
+                }
+
+                for (;index < df.length();index++)
+                {
+                    for (int c = 1; c <= df.size(); c++) {
+                        stmt.setObject(c, df.get(index, c - 1));
+                    }
+                    stmt.addBatch();
+
+                }
+            }
+
+
 
             stmt.executeBatch();
         } finally {

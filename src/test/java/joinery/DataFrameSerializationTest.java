@@ -291,7 +291,8 @@ public class DataFrameSerializationTest {
         try (Connection dbc = DriverManager.getConnection("jdbc:derby:memory:testdb;create=true")) {
             dbc.createStatement().executeUpdate("create table test (category varchar(32), name varchar(32), value int)");
             PreparedStatement stmt = dbc.prepareStatement("insert into test values (?,?,?)");
-            df.writeSql(stmt);
+            int chunkSize = 5;
+            df.writeSql(stmt, chunkSize);
 
             Map<Object, Object> names = new HashMap<>();
             names.put("CATEGORY", "category");
