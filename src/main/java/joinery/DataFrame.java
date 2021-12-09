@@ -2174,7 +2174,35 @@ implements Iterable<List<V>> {
      */
     public final void writeCsv(final String file)
     throws IOException {
-        Serialization.writeCsv(this, new FileOutputStream(file));
+        Serialization.writeCsv(this, new FileOutputStream(file), '\0');
+    }
+
+    /**
+     * Write the data from this data frame to
+     * the specified file as comma separated values.
+     *
+     * @param file the file to write
+     * @param separator the character to use as the separator when writing the CSV
+     * @throws IOException if an error occurs writing the file
+     */
+     // CS427 Issue link: https://github.com/cardillo/joinery/issues/93 
+
+    public final void writeCsv(final String file, final char separator)
+    throws IOException {
+        Serialization.writeCsv(this, new FileOutputStream(file), separator);
+    }
+
+    /**
+     * Write the data from this data frame to
+     * the provided output stream as comma separated values.
+     *
+     * @param output
+     * @param separator the character to use as the separator when writing the CSV
+     * @throws IOException
+     */
+    public final void writeCsv(final OutputStream output, final char separator)
+    throws IOException {
+        Serialization.writeCsv(this, output, separator);
     }
 
     /**
@@ -2186,7 +2214,7 @@ implements Iterable<List<V>> {
      */
     public final void writeCsv(final OutputStream output)
     throws IOException {
-        Serialization.writeCsv(this, output);
+        Serialization.writeCsv(this, output, '\0');
     }
 
     /**
