@@ -36,6 +36,9 @@ public class DataFrameAggregationTest {
         df = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("grouping.csv"));
     }
 
+    /**
+     * For issue #82
+     */
     @Test
     public void testMode1() {
         DataFrame<Object> DF = new DataFrame<Object>();
@@ -225,7 +228,9 @@ public class DataFrameAggregationTest {
     }
 
 
-
+    /**
+     * For issue #74
+     */
     @Test
     public final void test_get_entry_by_object() {
         DataFrame<Object> DF = new DataFrame<>("Name", "DateOfBirth", "Age");
@@ -248,14 +253,17 @@ public class DataFrameAggregationTest {
 
         //abnormal cases
         assertEquals(DF.getEntryByObject("one", "Nam"), null);
+        assertEquals(DF.getEntryByObject("1", "Name"), null);
         assertEquals(DF.getEntryByObject("on", "DateOfBith"), null);
         assertEquals(DF.getEntryByObject("oneq", "Age"), null);
         assertEquals(DF.getEntryByObject("two", "Nae"), null);
+        assertEquals(DF.getEntryByObject("2", "Name"), null);
         assertEquals(DF.getEntryByObject("two", "DateOfBrth"), null);
         assertEquals(DF.getEntryByObject("wo", "Age"), null);
         assertEquals(DF.getEntryByObject("thee", "Nam"), null);
         assertEquals(DF.getEntryByObject("te", "DateOfBirth"), null);
         assertEquals(DF.getEntryByObject("three", "Ag"), null);
+        assertEquals(DF.getEntryByObject("3", "Age"), null);
 
     }
 
