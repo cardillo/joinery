@@ -12,7 +12,8 @@ import joinery.impl.Comparison;
 
 import static org.junit.Assert.*;
 
-
+// CS427 Issue link: https://github.com/cardillo/joinery/issues/83
+// This entire class is for testing the concatenate function during the CS 427 Team Project
 public class DataFrameConcatenationTest {
     private DataFrame<Object> df1, df2, df3, df4, df5;
 

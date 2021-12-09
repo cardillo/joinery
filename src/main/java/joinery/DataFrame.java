@@ -603,6 +603,7 @@ implements Iterable<List<V>> {
         return this;
     }
 
+    // CS427 Issue link: https://github.com/cardillo/joinery/issues/83
     /**
      * Concatenate two dataframes, either vertically or horizontally (Developed by Dongming Xia)
      * If the input axis value is invalid (not 0 or 1), print out error message and return the main dataframe
@@ -626,7 +627,6 @@ implements Iterable<List<V>> {
      * @param df2 - The dataframe to be concatenated after the main dataframe
      * @param axis - The axis to concatenate along
      */
-
     public final DataFrame<V> concatenate(final DataFrame<V> df2, final int axis){
         // concatenate horizontally by calling the verticalConcat() function
         if (axis == 0){
@@ -643,6 +643,7 @@ implements Iterable<List<V>> {
         }
     }
 
+    // CS427 Issue link: https://github.com/cardillo/joinery/issues/83
     /**
      * Concatenate two dataframes vertically, if the input axis value is not given by the user
      *
@@ -650,7 +651,7 @@ implements Iterable<List<V>> {
      */
     public final DataFrame<V> concatenate(final DataFrame<V> df2){ return this.concatenate(df2, 0); }
 
-
+    // CS427 Issue link: https://github.com/cardillo/joinery/issues/83
     private DataFrame<V> verticalConcat(final DataFrame<V> df2) {
         // check if df2 has the same number of columns as the main df, if not, return the main dataframe
         if (this.size() != df2.size()){
@@ -671,21 +672,13 @@ implements Iterable<List<V>> {
         return this;
     }
 
+    // CS427 Issue link: https://github.com/cardillo/joinery/issues/83
     private DataFrame<V> horizontalConcat(final DataFrame<V> df2) {
         // check if df2 has the same number of rows as the main df, if not, return the main dataframe
         if (this.length() != df2.length()) {
             System.out.println("The number of rows between two dataframes does not match");
             return this;
         }
-
-        /*
-        DataFrame<V> temp_df1 = new DataFrame<>();
-        DataFrame<V> temp_df2 = new DataFrame<>();
-
-        temp_df1 = this.resetIndex();
-        temp_df2 = df2.resetIndex();
-
-         */
 
         return this.resetIndex().join(df2.resetIndex());
     }
