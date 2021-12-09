@@ -7,6 +7,7 @@ import java.util.List;
 
 import joinery.DataFrame;
 
+// CS427 Issue link: https://github.com/cardillo/joinery/issues/51
 public class Random_Export {
     public static void main(final String[] args) {
         DataFrame<Object> df1 = new DataFrame<>("ID", "Name", "Age");
@@ -14,10 +15,9 @@ public class Random_Export {
         df1.append(22,Arrays.asList(2, "B", 20));
         df1.append(33,Arrays.asList(3, "C", 30));
         df1.append(44,Arrays.asList(4, "D", 40));
-        String filename1 = "df1_origin.csv";
+        String filename1 = "df1_withColName.csv";
 
         // System.out.println(df1.types());
-
 
         try{
             df1.writeCsv(filename1, true);
@@ -26,10 +26,5 @@ public class Random_Export {
         catch (Exception e){
             e.printStackTrace();
         }
-
-
-
-
-
     }
 }
