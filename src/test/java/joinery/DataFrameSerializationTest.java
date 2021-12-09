@@ -176,7 +176,7 @@ public class DataFrameSerializationTest {
             );
     }
 
-    @Test
+    @Test // CS427 Issue link: https://github.com/cardillo/joinery/issues/51
     public void testWriteCsvNonStringIndex()
     throws IOException {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -191,7 +191,7 @@ public class DataFrameSerializationTest {
      *
      * @throws IOException if an error occurs writing the file
      */
-    @Test
+    @Test // CS427 Issue link: https://github.com/cardillo/joinery/issues/51
     public void testWriteCsvWithRowNames()
             throws IOException {
         df = new DataFrame<>(
