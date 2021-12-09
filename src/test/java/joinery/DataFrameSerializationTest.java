@@ -186,6 +186,7 @@ public class DataFrameSerializationTest {
         assertTrue("writeCsv does not throw due to non-string indices", true);
     }
 
+    //CS 427 Issue Link: https://github.com/cardillo/joinery/issues/93
     @Test 
     public void testWriteCsvWithSeparator() 
     throws IOException {
@@ -193,6 +194,20 @@ public class DataFrameSerializationTest {
         tmp.deleteOnExit();
         df.writeCsv(tmp.getPath(), '|');
         assertTrue(tmp.length() > 64); 
+    }
+
+    @Test
+    public void testReadWriteCsvTypesSeparator()
+    throws IOException {
+        final File tmp = File.createTempFile(getClass().getName(), ".csv");
+        tmp.deleteOnExit();
+        final DataFrame<Object> original = new DataFrame<>("date", "long", "double", "bool", "string");
+        original.append(Arrays.asList(new Date(), 1L, 1.0, true, "test"));
+        original.writeCsv(tmp.getPath(), '|');
+        assertArrayEquals(
+                original.types().toArray(),
+                DataFrame.readCsv(tmp.getPath(), "|").types().toArray()
+            );
     }
 
     @Test(expected=FileNotFoundException.class)
