@@ -290,11 +290,18 @@ public class Serialization {
         }
     }
 
+    
     public static <V> void writeCsv(final DataFrame<V> df, final String output)
     throws IOException {
         writeCsv(df, new FileOutputStream(output), '\0');
     }
-
+    //CS 427 Issue Link: https://github.com/cardillo/joinery/issues/93
+    /**
+    * Writes the dataframe to a CSV, using a specified separator or default comma.
+    * @param df The dataframe to write
+    * @param output The output stream to write the dataframe to
+    * @param separator The separator to use when writing the dataframe to the output
+    **/
     public static <V> void writeCsv(final DataFrame<V> df, final OutputStream output, final char separator)
     throws IOException {
         CsvPreference preference;
