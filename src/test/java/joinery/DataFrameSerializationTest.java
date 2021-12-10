@@ -329,4 +329,50 @@ public class DataFrameSerializationTest {
             );
         }
     }
+
+    @Test
+    public void testToFromSqlChunkSize2()
+            throws Exception {
+        Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+        try (Connection dbc = DriverManager.getConnection("jdbc:derby:memory:testdb;create=true")) {
+            dbc.createStatement().executeUpdate("create table test (category varchar(32), name varchar(32), value int)");
+            PreparedStatement stmt = dbc.prepareStatement("insert into test values (?,?,?)");
+            df.writeSql(stmt, 2);
+
+            Map<Object, Object> names = new HashMap<>();
+            names.put("CATEGORY", "category");
+            names.put("NAME", "name");
+            names.put("VALUE", "value");
+
+            DataFrame<Object> other = DataFrame.readSql(dbc, "select * from test").rename(names);
+            DataFrame<String> cmp = DataFrame.compare(df, other);
+            assertArrayEquals(
+                    cmp.col("value").toArray(),
+                    new String[] { "1 | 1", "2 | 2", "3 | 3", "4 | 4", "5 | 5", "6 | 6" }
+            );
+        }
+    }
+
+    @Test
+    public void testToFromSqlChunkSize3()
+            throws Exception {
+        Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+        try (Connection dbc = DriverManager.getConnection("jdbc:derby:memory:testdb;create=true")) {
+            dbc.createStatement().executeUpdate("create table test (category varchar(32), name varchar(32), value int)");
+            PreparedStatement stmt = dbc.prepareStatement("insert into test values (?,?,?)");
+            df.writeSql(stmt, 1);
+
+            Map<Object, Object> names = new HashMap<>();
+            names.put("CATEGORY", "category");
+            names.put("NAME", "name");
+            names.put("VALUE", "value");
+
+            DataFrame<Object> other = DataFrame.readSql(dbc, "select * from test").rename(names);
+            DataFrame<String> cmp = DataFrame.compare(df, other);
+            assertArrayEquals(
+                    cmp.col("value").toArray(),
+                    new String[] { "1 | 1", "2 | 2", "3 | 3", "4 | 4", "5 | 5", "6 | 6" }
+            );
+        }
+    }
 }
