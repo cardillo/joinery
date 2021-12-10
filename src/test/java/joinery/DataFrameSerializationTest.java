@@ -283,7 +283,7 @@ public class DataFrameSerializationTest {
         DataFrame<Object> dfEmptyHeader = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization_empty_header.csv"));
         dfEmptyHeader.transpose().toString();
     }
-
+    //Link to the issue: https://github.com/cardillo/joinery/issues/94
     @Test
     public void testToFromSql()
     throws Exception {
