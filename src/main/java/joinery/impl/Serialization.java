@@ -447,6 +447,22 @@ public class Serialization {
         }
     }
 
+    /**
+     *
+     * Executes SQL statement to write local data to SQL database in splits.
+     * User can specific the number of splits to divide rows of data so the method operates efficiently and minimizes chances of failing
+     * while writing big query.
+     * It takes DataFrame object df, SQL statement stmt, and number of splits, chunkSize.
+     * This method writes directly to connected SQL database, so there is no return type.
+     *
+     * @param  df  DataFrame object of loaded data
+     * @param  stmt SQL statement
+     * @param  chunkSize number of splits for rows of data
+     * @return      none
+     * Link to the issue: https://github.com/cardillo/joinery/issues/94
+     */
+
+
     public static <V> void writeSql(final DataFrame<V> df, final PreparedStatement stmt, int chunkSize)
     throws SQLException {
         try {
