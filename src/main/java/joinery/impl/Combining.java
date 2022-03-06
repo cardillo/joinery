@@ -33,7 +33,7 @@ import joinery.DataFrame.JoinType;
 import joinery.DataFrame.KeyFunction;
 
 public class Combining {
-    public static <V> DataFrame<V> join(final DataFrame<V> left, final DataFrame<V> right, final JoinType how, final KeyFunction<V> on) {
+    public static <V> DataFrame<V> join(final DataFrame<V> left, final DataFrame<V> right, final JoinType how, final KeyFunction<V> leftOn, final KeyFunction<V> rightOn) {
         final Iterator<Object> leftIt = left.index().iterator();
         final Iterator<Object> rightIt = right.index().iterator();
         final Map<Object, List<V>> leftMap = new LinkedHashMap<>();
@@ -41,7 +41,7 @@ public class Combining {
 
         for (final List<V> row : left) {
             final Object name = leftIt.next();
-            final Object key = on == null ? name : on.apply(row);
+            final Object key = leftOn == null ? name : leftOn.apply(row);
             if (leftMap.put(key, row) != null) {
                 throw new IllegalArgumentException("generated key is not unique: " + key);
             }
@@ -49,7 +49,7 @@ public class Combining {
 
         for (final List<V> row : right) {
             final Object name = rightIt.next();
-            final Object key = on == null ? name : on.apply(row);
+            final Object key = rightOn == null ? name : rightOn.apply(row);
             if (rightMap.put(key, row) != null) {
                 throw new IllegalArgumentException("generated key is not unique: " + key);
             }
@@ -100,7 +100,7 @@ public class Combining {
     }
 
     public static <V> DataFrame<V> joinOn(final DataFrame<V> left, final DataFrame<V> right, final JoinType how, final Integer ... cols) {
-        return join(left, right, how, new KeyFunction<V>() {
+        KeyFunction<V> on = new KeyFunction<V>() {
             @Override
             public Object apply(final List<V> value) {
                 final List<V> key = new ArrayList<>(cols.length);
@@ -109,14 +109,43 @@ public class Combining {
                 }
                 return Collections.unmodifiableList(key);
             }
-        });
+        };
+        return join(left, right, how, on, on);
+    }
+
+    public static <V> DataFrame<V> joinOn(final DataFrame<V> left, final DataFrame<V> right, final JoinType how, final Integer[] leftCols, final Integer[] rightCols) {
+        if (leftCols != null && rightCols != null
+                && leftCols.length != rightCols.length) {
+            throw new IllegalArgumentException("left columns number and right columns number must match");
+        }
+        KeyFunction<V> leftOn = new KeyFunction<V>() {
+            @Override
+            public Object apply(final List<V> value) {
+                final List<V> key = new ArrayList<>(leftCols.length);
+                for (final int col : leftCols) {
+                    key.add(value.get(col));
+                }
+                return Collections.unmodifiableList(key);
+            }
+        };
+        KeyFunction<V> rightOn = new KeyFunction<V>() {
+            @Override
+            public Object apply(final List<V> value) {
+                final List<V> key = new ArrayList<>(rightCols.length);
+                for (final int col : rightCols) {
+                    key.add(value.get(col));
+                }
+                return Collections.unmodifiableList(key);
+            }
+        };
+        return join(left, right, how, leftOn, rightOn);
     }
 
     public static <V> DataFrame<V> merge(final DataFrame<V> left, final DataFrame<V> right, final JoinType how) {
         final Set<Object> intersection = new LinkedHashSet<>(left.nonnumeric().columns());
         intersection.retainAll(right.nonnumeric().columns());
         final Object[] columns = intersection.toArray(new Object[intersection.size()]);
-        return join(left.reindex(columns), right.reindex(columns), how, null);
+        return join(left.reindex(columns), right.reindex(columns), how, null, null);
     }
 
     @SafeVarargs
