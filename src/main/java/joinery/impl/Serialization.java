@@ -21,10 +21,10 @@ package joinery.impl;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.URL;
-import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.sql.*;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
@@ -201,14 +201,17 @@ public class Serialization {
         return readCsv(file.contains("://") ?
                 new URL(file).openStream() : new FileInputStream(file), ",", NumberDefault.LONG_DEFAULT, null);
     }
-
-    public static DataFrame<Object> readCsv(final String file, final Charset charsetName)
+    //    CS304 Issue link: https://github.com/cardillo/joinery/issues/107
+    public static DataFrame<Object> readCsv
+            (final String file, final Charset charsetName)
             throws IOException {
+
         String charset = "GBK";
         byte[] first3Bytes = new byte[3];
         try {
             boolean checked = false;
-            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
+            BufferedInputStream bis =
+                    new BufferedInputStream(new FileInputStream(file));
             bis.mark(100); // 读者注： bis.mark(0);修改为 bis.mark(100);我用过这段代码，需要修改上面标出的地方。
             int read = bis.read(first3Bytes, 0, 3);
             if (read == -1) {
@@ -227,17 +230,20 @@ public class Serialization {
             bis.reset();
             if (!checked) {
                 while ((read = bis.read()) != -1) {
-                    if (read >= 0xF0)
+                    if (read >= 0xF0) {
                         break;
-                    if (0x80 <= read && read <= 0xBF) // 单独出现BF以下的，也算是GBK
+                    }
+                    if (0x80 <= read && read <= 0xBF) {// 单独出现BF以下的，也算是GBK
                         break;
+                    }
                     if (0xC0 <= read && read <= 0xDF) {
                         read = bis.read();
-                        if (0x80 <= read && read <= 0xBF) // 双字节 (0xC0 - 0xDF)
+                        if (0x80 <= read && read <= 0xBF) { // 双字节 (0xC0 - 0xDF)
                             // (0x80 - 0xBF),也可能在GB编码内
                             continue;
-                        else
+                        } else {
                             break;
+                        }
                     } else if (0xE0 <= read && read <= 0xEF) { // 也有可能出错，但是几率较小
                         read = bis.read();
                         if (0x80 <= read && read <= 0xBF) {
@@ -245,10 +251,12 @@ public class Serialization {
                             if (0x80 <= read && read <= 0xBF) {
                                 charset = "UTF-8";
                                 break;
-                            } else
+                            } else {
                                 break;
-                        } else
+                            }
+                        } else {
                             break;
+                        }
                     }
                 }
             }
@@ -260,7 +268,8 @@ public class Serialization {
 
         if (charsetName.toString().equals(charset)) {
             return readCsv(file.contains("://") ?
-                    new URL(file).openStream() : new FileInputStream(file), ",", NumberDefault.LONG_DEFAULT, null);
+                    new URL(file).openStream() : new FileInputStream(file),
+                    ",", NumberDefault.LONG_DEFAULT, null);
 
         } else {
             System.out.println("the encoding method of " + file + " is " + charset + ", not " + charsetName.toString());
@@ -475,6 +484,16 @@ public class Serialization {
         }
     }
 
+    /**
+     * Read data from the provided query results into a new data frame.
+     * If the query results are types of Integer, Double or Date, the type will
+     * be preserved in the data frame.
+     *
+     * @param rs the query results
+     * @return a new data frame
+     * @throws SQLException if an error occurs reading the results
+     */
+//    CS304 Issue link: https://github.com/cardillo/joinery/issues/92
     public static DataFrame<Object> readSql(final ResultSet rs)
             throws SQLException {
         try {
@@ -483,22 +502,47 @@ public class Serialization {
             for (int i = 1; i <= md.getColumnCount(); i++) {
                 columns.add(md.getColumnLabel(i));
             }
-
             DataFrame<Object> df = new DataFrame<>(columns);
             List<Object> row = new ArrayList<>(columns.size());
             while (rs.next()) {
                 for (String c : columns) {
-                    row.add(rs.getString(c));
+                    //For issue #92, preserve the data type
+                    //and put data into dataframe.
+                    Object rowElement;
+                    try {
+                        rowElement = Integer.parseInt(rs.getString(c));
+                    } catch (NumberFormatException e) {
+                        SimpleDateFormat sdf = new
+                                SimpleDateFormat("yyyy-MM-dd");
+                        try {
+                            rowElement = sdf.parse(rs.getString(c));
+                        } catch (ParseException parseException) {
+                            SimpleDateFormat simpleDateFormat =
+                                    new SimpleDateFormat("MM-dd");
+                            try {
+                                rowElement = simpleDateFormat.
+                                        parse(rs.getString(c));
+                            } catch (ParseException exception) {
+                                try {
+                                    rowElement = Double.parseDouble(
+                                            rs.getString(c));
+                                } catch (NumberFormatException e2) {
+                                    rowElement = rs.getString(c);
+                                }
+                            }
+                        }
+                    }
+                    row.add(rowElement);
                 }
                 df.append(row);
                 row.clear();
             }
-
             return df;
         } finally {
             rs.close();
         }
     }
+
 
     public static <V> void writeSql(final DataFrame<V> df, final PreparedStatement stmt)
             throws SQLException {

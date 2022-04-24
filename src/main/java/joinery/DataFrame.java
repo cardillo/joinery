@@ -2112,6 +2112,7 @@ implements Iterable<List<V>> {
      * return the data as a data frame.
      *
      * @param file the csv file
+     * @param charset the charset of the csv file encoding
      * @return a new data frame
      * @throws IOException if an error reading the file occurs
      */
