@@ -55,13 +55,6 @@
 
   <dependencies>
     <!-- build deps -->
-
-    <dependency>
-      <groupId>sh.joinery</groupId>
-      <artifactId>joinery-dataframe</artifactId>
-      <version>1.10</version>
-    </dependency>
-
     <dependency>
       <groupId>io.dropwizard.metrics</groupId>
       <artifactId>metrics-annotation</artifactId>
