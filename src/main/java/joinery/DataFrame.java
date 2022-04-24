@@ -2263,6 +2263,8 @@ implements Iterable<List<V>> {
 
     /**
      * Read data from the provided query results into a new data frame.
+     * If the query results are types of Integer, Double or Date, the type will
+     * be preserved in the data frame.
      *
      * @param rs the query results
      * @return a new data frame
