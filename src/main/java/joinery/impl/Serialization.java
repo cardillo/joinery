@@ -437,27 +437,27 @@ public class Serialization {
             while (rs.next()) {
                 for (String c : columns) {
                     // For issue #92, preserve the data type and put data into dataframe.
-                    Object rowElement=null;
-                    try {
-                        rowElement=Integer.parseInt(rs.getString(c));
-                    }catch (NumberFormatException e) {
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                        try {
-                            rowElement = sdf.parse(rs.getString(c));
-                        } catch (ParseException parseException) {
-                            SimpleDateFormat sdf_md = new SimpleDateFormat("MM-dd");
-                            try {
-                                rowElement = sdf_md.parse(rs.getString(c));
-                            } catch (ParseException exception) {
-                                try {
-                                    rowElement = Double.parseDouble(rs.getString(c));
-                                } catch (NumberFormatException e2) {
-                                    rowElement = rs.getString(c);
-                                }
-                            }
-                        }
-                    }
-                    row.add(rowElement);
+//                    Object rowElement=null;
+//                    try {
+//                        rowElement=Integer.parseInt(rs.getString(c));
+//                    }catch (NumberFormatException e) {
+//                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//                        try {
+//                            rowElement = sdf.parse(rs.getString(c));
+//                        } catch (ParseException parseException) {
+//                            SimpleDateFormat sdf_md = new SimpleDateFormat("MM-dd");
+//                            try {
+//                                rowElement = sdf_md.parse(rs.getString(c));
+//                            } catch (ParseException exception) {
+//                                try {
+//                                    rowElement = Double.parseDouble(rs.getString(c));
+//                                } catch (NumberFormatException e2) {
+//                                    rowElement = rs.getString(c);
+//                                }
+//                            }
+//                        }
+//                    }
+                    row.add(rs.getString(c));
                 }
                 df.append(row);
                 row.clear();
