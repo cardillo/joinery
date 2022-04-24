@@ -18,30 +18,16 @@
 
 package joinery.impl;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.math.BigInteger;
 import java.net.URL;
-import java.sql.ParameterMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
+import java.util.*;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -69,7 +55,7 @@ public class Serialization {
     private static final String NEWLINE = "\n";
     private static final String DELIMITER = "\t";
     private static final Object INDEX_KEY = new Object();
-    private static final int    MAX_COLUMN_WIDTH = 20;
+    private static final int MAX_COLUMN_WIDTH = 20;
 
     public static String toString(final DataFrame<?> df, final int limit) {
         final int len = df.length();
@@ -139,9 +125,9 @@ public class Serialization {
             // skip rows if necessary to limit output
             if (limit - 3 < r && r < (limit << 1) && r < len - 4) {
                 sb.append(NEWLINE).append(ELLIPSES)
-                  .append(" ").append(len - limit)
-                  .append(" rows skipped ").append(ELLIPSES)
-                  .append(NEWLINE).append(NEWLINE);
+                        .append(" ").append(len - limit)
+                        .append(" rows skipped ").append(ELLIPSES)
+                        .append(NEWLINE).append(NEWLINE);
                 while (r < len - 2) {
                     if (names.hasNext()) {
                         names.next();
@@ -184,7 +170,7 @@ public class Serialization {
     }
 
     private static final String fmt(final Class<?> cls, final Object o) {
-        if(cls==null) return "null";
+        if (cls == null) return "null";
         String s;
         if (o instanceof Number) {
             if (Short.class.equals(cls) || Integer.class.equals(cls) ||
@@ -199,10 +185,10 @@ public class Serialization {
             cal.setTime(dt);
             final DateFormat fmt = new SimpleDateFormat(
                     cal.get(Calendar.HOUR_OF_DAY) == 0 &&
-                        cal.get(Calendar.MINUTE) == 0 &&
-                        cal.get(Calendar.SECOND) == 0 ?
-                    "yyyy-MM-dd" : "yyyy-MM-dd'T'HH:mm:ssXXX"
-                );
+                            cal.get(Calendar.MINUTE) == 0 &&
+                            cal.get(Calendar.SECOND) == 0 ?
+                            "yyyy-MM-dd" : "yyyy-MM-dd'T'HH:mm:ssXXX"
+            );
             s = fmt.format(dt);
         } else {
             s = o != null ? String.valueOf(o) : "";
@@ -211,41 +197,108 @@ public class Serialization {
     }
 
     public static DataFrame<Object> readCsv(final String file)
-    throws IOException {
+            throws IOException {
         return readCsv(file.contains("://") ?
                 new URL(file).openStream() : new FileInputStream(file), ",", NumberDefault.LONG_DEFAULT, null);
     }
 
+    public static DataFrame<Object> readCsv(final String file, final Charset charsetName)
+            throws IOException {
+        String charset = "GBK";
+        byte[] first3Bytes = new byte[3];
+        try {
+            boolean checked = false;
+            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
+            bis.mark(100); // 读者注： bis.mark(0);修改为 bis.mark(100);我用过这段代码，需要修改上面标出的地方。
+            int read = bis.read(first3Bytes, 0, 3);
+            if (read == -1) {
+                bis.close();  //ANSI
+            } else if (first3Bytes[0] == (byte) 0xFF && first3Bytes[1] == (byte) 0xFE) {
+                charset = "UTF-16LE"; // 文件编码为 Unicode
+                checked = true;
+            } else if (first3Bytes[0] == (byte) 0xFE && first3Bytes[1] == (byte) 0xFF) {
+                charset = "UTF-16BE"; // 文件编码为 Unicode big endian
+                checked = true;
+            } else if (first3Bytes[0] == (byte) 0xEF && first3Bytes[1] == (byte) 0xBB
+                    && first3Bytes[2] == (byte) 0xBF) {
+                charset = "UTF-8"; // 文件编码为 UTF-8
+                checked = true;
+            }
+            bis.reset();
+            if (!checked) {
+                while ((read = bis.read()) != -1) {
+                    if (read >= 0xF0)
+                        break;
+                    if (0x80 <= read && read <= 0xBF) // 单独出现BF以下的，也算是GBK
+                        break;
+                    if (0xC0 <= read && read <= 0xDF) {
+                        read = bis.read();
+                        if (0x80 <= read && read <= 0xBF) // 双字节 (0xC0 - 0xDF)
+                            // (0x80 - 0xBF),也可能在GB编码内
+                            continue;
+                        else
+                            break;
+                    } else if (0xE0 <= read && read <= 0xEF) { // 也有可能出错，但是几率较小
+                        read = bis.read();
+                        if (0x80 <= read && read <= 0xBF) {
+                            read = bis.read();
+                            if (0x80 <= read && read <= 0xBF) {
+                                charset = "UTF-8";
+                                break;
+                            } else
+                                break;
+                        } else
+                            break;
+                    }
+                }
+            }
+            bis.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        if (charsetName.toString().equals(charset)) {
+            return readCsv(file.contains("://") ?
+                    new URL(file).openStream() : new FileInputStream(file), ",", NumberDefault.LONG_DEFAULT, null);
+
+        } else {
+            System.out.println("the encoding method of " + file + " is " + charset + ", not " + charsetName.toString());
+            throw new IOException();
+        }
+    }
+
     public static DataFrame<Object> readCsv(final String file, final String separator, NumberDefault numDefault)
-    throws IOException {
+            throws IOException {
         return readCsv(file.contains("://") ?
                 new URL(file).openStream() : new FileInputStream(file), separator, numDefault, null);
     }
 
     public static DataFrame<Object> readCsv(final String file, final String separator, NumberDefault numDefault, final String naString)
-    throws IOException {
+            throws IOException {
         return readCsv(file.contains("://") ?
                 new URL(file).openStream() : new FileInputStream(file), separator, numDefault, naString);
     }
 
     public static DataFrame<Object> readCsv(final String file, final String separator, NumberDefault numDefault, final String naString, boolean hasHeader)
-    throws IOException {
+            throws IOException {
         return readCsv(file.contains("://") ?
                 new URL(file).openStream() : new FileInputStream(file), separator, numDefault, naString, hasHeader);
     }
 
-    public static DataFrame<Object> readCsv(final InputStream input) 
-    throws IOException {
+
+    public static DataFrame<Object> readCsv(final InputStream input)
+            throws IOException {
         return readCsv(input, ",", NumberDefault.LONG_DEFAULT, null);
     }
 
-    public static DataFrame<Object> readCsv(final InputStream input, String separator, NumberDefault numDefault, String naString) 
-    throws IOException {
-    	return readCsv(input,separator, numDefault,naString, true);
+    public static DataFrame<Object> readCsv(final InputStream input, String separator, NumberDefault numDefault, String naString)
+            throws IOException {
+        return readCsv(input, separator, numDefault, naString, true);
     }
 
     public static DataFrame<Object> readCsv(final InputStream input, String separator, NumberDefault numDefault, String naString, boolean hasHeader)
-    throws IOException {
+            throws IOException {
         CsvPreference csvPreference;
         switch (separator) {
             case "\\t":
@@ -258,31 +311,31 @@ public class Serialization {
                 csvPreference = CsvPreference.EXCEL_NORTH_EUROPE_PREFERENCE;
                 break;
             case "|":
-            	csvPreference  = new CsvPreference.Builder('"', '|', "\n").build();
+                csvPreference = new CsvPreference.Builder('"', '|', "\n").build();
                 break;
             default:
                 throw new IllegalArgumentException("Separator: " + separator + " is not currently supported");
         }
         try (CsvListReader reader = new CsvListReader(new InputStreamReader(input), csvPreference)) {
-        	final List<String> header;
-        	final DataFrame<Object> df;
-        	final CellProcessor[] procs;
-        	if(hasHeader) {
-        		header = Arrays.asList(reader.getHeader(true));
-        		procs = new CellProcessor[header.size()];
+            final List<String> header;
+            final DataFrame<Object> df;
+            final CellProcessor[] procs;
+            if (hasHeader) {
+                header = Arrays.asList(reader.getHeader(true));
+                procs = new CellProcessor[header.size()];
                 df = new DataFrame<>(header);
-        	} else {
-        		// Read the first row to figure out how many columns we have
-        		reader.read();
-        		header = new ArrayList<String>();
-        		for (int i = 0; i < reader.length(); i++) {
-					header.add("V"+i);
-				}
-        		procs = new CellProcessor[header.size()];
-        		df = new DataFrame<>(header);
-        		// The following line executes the procs on the previously read row again
-        		df.append(reader.executeProcessors(procs));
-        	}
+            } else {
+                // Read the first row to figure out how many columns we have
+                reader.read();
+                header = new ArrayList<String>();
+                for (int i = 0; i < reader.length(); i++) {
+                    header.add("V" + i);
+                }
+                procs = new CellProcessor[header.size()];
+                df = new DataFrame<>(header);
+                // The following line executes the procs on the previously read row again
+                df.append(reader.executeProcessors(procs));
+            }
             for (List<Object> row = reader.read(procs); row != null; row = reader.read(procs)) {
                 df.append(new ArrayList<>(row));
             }
@@ -291,12 +344,12 @@ public class Serialization {
     }
 
     public static <V> void writeCsv(final DataFrame<V> df, final String output)
-    throws IOException {
+            throws IOException {
         writeCsv(df, new FileOutputStream(output));
     }
 
     public static <V> void writeCsv(final DataFrame<V> df, final OutputStream output)
-    throws IOException {
+            throws IOException {
         try (CsvListWriter writer = new CsvListWriter(new OutputStreamWriter(output), CsvPreference.STANDARD_PREFERENCE)) {
             final String[] header = new String[df.size()];
             final Iterator<Object> it = df.columns().iterator();
@@ -321,13 +374,13 @@ public class Serialization {
     }
 
     public static DataFrame<Object> readXls(final String file)
-    throws IOException {
+            throws IOException {
         return readXls(file.contains("://") ?
-                    new URL(file).openStream() : new FileInputStream(file));
+                new URL(file).openStream() : new FileInputStream(file));
     }
 
     public static DataFrame<Object> readXls(final InputStream input)
-    throws IOException {
+            throws IOException {
         final Workbook wb = new HSSFWorkbook(input);
         final Sheet sheet = wb.getSheetAt(0);
         final List<Object> columns = new ArrayList<>();
@@ -359,12 +412,12 @@ public class Serialization {
     }
 
     public static <V> void writeXls(final DataFrame<V> df, final String output)
-    throws IOException {
+            throws IOException {
         writeXls(df, new FileOutputStream(output));
     }
 
     public static <V> void writeXls(final DataFrame<V> df, final OutputStream output)
-    throws IOException {
+            throws IOException {
         final Workbook wb = new HSSFWorkbook();
         final Sheet sheet = wb.createSheet();
 
@@ -423,7 +476,7 @@ public class Serialization {
     }
 
     public static DataFrame<Object> readSql(final ResultSet rs)
-    throws SQLException {
+            throws SQLException {
         try {
             ResultSetMetaData md = rs.getMetaData();
             List<String> columns = new ArrayList<>();
@@ -448,7 +501,7 @@ public class Serialization {
     }
 
     public static <V> void writeSql(final DataFrame<V> df, final PreparedStatement stmt)
-    throws SQLException {
+            throws SQLException {
         try {
             ParameterMetaData md = stmt.getParameterMetaData();
             List<Integer> columns = new ArrayList<>();
