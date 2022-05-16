@@ -336,14 +336,16 @@ public class Serialization {
         for (final Row row : sheet) {
             if (row.getRowNum() == 0) {
                 // read header
-                for (final Cell cell : row) {
-                    columns.add(readCell(cell));
+                for (int i = 0; i < row.getLastCellNum(); i++) {
+                    final Cell cell = row.getCell(i);
+                    columns.add(cell == null ? null : readCell(cell));
                 }
             } else {
                 // read data values
                 final List<Object> values = new ArrayList<>();
-                for (final Cell cell : row) {
-                    values.add(readCell(cell));
+                for (int i = 0; i < row.getLastCellNum(); i++) {
+                    final Cell cell = row.getCell(i);
+                    values.add(cell == null ? null : readCell(cell));
                 }
                 data.add(values);
             }
