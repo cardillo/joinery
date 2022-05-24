@@ -201,9 +201,10 @@ public class Serialization {
         return readCsv(file.contains("://") ?
                 new URL(file).openStream() : new FileInputStream(file), ",", NumberDefault.LONG_DEFAULT, null);
     }
+
     //    CS304 Issue link: https://github.com/cardillo/joinery/issues/107
     public static DataFrame<Object> readCsv
-            (final String file, final Charset charsetName)
+    (final String file, final Charset charsetName)
             throws IOException {
 
         String charset = "GBK";
@@ -268,7 +269,7 @@ public class Serialization {
 
         if (charsetName.toString().equals(charset)) {
             return readCsv(file.contains("://") ?
-                    new URL(file).openStream() : new FileInputStream(file),
+                            new URL(file).openStream() : new FileInputStream(file),
                     ",", NumberDefault.LONG_DEFAULT, null);
 
         } else {
@@ -544,7 +545,7 @@ public class Serialization {
     }
 
 
-    public static <V> void writeSql(final DataFrame<V> df, final PreparedStatement stmt)
+    public static <V> void writeSql(final DataFrame<V> df, final PreparedStatement stmt, int checkSize)
             throws SQLException {
         try {
             ParameterMetaData md = stmt.getParameterMetaData();
@@ -552,15 +553,20 @@ public class Serialization {
             for (int i = 1; i <= md.getParameterCount(); i++) {
                 columns.add(md.getParameterType(i));
             }
-
+            int count = 0;
             for (int r = 0; r < df.length(); r++) {
                 for (int c = 1; c <= df.size(); c++) {
                     stmt.setObject(c, df.get(r, c - 1));
                 }
                 stmt.addBatch();
+                count++;
+                if (count % checkSize == 0) {
+                    stmt.executeBatch();
+                }
             }
-
-            stmt.executeBatch();
+            if (count % checkSize != 0) {
+                stmt.executeBatch();
+            }
         } finally {
             stmt.close();
         }
