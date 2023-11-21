@@ -227,6 +227,33 @@ implements Iterable<List<V>> {
     }
 
     /**
+     * Get the col number of a col Name
+     *
+     * columns is a private member of DataFrame
+     * provider a interface, so that users can get col number
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df = new DataFrame<>("name", "age", "value");
+     * > df.append(Arrays.asList("one", 10, 1));
+     * > df.append(Arrays.asList("two", 20, 2));
+     * > df.numOfCol("age")
+     * 1 }</pre>
+     *
+     * @param name the column name
+     * @return the col number of given column name
+     * */
+    // CS304 Issue link: https://github.com/cardillo/joinery/issues/74
+    public int numOfCol(String name) {
+        String[] colNames = (String[]) this.columns().toArray(new String[0]);
+        for (int i = 0; i < colNames.length; i++){
+            if (name.equals(colNames[i])){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
      * Add new columns to the data frame.
      *
      * Any existing rows will have {@code null} values for the new columns.
@@ -2263,6 +2290,8 @@ implements Iterable<List<V>> {
 
     /**
      * Read data from the provided query results into a new data frame.
+     * If the query results are types of Integer, Double or Date, the type will
+     * be preserved in the data frame.
      *
      * @param rs the query results
      * @return a new data frame
