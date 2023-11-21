@@ -7,3 +7,7 @@ target/
 *.war
 *.ear
 hs_err_pid*
+.DS_Store
+.idea/
+*.log
+*.iml
