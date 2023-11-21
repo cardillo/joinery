@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Collection;
 
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -290,14 +291,83 @@ public class Serialization {
         }
     }
 
+    /**
+     * Write the data from data frame to the specified file as csv with no row names.
+     *
+     * @param output the file to write to
+     * @param df data frame to write from
+     * @throws IOException if an error occurs writing the file
+     */
     public static <V> void writeCsv(final DataFrame<V> df, final String output)
     throws IOException {
         writeCsv(df, new FileOutputStream(output));
     }
 
+    /**
+     * Write the data from data frame to the specified file as csv.
+     *
+     * @param output the file to write to
+     * @param df data frame to write from
+     * @param writeRowNames whether to include row names
+     * @throws IOException if an error occurs writing the file
+     */
+    // CS427 Issue link: https://github.com/cardillo/joinery/issues/51
+    public static <V> void writeCsv(final DataFrame<V> df, final String output, final boolean writeRowNames)
+            throws IOException {
+        writeCsv(df, new FileOutputStream(output), writeRowNames);
+    }
+
+    /**
+     * Write the data from data frame to the specified file as csv with no row names.
+     *
+     * @param output the file to write to
+     * @param df data frame to write from
+     * @throws IOException if an error occurs writing the file
+     */
+    // CS427 Issue link: https://github.com/cardillo/joinery/issues/51
     public static <V> void writeCsv(final DataFrame<V> df, final OutputStream output)
-    throws IOException {
+            throws IOException {
+        writeCsv(df, output, false);
+    }
+
+    /**
+     * Add row names to data frame as the
+     * first column.
+     *
+     * @param df data frame to add to
+     * @return data frame with the row names
+     */
+    // CS427 Issue link: https://github.com/cardillo/joinery/issues/51
+    public static <V> DataFrame<V> addRowNames(final DataFrame<V> df) {
+        DataFrame<V> dff = new DataFrame<>();
+        final List<V> indexes = new ArrayList<>((Collection<? extends V>) df.index());
+        dff.add("", indexes);
+        dff = df.join(dff, DataFrame.JoinType.RIGHT);
+        for (int c = 0; c < df.size(); c++) {
+            final int sizeOfCol = df.length();
+            for (int r = 0; r < sizeOfCol; r++) {
+                dff.set(r, c+1, df.get(r, c));
+            }
+        }
+        return dff;
+    }
+
+    /**
+     * Write the data from data frame to the specified file as csv.
+     *
+     * @param output the file to write to
+     * @param df data frame to write from
+     * @param writeRowNames whether to include row names
+     * @throws IOException if an error occurs writing the file
+     */
+    // CS427 Issue link: https://github.com/cardillo/joinery/issues/51
+    public static <V> void writeCsv(final DataFrame<V> df, final OutputStream output, final boolean writeRowNames)
+            throws IOException {
         try (CsvListWriter writer = new CsvListWriter(new OutputStreamWriter(output), CsvPreference.STANDARD_PREFERENCE)) {
+            if (writeRowNames) {
+                writeCsv(addRowNames(df), output, false);
+                return;
+            }
             final String[] header = new String[df.size()];
             final Iterator<Object> it = df.columns().iterator();
             for (int c = 0; c < df.size(); c++) {
