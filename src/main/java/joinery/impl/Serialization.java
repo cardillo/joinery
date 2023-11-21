@@ -447,7 +447,23 @@ public class Serialization {
         }
     }
 
-    public static <V> void writeSql(final DataFrame<V> df, final PreparedStatement stmt)
+    /**
+     *
+     * Executes SQL statement to write local data to SQL database in splits.
+     * User can specific the number of splits to divide rows of data so the method operates efficiently and minimizes chances of failing
+     * while writing big query.
+     * It takes DataFrame object df, SQL statement stmt, and number of splits, chunkSize.
+     * This method writes directly to connected SQL database, so there is no return type.
+     *
+     * @param  df  DataFrame object of loaded data
+     * @param  stmt SQL statement
+     * @param  chunkSize number of splits for rows of data
+     * @return      none
+     * Link to the issue: https://github.com/cardillo/joinery/issues/94
+     */
+
+
+    public static <V> void writeSql(final DataFrame<V> df, final PreparedStatement stmt, int chunkSize)
     throws SQLException {
         try {
             ParameterMetaData md = stmt.getParameterMetaData();
@@ -456,12 +472,50 @@ public class Serialization {
                 columns.add(md.getParameterType(i));
             }
 
-            for (int r = 0; r < df.length(); r++) {
-                for (int c = 1; c <= df.size(); c++) {
-                    stmt.setObject(c, df.get(r, c - 1));
-                }
-                stmt.addBatch();
+            if (chunkSize <= 0 | chunkSize >= df.length())
+            {
+                chunkSize = 1;
             }
+
+            int split = df.length() / chunkSize;
+
+
+
+            if (chunkSize == 1)
+            {
+                for (int r = 0; r < df.length(); r++) {
+                    for (int c = 1; c <= df.size(); c++) {
+                        stmt.setObject(c, df.get(r, c - 1));
+                    }
+                    stmt.addBatch();
+                }
+            }
+
+            else
+            {
+                int index = 0;
+
+                for (int z = 0; z < chunkSize-1; z++) {
+                    for (int r = 0; r < split; r++) {
+                        for (int c = 1; c <= df.size(); c++) {
+                            stmt.setObject(c, df.get(index, c - 1));
+                        }
+                        ++index;
+                        stmt.addBatch();
+                    }
+                }
+
+                for (;index < df.length();index++)
+                {
+                    for (int c = 1; c <= df.size(); c++) {
+                        stmt.setObject(c, df.get(index, c - 1));
+                    }
+                    stmt.addBatch();
+
+                }
+            }
+
+
 
             stmt.executeBatch();
         } finally {
