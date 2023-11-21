@@ -101,4 +101,35 @@ public class DataFrameSortByTest {
                 sorted.col(1).toArray()
             );
     }
+
+    @Test
+    public final void testSortByIndex() {
+        final DataFrame<Object> sorted = df.sortBy("name");
+        assertArrayEquals(
+                new Object[] { 0, 1, 2, 3, 4, 5 },
+                sorted.sortIndex(1).index().toArray()
+            );
+    }
+
+    @Test
+    public final void testSortByStringIndex() {
+        df = new DataFrame<>("name", "value");
+        df.append("row1", Arrays.asList("charlie", 3));
+        df.append("row2", Arrays.asList("alpha", 1));
+        df.append("row3", Arrays.asList("bravo", 2));
+        final DataFrame<Object> sorted = df.sortBy("name");
+        assertArrayEquals(
+                new Object[] { "row1", "row2", "row3" },
+                sorted.sortIndex(1).index().toArray()
+            );
+    }
+
+    @Test
+    public final void testSortByIndexDecreasing() {
+        final DataFrame<Object> sorted = df.sortBy("name");
+        assertArrayEquals(
+                new Object[] { 5, 4, 3, 2, 1, 0 },
+                sorted.sortIndex(-1).index().toArray()
+            );
+    }
 }

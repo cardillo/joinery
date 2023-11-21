@@ -75,4 +75,42 @@ public class Sorting {
 
         return sorted;
     }
+
+    public static <V> DataFrame<V> sortIndex(
+            final DataFrame<V> df, final SortDirection dir) {
+        final DataFrame<V> sorted = new DataFrame<V>(df.columns());
+        final Comparator<Object> comparator = new Comparator<Object>() {
+            @Override
+            @SuppressWarnings("unchecked")
+            public int compare(final Object r1, final Object r2) {
+                int result = 0;
+                
+                final Comparable<Object> v1 = Comparable.class.cast(r1);
+                final Object v2 = r2;
+                result = v1.compareTo(v2);
+                result *= dir == SortDirection.DESCENDING ? -1 : 1;
+                return result;
+            }
+        };
+
+        final Comparator<Integer> cmp = new Comparator<Integer>() {
+            @Override
+            public int compare(final Integer r1, final Integer r2) {
+                return comparator.compare(df.index().toArray()[r1],  df.index().toArray()[r2]);
+            }
+        };
+
+        final Integer[] rows = new Integer[df.length()];
+        for (int r = 0; r < df.length(); r++) {
+            rows[r] = r;
+        }
+        Arrays.sort(rows, cmp);
+
+        final List<Object> labels = new ArrayList<>(df.index());
+        for (final Integer r : rows) {
+            final Object label = r < labels.size() ? labels.get(r) : r;
+            sorted.append(label, df.row(r));
+        }
+        return sorted;
+    }
 }
