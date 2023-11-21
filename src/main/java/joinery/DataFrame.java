@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -2106,6 +2107,19 @@ implements Iterable<List<V>> {
     throws IOException {
         return Serialization.readCsv(file);
     }
+    /**
+     * Read the specified csv file with a specified encoding method and
+     * return the data as a data frame.
+     *
+     * @param file the csv file
+     * @param charset the charset of the csv file encoding
+     * @return a new data frame
+     * @throws IOException if an error reading the file occurs
+     */
+    public static final DataFrame<Object> readCsv(final String file, final Charset charset)
+            throws IOException {
+        return Serialization.readCsv(file,charset);
+    }
 
     /**
      * Read csv records from an input stream
@@ -2164,6 +2178,8 @@ implements Iterable<List<V>> {
     throws IOException {
         return Serialization.readCsv(input, separator, longDefault, null);
     }
+
+
 
     /**
      * Write the data from this data frame to
@@ -2231,7 +2247,6 @@ implements Iterable<List<V>> {
      * Write the data from the data frame
      * to the provided output stream as an excel workbook.
      *
-     * @param file the file to write
      * @throws IOException if an error occurs writing the file
      */
     public final void writeXls(final OutputStream output)
@@ -2281,9 +2296,9 @@ implements Iterable<List<V>> {
      * @param sql the SQL statement
      * @throws SQLException if an error occurs executing the statement
      */
-    public final void writeSql(final Connection c, final String sql)
+    public final void writeSql(final Connection c, final String sql,int checkSize)
     throws SQLException {
-        writeSql(c.prepareStatement(sql));
+        writeSql(c.prepareStatement(sql), checkSize);
     }
 
     /**
@@ -2293,9 +2308,9 @@ implements Iterable<List<V>> {
      * @param stmt a prepared insert statement
      * @throws SQLException if an error occurs executing the statement
      */
-    public final void writeSql(final PreparedStatement stmt)
+    public final void writeSql(final PreparedStatement stmt,int checkSize)
     throws SQLException {
-        Serialization.writeSql(this, stmt);
+        Serialization.writeSql(this, stmt,checkSize);
     }
 
     public final String toString(final int limit) {
