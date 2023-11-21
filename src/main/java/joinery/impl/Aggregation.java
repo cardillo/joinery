@@ -107,6 +107,7 @@ public class Aggregation {
         }
     }
 
+
     public static class Sum<V>
     extends AbstractStorelessStatistic<V> {
         public Sum() {
@@ -123,9 +124,7 @@ public class Aggregation {
 
     public static class Mean<V>
     extends AbstractStorelessStatistic<V> {
-        public Mean() {
-            super(new org.apache.commons.math3.stat.descriptive.moment.Mean());
-        }
+        public Mean() { super(new org.apache.commons.math3.stat.descriptive.moment.Mean()); }
     }
 
     public static class StdDev<V>

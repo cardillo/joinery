@@ -246,6 +246,16 @@ extends ScriptableObject {
         return df.get(row, col);
     }
 
+    public Object jsFunction_getEntryByObject(final Object row, final Object col) {
+
+        return df.getEntryByObject(row, col);
+
+    }
+
+    public int jsFunction_getIndxByObject(final Object name, final int indicator) {
+        return df.getIndxByObject(name, indicator);
+    }
+
     public DataFrameAdapter jsFunction_slice(final Integer rowStart, final Integer rowEnd, final Integer colStart, final Integer colEnd) {
         return new DataFrameAdapter(this, df.slice(rowStart, rowEnd, colStart, colEnd));
     }
@@ -371,6 +381,10 @@ extends ScriptableObject {
         return new DataFrameAdapter(this, df.mean());
     }
 
+    public DataFrameAdapter jsFunction_mode() { return new DataFrameAdapter(this, df.mode().cast(Object.class)); }
+
+//    public DataFrameAdapter jsFunction_mode(int col_no) {return new DataFrameAdapter(this, df.mode(col_no));}
+
     public DataFrameAdapter jsFunction_stddev() {
         return new DataFrameAdapter(this, df.stddev());
     }
@@ -395,9 +409,7 @@ extends ScriptableObject {
         return new DataFrameAdapter(this, df.max());
     }
 
-    public DataFrameAdapter jsFunction_median() {
-        return new DataFrameAdapter(this, df.median());
-    }
+    public DataFrameAdapter jsFunction_median() {return new DataFrameAdapter(this, df.median()); }
 
     public DataFrameAdapter jsFunction_cumsum() {
         return new DataFrameAdapter(this, df.cumsum());

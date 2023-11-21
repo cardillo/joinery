@@ -31,6 +31,16 @@
     <tag>HEAD</tag>
   </scm>
 
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <version>3.0.4</version>
+      </plugin>
+    </plugins>
+  </reporting>
+
   <properties>
     <project.build.sourceEncoding>iso-8859-1</project.build.sourceEncoding>
     <project.reporting.outputEncoding>iso-8859-1</project.reporting.outputEncoding>
