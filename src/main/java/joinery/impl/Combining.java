@@ -33,6 +33,7 @@ import joinery.DataFrame.JoinType;
 import joinery.DataFrame.KeyFunction;
 
 public class Combining {
+
     public static <V> DataFrame<V> join(final DataFrame<V> left, final DataFrame<V> right, final JoinType how, final KeyFunction<V> on) {
         final Iterator<Object> leftIt = left.index().iterator();
         final Iterator<Object> rightIt = right.index().iterator();
@@ -89,7 +90,7 @@ public class Combining {
                 final List<V> row = how != JoinType.RIGHT ? leftMap.get(entry.getKey()) : rightMap.get(entry.getKey());
                 if (row == null) {
                     final List<V> tmp = new ArrayList<>(Collections.<V>nCopies(
-                        how != JoinType.RIGHT ? left.columns().size() : right.columns().size(), null));
+                            how != JoinType.RIGHT ? left.columns().size() : right.columns().size(), null));
                     tmp.addAll(entry.getValue());
                     df.append(entry.getKey(), tmp);
                 }
@@ -97,6 +98,109 @@ public class Combining {
         }
 
         return df;
+    }
+
+    public static <V> DataFrame<V> nonStrictJoin(final DataFrame<V> left, final DataFrame<V> right, final JoinType how, final KeyFunction<V> on) {
+        final Iterator<Object> leftIt = left.index().iterator();
+        final Iterator<Object> rightIt = right.index().iterator();
+        final Map<Object, List<List<V>>> leftMap = new LinkedHashMap<>();
+        final Map<Object, List<List<V>>> rightMap = new LinkedHashMap<>();
+        for (final List<V> row : left) {
+            final Object name = leftIt.next();
+            final Object key = on == null ? name : on.apply(row);
+            List<List<V>> orDefault = leftMap.getOrDefault(key, new ArrayList<>());
+            leftMap.put(key, orDefault);
+            orDefault.add(row);
+        }
+
+        for (final List<V> row : right) {
+            final Object name = rightIt.next();
+            final Object key = on == null ? name : on.apply(row);
+            List<List<V>> orDefault = rightMap.getOrDefault(key, new ArrayList<>());
+            rightMap.put(key, orDefault);
+            orDefault.add(row);
+        }
+
+        final List<Object> columns = new ArrayList<>(how != JoinType.RIGHT ? left.columns() : right.columns());
+        for (Object column : how != JoinType.RIGHT ? right.columns() : left.columns()) {
+            final int index = columns.indexOf(column);
+            if (index >= 0) {
+                if (column instanceof List) {
+                    @SuppressWarnings("unchecked")
+                    final List<Object> l1 = List.class.cast(columns.get(index));
+                    l1.add(how != JoinType.RIGHT ? "left" : "right");
+                    @SuppressWarnings("unchecked")
+                    final List<Object> l2= List.class.cast(column);
+                    l2.add(how != JoinType.RIGHT ? "right" : "left");
+                } else {
+                    columns.set(index, String.format("%s_%s", columns.get(index), how != JoinType.RIGHT ? "left" : "right"));
+                    column = String.format("%s_%s", column, how != JoinType.RIGHT ? "right" : "left");
+                }
+            }
+            columns.add(column);
+        }
+
+        final DataFrame<V> df = new DataFrame<>(columns);
+        int counter = 0;
+        for (final Map.Entry<Object, List<List<V>>> entry : how != JoinType.RIGHT ? leftMap.entrySet() : rightMap.entrySet()) {
+            List<List<V>> values = entry.getValue();
+            for(final List<V> tmp : values){
+                final List<List<V>> rows = how != JoinType.RIGHT ? rightMap.get(entry.getKey()) : leftMap.get(entry.getKey());
+                if ((rows != null && rows.size() > 0) || how != JoinType.INNER) {
+                    if(rows == null) {
+                        System.out.println("rows is null for " + entry.getKey());
+                        List<V> ttmp = new ArrayList<>();
+                        ttmp.addAll(tmp);
+                        ttmp.addAll(Collections.<V>nCopies(right.columns().size(), null));
+                        df.append(counter++, ttmp);
+                        continue;
+                    } else {
+                        for (List<V> row : rows) {
+                            List<V> ttmp = new ArrayList<>();
+                            ttmp.addAll(tmp);
+                            ttmp.addAll(row != null ? row : Collections.<V>nCopies(right.columns().size(), null));
+                            df.append(counter++, ttmp);  // nonstrict join, key can be not unique
+                        }
+                    }
+                }
+            }
+        }
+
+        if (how == JoinType.OUTER) {
+            for (final Map.Entry<Object, List<List<V>>> entry : how != JoinType.RIGHT ? rightMap.entrySet() : leftMap.entrySet()) {
+                List<List<V>> values = entry.getValue();
+                for (final List<V> tmp : values) {
+                    final List<List<V>> rows = how != JoinType.RIGHT ? leftMap.get(entry.getKey()) : rightMap.get(entry.getKey());
+                    if ((rows != null && rows.size() > 0) || how != JoinType.INNER) {
+                        if(rows == null) {
+                            System.out.println("rows is null for " + entry.getKey());
+                            continue;
+                        }
+                        for (List<V> row : rows) {
+                            List<V> ttmp = new ArrayList<>();
+                            ttmp.addAll(tmp);
+                            ttmp.addAll(row != null ? row : Collections.<V>nCopies(right.columns().size(), null));
+                            df.append(counter++, ttmp);
+                        }
+                    }
+                }
+            }
+        }
+
+        return df;
+    }
+
+    public static <V> DataFrame<V> nonStrictJoinOn(final DataFrame<V> left, final DataFrame<V> right, final JoinType how, final Integer ... cols) {
+        return nonStrictJoin(left, right, how, new KeyFunction<V>() {
+            @Override
+            public Object apply(final List<V> value) {
+                final List<V> key = new ArrayList<>(cols.length);
+                for (final int col : cols) {
+                    key.add(value.get(col));
+                }
+                return Collections.unmodifiableList(key);
+            }
+        });
     }
 
     public static <V> DataFrame<V> joinOn(final DataFrame<V> left, final DataFrame<V> right, final JoinType how, final Integer ... cols) {
