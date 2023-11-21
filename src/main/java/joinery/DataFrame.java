@@ -2174,19 +2174,28 @@ implements Iterable<List<V>> {
      */
     public final void writeCsv(final String file)
     throws IOException {
-        Serialization.writeCsv(this, new FileOutputStream(file));
+        Serialization.writeCsv(this, new FileOutputStream(file),",");
     }
 
+    public final void writeCsv(final String file, final String separator)
+            throws IOException {
+        Serialization.writeCsv(this, new FileOutputStream(file), separator);
+    }
     /**
      * Write the data from this data frame to
-     * the provided output stream as comma separated values.
+     * the provided output stream as delimiter specified separated values.
      *
      * @param output
      * @throws IOException
      */
     public final void writeCsv(final OutputStream output)
     throws IOException {
-        Serialization.writeCsv(this, output);
+        Serialization.writeCsv(this, output, ",");
+    }
+
+    public final void writeCsv(final OutputStream output, final String separator)
+            throws IOException {
+            Serialization.writeCsv(this,  output, separator);
     }
 
     /**

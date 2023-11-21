@@ -69,7 +69,7 @@ public class Serialization {
     private static final String NEWLINE = "\n";
     private static final String DELIMITER = "\t";
     private static final Object INDEX_KEY = new Object();
-    private static final int    MAX_COLUMN_WIDTH = 20;
+    private static final int MAX_COLUMN_WIDTH = 20;
 
     public static String toString(final DataFrame<?> df, final int limit) {
         final int len = df.length();
@@ -139,9 +139,9 @@ public class Serialization {
             // skip rows if necessary to limit output
             if (limit - 3 < r && r < (limit << 1) && r < len - 4) {
                 sb.append(NEWLINE).append(ELLIPSES)
-                  .append(" ").append(len - limit)
-                  .append(" rows skipped ").append(ELLIPSES)
-                  .append(NEWLINE).append(NEWLINE);
+                        .append(" ").append(len - limit)
+                        .append(" rows skipped ").append(ELLIPSES)
+                        .append(NEWLINE).append(NEWLINE);
                 while (r < len - 2) {
                     if (names.hasNext()) {
                         names.next();
@@ -184,7 +184,7 @@ public class Serialization {
     }
 
     private static final String fmt(final Class<?> cls, final Object o) {
-        if(cls==null) return "null";
+        if (cls == null) return "null";
         String s;
         if (o instanceof Number) {
             if (Short.class.equals(cls) || Integer.class.equals(cls) ||
@@ -199,10 +199,10 @@ public class Serialization {
             cal.setTime(dt);
             final DateFormat fmt = new SimpleDateFormat(
                     cal.get(Calendar.HOUR_OF_DAY) == 0 &&
-                        cal.get(Calendar.MINUTE) == 0 &&
-                        cal.get(Calendar.SECOND) == 0 ?
-                    "yyyy-MM-dd" : "yyyy-MM-dd'T'HH:mm:ssXXX"
-                );
+                            cal.get(Calendar.MINUTE) == 0 &&
+                            cal.get(Calendar.SECOND) == 0 ?
+                            "yyyy-MM-dd" : "yyyy-MM-dd'T'HH:mm:ssXXX"
+            );
             s = fmt.format(dt);
         } else {
             s = o != null ? String.valueOf(o) : "";
@@ -211,41 +211,41 @@ public class Serialization {
     }
 
     public static DataFrame<Object> readCsv(final String file)
-    throws IOException {
+            throws IOException {
         return readCsv(file.contains("://") ?
                 new URL(file).openStream() : new FileInputStream(file), ",", NumberDefault.LONG_DEFAULT, null);
     }
 
     public static DataFrame<Object> readCsv(final String file, final String separator, NumberDefault numDefault)
-    throws IOException {
+            throws IOException {
         return readCsv(file.contains("://") ?
                 new URL(file).openStream() : new FileInputStream(file), separator, numDefault, null);
     }
 
     public static DataFrame<Object> readCsv(final String file, final String separator, NumberDefault numDefault, final String naString)
-    throws IOException {
+            throws IOException {
         return readCsv(file.contains("://") ?
                 new URL(file).openStream() : new FileInputStream(file), separator, numDefault, naString);
     }
 
     public static DataFrame<Object> readCsv(final String file, final String separator, NumberDefault numDefault, final String naString, boolean hasHeader)
-    throws IOException {
+            throws IOException {
         return readCsv(file.contains("://") ?
                 new URL(file).openStream() : new FileInputStream(file), separator, numDefault, naString, hasHeader);
     }
 
-    public static DataFrame<Object> readCsv(final InputStream input) 
-    throws IOException {
+    public static DataFrame<Object> readCsv(final InputStream input)
+            throws IOException {
         return readCsv(input, ",", NumberDefault.LONG_DEFAULT, null);
     }
 
-    public static DataFrame<Object> readCsv(final InputStream input, String separator, NumberDefault numDefault, String naString) 
-    throws IOException {
-    	return readCsv(input,separator, numDefault,naString, true);
+    public static DataFrame<Object> readCsv(final InputStream input, String separator, NumberDefault numDefault, String naString)
+            throws IOException {
+        return readCsv(input, separator, numDefault, naString, true);
     }
 
     public static DataFrame<Object> readCsv(final InputStream input, String separator, NumberDefault numDefault, String naString, boolean hasHeader)
-    throws IOException {
+            throws IOException {
         CsvPreference csvPreference;
         switch (separator) {
             case "\\t":
@@ -258,31 +258,31 @@ public class Serialization {
                 csvPreference = CsvPreference.EXCEL_NORTH_EUROPE_PREFERENCE;
                 break;
             case "|":
-            	csvPreference  = new CsvPreference.Builder('"', '|', "\n").build();
+                csvPreference = new CsvPreference.Builder('"', '|', "\n").build();
                 break;
             default:
                 throw new IllegalArgumentException("Separator: " + separator + " is not currently supported");
         }
         try (CsvListReader reader = new CsvListReader(new InputStreamReader(input), csvPreference)) {
-        	final List<String> header;
-        	final DataFrame<Object> df;
-        	final CellProcessor[] procs;
-        	if(hasHeader) {
-        		header = Arrays.asList(reader.getHeader(true));
-        		procs = new CellProcessor[header.size()];
+            final List<String> header;
+            final DataFrame<Object> df;
+            final CellProcessor[] procs;
+            if (hasHeader) {
+                header = Arrays.asList(reader.getHeader(true));
+                procs = new CellProcessor[header.size()];
                 df = new DataFrame<>(header);
-        	} else {
-        		// Read the first row to figure out how many columns we have
-        		reader.read();
-        		header = new ArrayList<String>();
-        		for (int i = 0; i < reader.length(); i++) {
-					header.add("V"+i);
-				}
-        		procs = new CellProcessor[header.size()];
-        		df = new DataFrame<>(header);
-        		// The following line executes the procs on the previously read row again
-        		df.append(reader.executeProcessors(procs));
-        	}
+            } else {
+                // Read the first row to figure out how many columns we have
+                reader.read();
+                header = new ArrayList<String>();
+                for (int i = 0; i < reader.length(); i++) {
+                    header.add("V" + i);
+                }
+                procs = new CellProcessor[header.size()];
+                df = new DataFrame<>(header);
+                // The following line executes the procs on the previously read row again
+                df.append(reader.executeProcessors(procs));
+            }
             for (List<Object> row = reader.read(procs); row != null; row = reader.read(procs)) {
                 df.append(new ArrayList<>(row));
             }
@@ -291,12 +291,12 @@ public class Serialization {
     }
 
     public static <V> void writeCsv(final DataFrame<V> df, final String output)
-    throws IOException {
+            throws IOException {
         writeCsv(df, new FileOutputStream(output));
     }
 
     public static <V> void writeCsv(final DataFrame<V> df, final OutputStream output)
-    throws IOException {
+            throws IOException {
         try (CsvListWriter writer = new CsvListWriter(new OutputStreamWriter(output), CsvPreference.STANDARD_PREFERENCE)) {
             final String[] header = new String[df.size()];
             final Iterator<Object> it = df.columns().iterator();
@@ -320,6 +320,53 @@ public class Serialization {
         }
     }
 
+    public static <V> void writeCsv(final DataFrame<V> df, final String output, String separator)
+            throws IOException {
+            writeCsv(df, new FileOutputStream(output),separator);
+    }
+
+    public static <V> void writeCsv(final DataFrame<V> df, final OutputStream output, String separator)
+            throws IOException {
+        CsvPreference csvPreference;
+        switch (separator) {
+            case "\\t":
+                csvPreference = CsvPreference.TAB_PREFERENCE;
+                break;
+            case ",":
+                csvPreference = CsvPreference.STANDARD_PREFERENCE;
+                break;
+            case ";":
+                csvPreference = CsvPreference.EXCEL_NORTH_EUROPE_PREFERENCE;
+                break;
+            case "|":
+                csvPreference = new CsvPreference.Builder('"', '|', "\n").build();
+                break;
+            default:
+                throw new IllegalArgumentException("Separator: " + separator + " is not currently supported. The supported separators are '\\t', ',', ';', and '|'.");
+        }
+        try (CsvListWriter writer = new CsvListWriter(new OutputStreamWriter(output), csvPreference)) {
+            final String[] header = new String[df.size()];
+            final Iterator<Object> it = df.columns().iterator();
+            for (int c = 0; c < df.size(); c++) {
+                header[c] = String.valueOf(it.hasNext() ? it.next() : c);
+            }
+            writer.writeHeader(header);
+            final CellProcessor[] procs = new CellProcessor[df.size()];
+            final List<Class<?>> types = df.types();
+            for (int c = 0; c < df.size(); c++) {
+                final Class<?> cls = types.get(c);
+                if (Date.class.isAssignableFrom(cls)) {
+                    procs[c] = new ConvertNullTo("", new FmtDate("yyyy-MM-dd'T'HH:mm:ssXXX"));
+                } else {
+                    procs[c] = new ConvertNullTo("");
+                }
+            }
+            for (final List<V> row : df) {
+                writer.write(row, procs);
+            }
+        }
+    }
+    
     public static DataFrame<Object> readXls(final String file)
     throws IOException {
         return readXls(file.contains("://") ?
