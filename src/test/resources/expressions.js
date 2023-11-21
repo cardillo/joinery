@@ -29,8 +29,8 @@ df.reshape(5, 2)
 df.reshape(['row1', 'row2', 'row3'], ['col1', 'col2']) // native array vs collection
 df.join(tmp)
 df.join(tmp, JoinType.OUTER)
-df.join(tmp, function (row) { return Math.random() })
-df.join(tmp, JoinType.OUTER, function (row) { return Math.random() })
+df.join(tmp, function (row) { return Math.random() }, function (row) { return Math.random() })
+df.join(tmp, JoinType.OUTER, function (row) { return Math.random() }, function (row) { return Math.random() })
 df.joinOn(tmp.add('a'), 'a') // trouble finding elems in index
 //df.joinOn(tmp, 0, 1)
 //df.joinOn(tmp, JoinType.INNER, 0) // assumes INNER is a numeric index

@@ -643,7 +643,7 @@ implements Iterable<List<V>> {
     /**
      * Return a new data frame created by performing a left outer join
      * of this data frame with the argument and using the row indices
-     * as the join key.
+     * as the join keys.
      *
      * <pre> {@code
      * > DataFrame<Object> left = new DataFrame<>("a", "b");
@@ -662,7 +662,7 @@ implements Iterable<List<V>> {
      * @return the result of the join operation as a new data frame
      */
     public final DataFrame<V> join(final DataFrame<V> other) {
-        return join(other, JoinType.LEFT, null);
+        return join(other, JoinType.LEFT, null, null);
     }
 
     /**
@@ -675,7 +675,7 @@ implements Iterable<List<V>> {
      * @return the result of the join operation as a new data frame
      */
     public final DataFrame<V> join(final DataFrame<V> other, final JoinType join) {
-        return join(other, join, null);
+        return join(other, join, null, null);
     }
 
     /**
@@ -683,11 +683,12 @@ implements Iterable<List<V>> {
      * data frame with the argument using the specified key function.
      *
      * @param other the other data frame
-     * @param on the function to generate the join keys
+     * @param leftOn the function to generate the left join keys
+     * @param rightOn the function to generate the right join keys
      * @return the result of the join operation as a new data frame
      */
-    public final DataFrame<V> join(final DataFrame<V> other, final KeyFunction<V> on) {
-        return join(other, JoinType.LEFT, on);
+    public final DataFrame<V> join(final DataFrame<V> other, final KeyFunction<V> leftOn, final KeyFunction<V> rightOn) {
+        return join(other, JoinType.LEFT, leftOn, rightOn);
     }
 
     /**
@@ -697,11 +698,12 @@ implements Iterable<List<V>> {
      *
      * @param other the other data frame
      * @param join the join type
-     * @param on the function to generate the join keys
+     * @param leftOn the function to generate the left join keys
+     * @param rightOn the function to generate the right join keys
      * @return the result of the join operation as a new data frame
      */
-    public final DataFrame<V> join(final DataFrame<V> other, final JoinType join, final KeyFunction<V> on) {
-        return Combining.join(this, other, join, on);
+    public final DataFrame<V> join(final DataFrame<V> other, final JoinType join, final KeyFunction<V> leftOn, final KeyFunction<V> rightOn) {
+        return Combining.join(this, other, join, leftOn, rightOn);
     }
 
     /**
@@ -731,6 +733,21 @@ implements Iterable<List<V>> {
     }
 
     /**
+     * Return a new data frame created by performing a join of this
+     * data frame with the argument using the specified join type and
+     * the column values as the join key.
+     *
+     * @param other the other data frame
+     * @param leftCols the indices of the columns to use as the left join key
+     * @param rightCols the indices of the columns to use as the right join key
+     * @param join the join type
+     * @return the result of the join operation as a new data frame
+     */
+    public final DataFrame<V> joinOn(final DataFrame<V> other, final Integer[] leftCols, final Integer[] rightCols, final JoinType join) {
+        return Combining.joinOn(this, other, join, leftCols, rightCols);
+    }
+
+    /**
      * Return a new data frame created by performing a left outer join of
      * this data frame with the argument using the column values as the join key.
      *
@@ -739,7 +756,7 @@ implements Iterable<List<V>> {
      * @return the result of the join operation as a new data frame
      */
     public final DataFrame<V> joinOn(final DataFrame<V> other, final Object ... cols) {
-        return joinOn(other, JoinType.LEFT, cols);
+        return Combining.joinOn(this, other, JoinType.LEFT, columns.indices(cols), other.columns.indices(cols));
     }
 
     /**
@@ -753,7 +770,22 @@ implements Iterable<List<V>> {
      * @return the result of the join operation as a new data frame
      */
     public final DataFrame<V> joinOn(final DataFrame<V> other, final JoinType join, final Object ... cols) {
-        return joinOn(other, join, columns.indices(cols));
+        return Combining.joinOn(this, other, join, columns.indices(cols), other.columns.indices(cols));
+    }
+
+    /**
+     * Return a new data frame created by performing a join of this
+     * data frame with the argument using the specified join type and
+     * the column values as the join key.
+     *
+     * @param other the other data frame
+     * @param leftCols the names of the columns to use as the left join key
+     * @param rightCols the names of the columns to use as the right join key
+     * @param join the join type
+     * @return the result of the join operation as a new data frame
+     */
+    public final DataFrame<V> joinOn(final DataFrame<V> other, final Object[] leftCols, final Object[] rightCols, final JoinType join) {
+        return Combining.joinOn(this, other, join, columns.indices(leftCols), other.columns.indices(rightCols));
     }
 
     /**
@@ -2231,7 +2263,7 @@ implements Iterable<List<V>> {
      * Write the data from the data frame
      * to the provided output stream as an excel workbook.
      *
-     * @param file the file to write
+     * @param output the file to write
      * @throws IOException if an error occurs writing the file
      */
     public final void writeXls(final OutputStream output)
