@@ -493,24 +493,6 @@
       </build>
     </profile>
 
-    <!-- for building doctest suite -->
-    <profile>
-      <id>build-doctest</id>
-      <activation>
-        <jdk>[1.6,1.8]</jdk>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>com.sun</groupId>
-          <artifactId>tools</artifactId>
-          <version>${java.version}</version>
-          <scope>system</scope>
-          <systemPath>${java.home}/../lib/tools.jar</systemPath>
-          <optional>true</optional>
-        </dependency>
-      </dependencies>
-    </profile>
-
     <!-- profile for release builds -->
     <profile>
       <id>release</id>
