@@ -32,8 +32,8 @@
   </scm>
 
   <properties>
-    <project.build.sourceEncoding>iso-8859-1</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>iso-8859-1</project.reporting.outputEncoding>
+    <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>utf-8</project.reporting.outputEncoding>
     <java.version>11</java.version>
     <junit.version>4.13.2</junit.version>
     <supercsv.version>2.4.0</supercsv.version>
@@ -316,7 +316,7 @@
           <artifactId>aspectj-maven-plugin</artifactId>
           <version>1.14</version>
           <configuration>
-            <complianceLevel>${java.version}</complianceLevel>
+            <release>${java.version}</release>
             <verbose>true</verbose>
           </configuration>
         </plugin>
