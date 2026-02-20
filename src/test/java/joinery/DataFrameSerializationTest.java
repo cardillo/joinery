@@ -25,11 +25,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -38,6 +34,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -207,6 +207,71 @@ public class DataFrameSerializationTest {
                     df.col(i).toArray()
                 );
         }
+    }
+
+    @Test
+    public void testReadXlsWorkbook()
+            throws IOException {
+        XSSFWorkbook workbook = new XSSFWorkbook(ClassLoader.getSystemResourceAsStream("serialization.xlsx"));
+        // final DataFrame<Object> df = DataFrame.readXls(workbook); // default read first sheet (0)
+        final DataFrame<Object> df = DataFrame.readXls(workbook, 1);
+        int row = df.length();
+        int col = df.size();
+
+        System.out.println("print col ...");
+
+        for (int i=0; i < col; i++) {
+            System.out.println(df.col(i));
+        }
+
+        System.out.println("\nprint row ...");
+        for (int i=0; i < row; i++) {
+            System.out.println(df.row(i));
+        }
+    }
+
+    @Test
+    public void testReadXlsSheet()
+            throws IOException {
+        XSSFWorkbook workbook = new XSSFWorkbook(ClassLoader.getSystemResourceAsStream("serialization.xlsx"));
+        Sheet sheet = workbook.getSheetAt(1);
+        final DataFrame<Object> df = DataFrame.readXls(sheet);
+
+        int row = df.length();
+        int col = df.size();
+
+        System.out.println("print col ...");
+
+        for (int i=0; i < col; i++) {
+            System.out.println(df.col(i));
+        }
+
+        System.out.println("\nprint row ...");
+        for (int i=0; i < row; i++) {
+            System.out.println(df.row(i));
+        }
+    }
+
+    @Test
+    public void testWriteXlsSheet()
+            throws IOException {
+        final Workbook wb = new SXSSFWorkbook(1);
+        final Sheet sheet = wb.createSheet("test");
+
+        DataFrame dataFrame = new DataFrame("name", "age");
+        dataFrame.append(Arrays.asList("json", 34));
+        dataFrame.append(Arrays.asList("steven", 26));
+
+        dataFrame.writeXls(sheet);
+
+        ByteArrayOutputStream byteStream  = new ByteArrayOutputStream();
+        wb.write(byteStream);
+
+        OutputStream out = new FileOutputStream("text.xlsx");
+        out.write(byteStream.toByteArray());
+
+        out.flush();
+        out.close();
     }
 
     @Test
