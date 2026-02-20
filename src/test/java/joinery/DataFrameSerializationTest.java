@@ -162,6 +162,79 @@ public class DataFrameSerializationTest {
         assertTrue(tmp.length() > 64);
     }
 
+    // TODO: Write csv with delimiter tests
+    @Test
+    public void testWriteCsvStringWithDelimiter()
+            throws IOException {
+        final File tmp = File.createTempFile(getClass().getName(), ".csv");
+        tmp.deleteOnExit();
+        df.writeCsv(tmp.getPath(),";");
+        assertTrue(tmp.length() > 64);
+    }
+
+    @Test
+    public void testWriteCsvStringWithDelimiter2()
+            throws IOException {
+        final File tmp = File.createTempFile(getClass().getName(), ".csv");
+        tmp.deleteOnExit();
+        df.writeCsv(tmp.getPath(),"\\t");
+        assertTrue(tmp.length() > 64);
+    }
+
+    @Test
+    public void testWriteCsvStringWithDelimiter3()
+            throws IOException {
+        final File tmp = File.createTempFile(getClass().getName(), ".csv");
+        tmp.deleteOnExit();
+        df.writeCsv(tmp.getPath(),"|");
+        assertTrue(tmp.length() > 64);
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void testWriteCsvStringWithDelimiter4()
+            throws IOException {
+        final File tmp = File.createTempFile(getClass().getName(), ".csv");
+        tmp.deleteOnExit();
+        df.writeCsv(tmp.getPath(),"/");
+        assertTrue(tmp.length() > 64);
+    }
+
+    @Test
+    public void testWriteCsvInputStreamDelimiter()
+            throws IOException {
+        final File tmp = File.createTempFile(getClass().getName(), ".csv");
+        tmp.deleteOnExit();
+        df.writeCsv(new FileOutputStream(tmp),";");
+        assertTrue(tmp.length() > 64);
+    }
+
+    @Test
+    public void testWriteCsvInputStreamDelimiter2()
+            throws IOException {
+        final File tmp = File.createTempFile(getClass().getName(), ".csv");
+        tmp.deleteOnExit();
+        df.writeCsv(new FileOutputStream(tmp),"\\t");
+        assertTrue(tmp.length() > 64);
+    }
+
+    @Test
+    public void testWriteCsvInputStreamDelimiter3()
+            throws IOException {
+        final File tmp = File.createTempFile(getClass().getName(), ".csv");
+        tmp.deleteOnExit();
+        df.writeCsv(new FileOutputStream(tmp),"|");
+        assertTrue(tmp.length() > 64);
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void testWriteCsvInputStreamDelimiter4()
+            throws IOException {
+        final File tmp = File.createTempFile(getClass().getName(), ".csv");
+        tmp.deleteOnExit();
+        df.writeCsv(new FileOutputStream(tmp),"/");
+        assertTrue(tmp.length() > 64);
+    }
+
     @Test
     public void testReadWriteCsvTypes()
     throws IOException {
