@@ -43,6 +43,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -336,14 +337,16 @@ public class Serialization {
         for (final Row row : sheet) {
             if (row.getRowNum() == 0) {
                 // read header
-                for (final Cell cell : row) {
-                    columns.add(readCell(cell));
+                for (int i = 0; i < row.getLastCellNum(); i++) {
+                    final Cell cell = row.getCell(i);
+                    columns.add(cell == null ? null : readCell(cell));
                 }
             } else {
                 // read data values
                 final List<Object> values = new ArrayList<>();
-                for (final Cell cell : row) {
-                    values.add(readCell(cell));
+                for (int i = 0; i < row.getLastCellNum(); i++) {
+                    final Cell cell = row.getCell(i);
+                    values.add(cell == null ? null : readCell(cell));
                 }
                 data.add(values);
             }
@@ -367,13 +370,14 @@ public class Serialization {
     throws IOException {
         final Workbook wb = new HSSFWorkbook();
         final Sheet sheet = wb.createSheet();
-
+ 	final HSSFCellStyle dateStyle = (HSSFCellStyle) wb.createCellStyle();
+        dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
         // add header
         Row row = sheet.createRow(0);
         final Iterator<Object> it = df.columns().iterator();
         for (int c = 0; c < df.size(); c++) {
             final Cell cell = row.createCell(c);
-            writeCell(cell, it.hasNext() ? it.next() : c);
+            writeCell(cell, it.hasNext() ? it.next() : c,dateStyle);
         }
 
         // add data values
@@ -381,7 +385,7 @@ public class Serialization {
             row = sheet.createRow(r + 1);
             for (int c = 0; c < df.size(); c++) {
                 final Cell cell = row.createCell(c);
-                writeCell(cell, df.get(r, c));
+                writeCell(cell, df.get(r, c),dateStyle);
             }
         }
 
@@ -404,13 +408,11 @@ public class Serialization {
         }
     }
 
-    private static final void writeCell(final Cell cell, final Object value) {
+    private static final void writeCell(final Cell cell, final Object value,final CellStyle style) {
         if (value instanceof Number) {
             cell.setCellType(CellType.NUMERIC);
             cell.setCellValue(Number.class.cast(value).doubleValue());
         } else if (value instanceof Date) {
-            final CellStyle style = cell.getSheet().getWorkbook().createCellStyle();
-            style.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
             cell.setCellStyle(style);
             cell.setCellType(CellType.NUMERIC);
             cell.setCellValue(Date.class.cast(value));
