@@ -666,6 +666,31 @@ implements Iterable<List<V>> {
     }
 
     /**
+     * Return a new data frame created by performing a left outer join
+     * of this data frame with the argument and using the row indices
+     * as the join key.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> left = new DataFrame<>("a", "b");
+     * > left.append("one", Arrays.asList(1, 2));
+     * > left.append("two", Arrays.asList(3, 4));
+     * > left.append("three", Arrays.asList(5, 6));
+     * > DataFrame<Object> right = new DataFrame<>("c", "d");
+     * > right.append("one", Arrays.asList(10, 20));
+     * > right.append("two", Arrays.asList(30, 40));
+     * > right.append("four", Arrays.asList(50, 60));
+     * > left.join(right)
+     * >     .index();
+     * [one, two, three] }</pre>
+     *
+     * @param other the other data frame
+     * @return the result of the join operation as a new data frame
+     */
+    public final DataFrame<V> nonStrictJoin(final DataFrame<V> other) {
+        return nonStrictJoin(other, JoinType.LEFT, null);
+    }
+
+    /**
      * Return a new data frame created by performing a join of this
      * data frame with the argument using the specified join type and
      * using the row indices as the join key.
@@ -679,6 +704,19 @@ implements Iterable<List<V>> {
     }
 
     /**
+     * Return a new data frame created by performing a join of this
+     * data frame with the argument using the specified join type and
+     * using the row indices as the join key.
+     *
+     * @param other the other data frame
+     * @param join the join type
+     * @return the result of the join operation as a new data frame
+     */
+    public final DataFrame<V> nonStrictJoin(final DataFrame<V> other, final JoinType join) {
+        return nonStrictJoin(other, join, null);
+    }
+
+    /**
      * Return a new data frame created by performing a left outer join of this
      * data frame with the argument using the specified key function.
      *
@@ -688,6 +726,18 @@ implements Iterable<List<V>> {
      */
     public final DataFrame<V> join(final DataFrame<V> other, final KeyFunction<V> on) {
         return join(other, JoinType.LEFT, on);
+    }
+
+    /**
+     * Return a new data frame created by performing a left outer join of this
+     * data frame with the argument using the specified key function.
+     *
+     * @param other the other data frame
+     * @param on the function to generate the join keys
+     * @return the result of the join operation as a new data frame
+     */
+    public final DataFrame<V> nonStrictJoin(final DataFrame<V> other, final KeyFunction<V> on) {
+        return nonStrictJoin(other, JoinType.LEFT, on);
     }
 
     /**
@@ -705,6 +755,20 @@ implements Iterable<List<V>> {
     }
 
     /**
+     * Return a new data frame created by performing a join of this
+     * data frame with the argument using the specified join type and
+     * the specified key function.
+     *
+     * @param other the other data frame
+     * @param join the join type
+     * @param on the function to generate the join keys
+     * @return the result of the join operation as a new data frame
+     */
+    public final DataFrame<V> nonStrictJoin(final DataFrame<V> other, final JoinType join, final KeyFunction<V> on) {
+        return Combining.nonStrictJoin(this, other, join, on);
+    }
+
+    /**
      * Return a new data frame created by performing a left outer join of
      * this data frame with the argument using the column values as the join key.
      *
@@ -714,6 +778,18 @@ implements Iterable<List<V>> {
      */
     public final DataFrame<V> joinOn(final DataFrame<V> other, final Integer ... cols) {
         return joinOn(other, JoinType.LEFT, cols);
+    }
+
+    /**
+     * Return a new data frame created by performing a left outer join of
+     * this data frame with the argument using the column values as the join key.
+     *
+     * @param other the other data frame
+     * @param cols the indices of the columns to use as the join key
+     * @return the result of the join operation as a new data frame
+     */
+    public final DataFrame<V> nonStrictJoinOn(final DataFrame<V> other, final Integer ... cols) {
+        return nonStrictJoinOn(other, JoinType.LEFT, cols);
     }
 
     /**
@@ -731,6 +807,20 @@ implements Iterable<List<V>> {
     }
 
     /**
+     * Return a new data frame created by performing a join of this
+     * data frame with the argument using the specified join type and
+     * the column values as the join key.
+     *
+     * @param other the other data frame
+     * @param join the join type
+     * @param cols the indices of the columns to use as the join key
+     * @return the result of the join operation as a new data frame
+     */
+    public final DataFrame<V> nonStrictJoinOn(final DataFrame<V> other, final JoinType join, final Integer ... cols) {
+        return Combining.nonStrictJoinOn(this, other, join, cols);
+    }
+
+    /**
      * Return a new data frame created by performing a left outer join of
      * this data frame with the argument using the column values as the join key.
      *
@@ -740,6 +830,18 @@ implements Iterable<List<V>> {
      */
     public final DataFrame<V> joinOn(final DataFrame<V> other, final Object ... cols) {
         return joinOn(other, JoinType.LEFT, cols);
+    }
+
+    /**
+     * Return a new data frame created by performing a left outer join of
+     * this data frame with the argument using the column values as the join key.
+     *
+     * @param other the other data frame
+     * @param cols the names of the columns to use as the join key
+     * @return the result of the join operation as a new data frame
+     */
+    public final DataFrame<V> nonStrictJoinOn(final DataFrame<V> other, final Object ... cols) {
+        return nonStrictJoinOn(other, JoinType.LEFT, cols);
     }
 
     /**
@@ -754,6 +856,20 @@ implements Iterable<List<V>> {
      */
     public final DataFrame<V> joinOn(final DataFrame<V> other, final JoinType join, final Object ... cols) {
         return joinOn(other, join, columns.indices(cols));
+    }
+
+    /**
+     * Return a new data frame created by performing a join of this
+     * data frame with the argument using the specified join type and
+     * the column values as the join key.
+     *
+     * @param other the other data frame
+     * @param join the join type
+     * @param cols the names of the columns to use as the join key
+     * @return the result of the join operation as a new data frame
+     */
+    public final DataFrame<V> nonStrictJoinOn(final DataFrame<V> other, final JoinType join, final Object ... cols) {
+        return nonStrictJoinOn(other, join, columns.indices(cols));
     }
 
     /**
