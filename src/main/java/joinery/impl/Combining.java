@@ -138,6 +138,26 @@ public class Combining {
         }
     }
 
+    public static <V> DataFrame<V> fillConcatDataFrame(final int rows, Set<Object> columns, final List<DataFrame<? extends V>> dfs){
+        List<Object> newcols = new ArrayList<>(columns);
+        DataFrame<V> combined = new DataFrame<V>(columns).reshape(rows, columns.size());
+        int offset = 0;
+        for (DataFrame<? extends V> df : dfs) {
+            List<Object> cols = new ArrayList<>(df.columns());
+            for (int c = 0; c < cols.size(); c++) {
+                int newc = newcols.indexOf(cols.get(c));
+                if (newc != -1){
+                    for (int r = 0; r < df.length(); r++) {
+                        combined.set(offset + r, newc, df.get(r, c));
+                    }
+                }
+            }
+            offset += df.length();
+        }
+
+        return combined;
+    }
+
     @SafeVarargs
     public static <V> DataFrame<V> concat(
             final DataFrame<V> first, final DataFrame<? extends V> ... others) {
@@ -154,20 +174,35 @@ public class Combining {
             }
         }
 
-        List<Object> newcols = new ArrayList<>(columns);
-        DataFrame<V> combined = new DataFrame<V>(columns).reshape(rows, columns.size());
-        int offset = 0;
-        for (DataFrame<? extends V> df : dfs) {
-            List<Object> cols = new ArrayList<>(df.columns());
-            for (int c = 0; c < cols.size(); c++) {
-                int newc = newcols.indexOf(cols.get(c));
-                for (int r = 0; r < df.length(); r++) {
-                    combined.set(offset + r, newc, df.get(r, c));
-                }
-            }
-            offset += df.length();
+        return fillConcatDataFrame(rows, columns, dfs);
+    }
+
+    @SafeVarargs
+    public static <V> DataFrame<V> concat(
+            final DataFrame<V> first, final JoinType how, final DataFrame<? extends V> ... others) {
+
+        if (how == JoinType.LEFT || how == JoinType.RIGHT) {
+            throw new IllegalArgumentException("JoinType.LEFT and JoinType.RIGHT are not supported for concat");
         }
 
-        return combined;
+        // for outer join, return original concat
+        if (how == JoinType.OUTER){
+            return concat(first, others);
+        }
+
+        // for inner join, find intersection of columns
+        List<DataFrame<? extends V>> dfs = new ArrayList<>(others.length + 1);
+        dfs.add(first);
+        dfs.addAll(Arrays.asList(others));
+
+        int rows = first.length();
+        Set<Object> columns = new LinkedHashSet<>(first.columns());
+        for (DataFrame<? extends V> df : others) {
+            rows += df.length();
+            Set<Object> c = new LinkedHashSet<>(df.columns());
+            columns.retainAll(c);
+        }
+
+        return fillConcatDataFrame(rows, columns, dfs);
     }
 }

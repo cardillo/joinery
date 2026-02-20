@@ -320,4 +320,28 @@ public class DataFrameCombiningTest {
                 left.concat(right).toArray()
             );
     }
+
+    @Test
+    public void testOuterConcat() {
+        assertArrayEquals(
+                new Object[] {
+                    1L, 2L, 3L, 1L, 2L, 4L,
+                    "a", "a", "a", null, null, null,
+                    10.0, 20.0, 30.0, 30.0, 40.0, 80.0,
+                    null, null, null, "b", "b", "b"
+                },
+                left.concat(JoinType.OUTER, right).toArray()
+            );
+    }
+
+    @Test
+    public void testInnerConcat() {
+        assertArrayEquals(
+                new Object[] {
+                    1L, 2L, 3L, 1L, 2L, 4L,
+                    10.0, 20.0, 30.0, 30.0, 40.0, 80.0,
+                },
+                left.concat(JoinType.INNER, right).toArray()
+            );
+    }
 }

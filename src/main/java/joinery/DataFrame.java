@@ -818,6 +818,33 @@ implements Iterable<List<V>> {
     }
 
     /**
+     * Concatenate the specified data frames with this data frame
+     * with specified join type and return the result.
+     *
+     * <pre> {@code
+     * > DataFrame<Object> left = new DataFrame<>("a", "b", "c");
+     * > left.append("one", Arrays.asList(1, 2, 3));
+     * > left.append("two", Arrays.asList(4, 5, 6));
+     * > left.append("three", Arrays.asList(7, 8, 9));
+     * > DataFrame<Object> right = new DataFrame<>("a", "b", "d");
+     * > right.append("one", Arrays.asList(10, 20, 30));
+     * > right.append("two", Arrays.asList(40, 50, 60));
+     * > right.append("four", Arrays.asList(70, 80, 90));
+     * > left.concat(JoinType.INNER, right).columns();
+     * [a, b] }</pre>  
+     * 
+     * @param join the join type (JoinType.INNER, JoinType.OUTER only)
+     * @param others the other data frames
+     * @throws IllegalArgumentException if the join type is not inner or outer
+     * 
+     * @return the data frame containing all the values
+     */
+    @SafeVarargs
+    public final DataFrame<V> concat(final JoinType join, final DataFrame<? extends V> ... others) {
+        return Combining.concat(this, join, others);
+    }
+
+    /**
      * Update the data frame in place by overwriting any null values with
      * any non-null values provided by the data frame arguments.
      *
