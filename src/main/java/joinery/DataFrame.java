@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
+import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -600,6 +601,86 @@ implements Iterable<List<V>> {
             data.set(c < row.size() ? row.get(c) : null, c, len);
         }
         return this;
+    }
+
+    // CS427 Issue link: https://github.com/cardillo/joinery/issues/83
+    /**
+     * Concatenate two dataframes, either vertically or horizontally (Developed by Dongming Xia)
+     * If the input axis value is invalid (not 0 or 1), print out error message and return the main dataframe
+     * For vertical concatenate, if the number of columns or type of columns does not match,
+     * print out error message and return the main dataframe
+     * For horizontal concatenate, if the number of rows does not match,
+     * print out error message and return the main dataframe
+     *
+     * <pre> {@code
+     * > DataFrame<Object> df1 = new DataFrame<>("a", "b", "c");
+     * > df1.append(Arrays.asList(1, 2, 3));
+     * > df1.append(Arrays.asList(4, 5, 6));
+     * > df1.append(Arrays.asList(7, 8, 9));
+     * > DataFrame<Object> df2 = new DataFrame<>("d", "e", "f");
+     * > df2.append(Arrays.asList(10, 20, 30));
+     * > df2.append(Arrays.asList(40, 50, 60));
+     * > df2.append(Arrays.asList(70, 80, 90));
+     * > df1.concatenate(df2, 0).length();
+     * 6 }</pre>
+     *
+     * @param df2 - The dataframe to be concatenated after the main dataframe
+     * @param axis - The axis to concatenate along
+     */
+    public final DataFrame<V> concatenate(final DataFrame<V> df2, final int axis){
+        // concatenate horizontally by calling the verticalConcat() function
+        if (axis == 0){
+            return this.verticalConcat(df2);
+        }
+        // concatenate vertically by calling the horizontalConcat() function
+        else if (axis == 1){
+            return this.horizontalConcat(df2);
+        }
+        // if input axis is invalid, print out message and return the main dataframe
+        else{
+            System.out.println("Please put 0 or 1 for the value of axis");
+            return this;
+        }
+    }
+
+    // CS427 Issue link: https://github.com/cardillo/joinery/issues/83
+    /**
+     * Concatenate two dataframes vertically, if the input axis value is not given by the user
+     *
+     * @param df2 - The dataframe to be concatenated vertically after the main dataframe
+     */
+    public final DataFrame<V> concatenate(final DataFrame<V> df2){ return this.concatenate(df2, 0); }
+
+    // CS427 Issue link: https://github.com/cardillo/joinery/issues/83
+    private DataFrame<V> verticalConcat(final DataFrame<V> df2) {
+        // check if df2 has the same number of columns as the main df, if not, return the main dataframe
+        if (this.size() != df2.size()){
+            System.out.println("The numbers of columns between two dataframes does not match");
+            return this;
+        }
+        // check if df2 has the same column types as the main df, if not, return the main dataframe
+        else if (!Arrays.equals(this.types().toArray(), df2.types().toArray())){
+            System.out.println("The column types between two dataframes does not match");
+            return this;
+        }
+
+        // the main body of the function, Time Complexity is O(n) where n is the number of rows in df2
+        for(List<V> row: df2){
+            this.append(row);
+        }
+
+        return this;
+    }
+
+    // CS427 Issue link: https://github.com/cardillo/joinery/issues/83
+    private DataFrame<V> horizontalConcat(final DataFrame<V> df2) {
+        // check if df2 has the same number of rows as the main df, if not, return the main dataframe
+        if (this.length() != df2.length()) {
+            System.out.println("The number of rows between two dataframes does not match");
+            return this;
+        }
+
+        return this.resetIndex().join(df2.resetIndex());
     }
 
     /**
@@ -2175,6 +2256,7 @@ implements Iterable<List<V>> {
     public final void writeCsv(final String file)
     throws IOException {
         Serialization.writeCsv(this, new FileOutputStream(file));
+
     }
 
     /**
@@ -2188,6 +2270,48 @@ implements Iterable<List<V>> {
     throws IOException {
         Serialization.writeCsv(this, output);
     }
+
+    // CS427 Issue link: https://github.com/cardillo/joinery/issues/51
+    /**
+     * Write the data from this data frame to
+     * the specified file as comma separated values.
+     * The user can specify if row names should also be written as the first column in the csv file
+     *
+     * @param file the file to write
+     * @param withColName if row names should also be written in the csv file
+     * @throws IOException if an error occurs writing the file
+     */
+    public final void writeCsv(final String file, final boolean withColName)
+            throws IOException {
+        if (withColName == false) {
+            Serialization.writeCsv(this, new FileOutputStream(file));
+        }
+        else {
+            Serialization.writeCsvWithRowName(this, new FileOutputStream(file));
+        }
+    }
+
+    // CS427 Issue link: https://github.com/cardillo/joinery/issues/51
+    /**
+     * Write the data from this data frame to
+     * the provided output stream as comma separated values.
+     * The user can specify if row names should also be written as the first column in the csv file
+     *
+     * @param output
+     * @param withColName
+     * @throws IOException
+     */
+    public final void writeCsv(final OutputStream output, final boolean withColName)
+            throws IOException {
+        if (withColName == false) {
+            Serialization.writeCsv(this, output);
+        }
+        else {
+            Serialization.writeCsvWithRowName(this, output);
+        }
+    }
+
+
 
     /**
      * Read data from the specified excel
@@ -2231,7 +2355,7 @@ implements Iterable<List<V>> {
      * Write the data from the data frame
      * to the provided output stream as an excel workbook.
      *
-     * @param file the file to write
+     * @param output the file to write
      * @throws IOException if an error occurs writing the file
      */
     public final void writeXls(final OutputStream output)
@@ -2471,4 +2595,6 @@ implements Iterable<List<V>> {
             );
         System.exit(255);
     }
+
+
 }
