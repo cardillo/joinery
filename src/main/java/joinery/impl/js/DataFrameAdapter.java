@@ -172,13 +172,16 @@ extends ScriptableObject {
         final DataFrame<Object> other = DataFrameAdapter.class.cast(args[0]).df;
         final JoinType type = args.length > 1 && args[1] instanceof NativeJavaObject ?
                 JoinType.class.cast(Context.jsToJava(args[1], JoinType.class)) : null;
-        if (args.length > 1 && args[args.length - 1] instanceof Function) {
+        if (args.length > 1
+                && args[args.length - 1] instanceof Function
+                && args[args.length - 2] instanceof Function) {
             @SuppressWarnings("unchecked")
-            final KeyFunction<Object> f = (KeyFunction<Object>)Context.jsToJava(args[args.length - 1], KeyFunction.class);
+            final KeyFunction<Object> fnLeft = (KeyFunction<Object>)Context.jsToJava(args[args.length - 2], KeyFunction.class);
+            final KeyFunction<Object> fnRight = (KeyFunction<Object>)Context.jsToJava(args[args.length - 1], KeyFunction.class);
             if (type != null) {
-                return new DataFrameAdapter(object, cast(object).df.join(other, type, f));
+                return new DataFrameAdapter(object, cast(object).df.join(other, type, fnLeft, fnRight));
             }
-            return new DataFrameAdapter(object, cast(object).df.join(other, f));
+            return new DataFrameAdapter(object, cast(object).df.join(other, fnLeft, fnRight));
         }
         if (type != null) {
             return new DataFrameAdapter(object, cast(object).df.join(other, type));
