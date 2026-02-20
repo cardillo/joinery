@@ -62,6 +62,7 @@ import joinery.impl.Sorting;
 import joinery.impl.SparseBitSet;
 import joinery.impl.Timeseries;
 import joinery.impl.Transforms;
+import joinery.impl.Unpivoting;
 import joinery.impl.Views;
 
 /**
@@ -1796,6 +1797,19 @@ implements Iterable<List<V>> {
     @Timed
     public <U> DataFrame<U> pivot(final KeyFunction<V> rows, final KeyFunction<V> cols, final Map<Integer, Aggregate<V,U>> values) {
         return Pivoting.pivot(this, rows, cols, values);
+    }
+    
+    public DataFrame<V> melt(final List<Object> idVars, final List<Object> valueVars, final String varName, final String valueName) {
+    	return melt(columns.indices(idVars), columns.indices(valueVars), varName, valueName);
+    }
+    
+    public DataFrame<V> melt(final Object[] idVars, final Object[] valueVars, final String varName, final String valueName) {
+    	return melt(columns.indices(idVars), columns.indices(valueVars), varName, valueName);
+    }
+    
+    @Timed
+    public DataFrame<V> melt(final Integer[] idVars, final Integer[] valueVars, final String varName, final String valueName) {
+    	return Unpivoting.melt(this, idVars, valueVars, varName, valueName);
     }
 
     public DataFrame<V> sortBy(final Object ... cols) {
