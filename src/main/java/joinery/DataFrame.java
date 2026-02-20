@@ -19,11 +19,9 @@
 package joinery;
 
 import java.awt.Container;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.lang.reflect.Array;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -2150,19 +2148,49 @@ implements Iterable<List<V>> {
         return Serialization.readCsv(file, separator, numberDefault, naString, hasHeader);
     }
 
-    public static final DataFrame<Object> readCsv(final String file, final String separator, final NumberDefault longDefault)
+    public static final DataFrame<Object> readCsv(final String file, final String separator, final NumberDefault numberDefault)
     throws IOException {
-        return Serialization.readCsv(file, separator, longDefault);
+        return Serialization.readCsv(file, separator, numberDefault);
     }
 
-    public static final DataFrame<Object> readCsv(final String file, final String separator, final NumberDefault longDefault, final String naString)
+    public static final DataFrame<Object> readCsv(final String file, final String separator, final NumberDefault numberDefault, final String naString)
     throws IOException {
-        return Serialization.readCsv(file, separator, longDefault, naString);
+        return Serialization.readCsv(file, separator, numberDefault, naString);
     }
 
-    public static final DataFrame<Object> readCsv(final InputStream input, final String separator, final NumberDefault longDefault)
+    public static final DataFrame<Object> readCsv(final InputStream input, final String separator, final NumberDefault numberDefault)
     throws IOException {
-        return Serialization.readCsv(input, separator, longDefault, null);
+        return Serialization.readCsv(input, separator, numberDefault, null);
+    }
+
+    public static final DataFrame<Object> readCsv(final Path path)
+        throws IOException {
+        return Serialization.readCsv(path);
+    }
+
+    public static final DataFrame<Object> readCsv(final Path path, final String separator)
+        throws IOException {
+        return Serialization.readCsv(path, separator, NumberDefault.LONG_DEFAULT, null);
+    }
+
+    public static final DataFrame<Object> readCsv(final Path path, final String separator, final String naString)
+        throws IOException {
+        return Serialization.readCsv(path, separator, NumberDefault.LONG_DEFAULT, naString);
+    }
+
+    public static final DataFrame<Object> readCsv(final Path path, final String separator, final String naString, final boolean hasHeader)
+        throws IOException {
+        return Serialization.readCsv(path, separator, NumberDefault.LONG_DEFAULT, naString, hasHeader);
+    }
+
+    public static final DataFrame<Object> readCsv(final Path path, final String separator, final NumberDefault numberDefault)
+        throws IOException {
+        return Serialization.readCsv(path, separator, numberDefault, null);
+    }
+
+    public static final DataFrame<Object> readCsv(final Path path, final String separator, final NumberDefault numberDefault, final String naString, final boolean hasHeader)
+        throws IOException {
+        return Serialization.readCsv(path, separator, numberDefault, naString, hasHeader);
     }
 
     /**
