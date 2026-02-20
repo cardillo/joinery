@@ -44,7 +44,7 @@
     <xchart.version>2.5.1</xchart.version>
     <jline.version>3.20.0</jline.version>
     <slf4j.version>1.7.7</slf4j.version>
-    <rhino.version>1.7.13</rhino.version>
+    <rhino.version>1.7.14.1</rhino.version>
 
     <!-- use property to allow redefining via profiles/command line -->
     <test.groups>!joinery.perf.PerformanceTests</test.groups>
