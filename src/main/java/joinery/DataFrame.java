@@ -2286,6 +2286,7 @@ implements Iterable<List<V>> {
         writeSql(c.prepareStatement(sql));
     }
 
+
     /**
      * Write the data from the data frame to a database by
      * executing the provided prepared SQL statement.
@@ -2297,6 +2298,12 @@ implements Iterable<List<V>> {
     throws SQLException {
         Serialization.writeSql(this, stmt);
     }
+
+    public final void writeSql(final PreparedStatement stmt, int chunkSize)
+    throws SQLException {
+        Serialization.writeSql(this, stmt, chunkSize);
+    }
+
 
     public final String toString(final int limit) {
         return Serialization.toString(this, limit);
