@@ -176,7 +176,7 @@ public class DataFrameSerializationTest {
             );
     }
 
-    @Test
+    @Test // CS427 Issue link: https://github.com/cardillo/joinery/issues/51
     public void testWriteCsvNonStringIndex()
     throws IOException {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -184,6 +184,65 @@ public class DataFrameSerializationTest {
         df.append(Arrays.asList(1, 2, 3, 4));
         df.writeCsv(out);
         assertTrue("writeCsv does not throw due to non-string indices", true);
+    }
+
+    /**
+     * Test to write a csv with row names enabled
+     *
+     * @throws IOException if an error occurs writing the file
+     */
+    @Test // CS427 Issue link: https://github.com/cardillo/joinery/issues/51
+    public void testWriteCsvWithRowNames()
+            throws IOException {
+        df = new DataFrame<>(
+                Arrays.<Object>asList("row1", "row2", "row3", "row4", "row5", "row6"),
+                Arrays.<Object>asList("category", "name", "value"),
+                Arrays.asList(
+                        Arrays.<Object>asList("a", "a", "b", "b", "c", "c"),
+                        Arrays.<Object>asList("alpha", "bravo", "charlie", "delta", "echo", "foxtrot"),
+                        Arrays.<Object>asList(1, 2, 3, 4, 5, 6)
+                )
+        );
+        final File tmp = File.createTempFile(getClass().getName(), ".csv");
+        tmp.deleteOnExit();
+        df.writeCsv(tmp.getPath(), true);
+        for (int i = 0; i < df.size() + 1; i++) {
+            assertArrayEquals(
+                    "Checking if reading the csv has the row names",
+                    DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization_row_names.csv")).col(0).toArray(),
+                    DataFrame.readCsv(tmp.getPath()).col(0).toArray()
+            );
+        }
+    }
+
+
+    /**
+     * Test to write a csv with row names disabled
+     *
+     * @throws IOException if an error occurs writing the file
+     */
+    @Test // CS427 Issue link: https://github.com/cardillo/joinery/issues/51
+    public void testWriteCsvWithoutRowNames()
+            throws IOException {
+        df = new DataFrame<>(
+                Arrays.<Object>asList("row1", "row2", "row3", "row4", "row5", "row6"),
+                Arrays.<Object>asList("category", "name", "value"),
+                Arrays.asList(
+                        Arrays.<Object>asList("a", "a", "b", "b", "c", "c"),
+                        Arrays.<Object>asList("alpha", "bravo", "charlie", "delta", "echo", "foxtrot"),
+                        Arrays.<Object>asList(1, 2, 3, 4, 5, 6)
+                )
+        );
+        final File tmp = File.createTempFile(getClass().getName(), ".csv");
+        tmp.deleteOnExit();
+        df.writeCsv(new FileOutputStream(tmp), false);
+        for (int i = 0; i < df.size(); i++) {
+            assertArrayEquals(
+                    "Checking if reading the csv does not have the row names",
+                    DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("serialization.csv")).col(0).toArray(),
+                    DataFrame.readCsv(tmp.getPath()).col(0).toArray()
+            );
+        }
     }
 
     @Test(expected=FileNotFoundException.class)
