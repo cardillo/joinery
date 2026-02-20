@@ -19,10 +19,13 @@
 package joinery;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 public class DataFrameAggregationTest {
     DataFrame<Object> df;
@@ -31,6 +34,263 @@ public class DataFrameAggregationTest {
     public void setUp()
     throws Exception {
         df = DataFrame.readCsv(ClassLoader.getSystemResourceAsStream("grouping.csv"));
+    }
+
+    /**
+     * For issue #82
+     */
+    @Test
+    public void testMode1() {
+        DataFrame<Object> DF = new DataFrame<Object>();
+        DF.add("Name", "DOB", "Age");
+        DF.append("row1", Arrays.asList("Cody", 1024, 23));
+        DF.append("row2", Arrays.asList("Elena", 826, 26));
+        DF.append("row3", Arrays.asList("Cody", 1024, 18));
+
+        assertArrayEquals(
+                new Object[] {"Cody", 1024, null},
+                DF.mode().toArray()
+        );
+    }
+
+    @Test
+    public void testMode2() {
+        DataFrame<Object> DF = new DataFrame<Object>();
+        DF.add("Name", "DOB", "Age");
+        DF.append("row1", Arrays.asList("Cody", 1024, 23));
+        DF.append("row2", Arrays.asList("Elena", 826, 26));
+        DF.append("row3", Arrays.asList("Emma", 917, 18));
+
+        assertArrayEquals(
+                new Object[] {null, null, null},
+                DF.mode().toArray()
+        );
+    }
+
+    @Test
+    public void testMode3() {
+        DataFrame<Object> DF = new DataFrame<Object>();
+        DF.add("Name", "DOB", "Age");
+        DF.append("row1", Arrays.asList("Cody", 1024, 23));
+        DF.append("row2", Arrays.asList("Elena", 826, 26));
+        DF.append("row3", Arrays.asList("Emma", 917, 18));
+        DF.append("row4", Arrays.asList("John", 1112, 22));
+        DF.append("row5", Arrays.asList("Elena", 917, 23));
+        DF.append("row6", Arrays.asList("Emma", 922, 18));
+
+        assertArrayEquals(
+                new Object[] {"Emma", 917, 18},
+                DF.mode().toArray()
+        );
+    }
+
+    @Test
+    public void testMode4() {
+        DataFrame<Object> DF = new DataFrame<Object>();
+        DF.add("Value");
+        DF.append("row1", Arrays.asList(10));
+
+        assertArrayEquals(
+                new Object[] {null},
+                DF.mode().toArray()
+        );
+    }
+
+    @Test
+    public void testMode5() {
+        DataFrame<Object> DF = new DataFrame<Object>();
+        DF.add("Value");
+        DF.append("row1", Arrays.asList(10));
+        DF.append("row2", Arrays.asList(10));
+        DF.append("row3", Arrays.asList(20));
+
+        assertArrayEquals(
+                new Object[] {10},
+                DF.mode().toArray()
+        );
+    }
+
+    @Test
+    public void testMode6() {
+        DataFrame<Object> DF = new DataFrame<Object>();
+        DF.add("Value");
+        DF.append("row1", Arrays.asList(10));
+        DF.append("row2", Arrays.asList(10));
+        DF.append("row3", Arrays.asList(20));
+        DF.append("row4", Arrays.asList(20));
+
+        assertArrayEquals(
+                new Object[] {20},
+                DF.mode().toArray()
+        );
+    }
+
+    @Test
+    public void testMode7() {
+        DataFrame<Object> DF = new DataFrame<Object>();
+        DF.add("Value");
+        DF.append("row1", Arrays.asList(10));
+        DF.append("row2", Arrays.asList(10));
+        DF.append("row3", Arrays.asList(20));
+        DF.append("row4", Arrays.asList(20));
+        DF.append("row5", Arrays.asList(30));
+        DF.append("row6", Arrays.asList(30));
+
+        assertArrayEquals(
+                new Object[] {20},
+                DF.mode().toArray()
+        );
+    }
+
+    @Test
+    public void testMode8() {
+        DataFrame<Object> DF = new DataFrame<Object>();
+        DF.add("Value");
+        DF.append("row1", Arrays.asList(10));
+        DF.append("row2", Arrays.asList(20));
+        DF.append("row3", Arrays.asList(30));
+        DF.append("row4", Arrays.asList(40));
+        DF.append("row5", Arrays.asList(50));
+        DF.append("row6", Arrays.asList(60));
+
+        assertArrayEquals(
+                new Object[] {null},
+                DF.mode().toArray()
+        );
+    }
+
+    @Test
+    public void testMode9() {
+        DataFrame<Object> DF = new DataFrame<Object>();
+        DF.add("Value");
+        DF.append("row1", Arrays.asList(10));
+        DF.append("row2", Arrays.asList(20));
+        DF.append("row3", Arrays.asList(30));
+        DF.append("row4", Arrays.asList(30));
+        DF.append("row5", Arrays.asList(50));
+        DF.append("row6", Arrays.asList(60));
+
+        assertArrayEquals(
+                new Object[] {30},
+                DF.mode().toArray()
+        );
+    }
+
+    @Test
+    public void testMode10() {
+        DataFrame<Object> DF = new DataFrame<Object>();
+        DF.add("Name");
+        DF.append("row1", Arrays.asList("Cody"));
+        DF.append("row2", Arrays.asList("Elena"));
+        DF.append("row3", Arrays.asList("Emma"));
+        DF.append("row4", Arrays.asList("John"));
+        DF.append("row5", Arrays.asList("ELENA"));
+        DF.append("row6", Arrays.asList("Emma"));
+
+        assertArrayEquals(
+                new Object[] {"Emma"},
+                DF.mode().toArray()
+        );
+    }
+
+    @Test
+    public void testMode11() {
+        DataFrame<Object> DF = new DataFrame<Object>();
+        DF.add("Name", "Age");
+        DF.append("row1", Arrays.asList("Cody", 22));
+        DF.append("row2", Arrays.asList("Elena", 23));
+        DF.append("row3", Arrays.asList("Emma", 24));
+        DF.append("row4", Arrays.asList("John", 16));
+        DF.append("row5", Arrays.asList("ELENA", 25));
+        DF.append("row6", Arrays.asList("Emma", 26));
+
+        assertArrayEquals(
+                new Object[] {"Emma", null},
+                DF.mode().toArray()
+        );
+    }
+
+    @Test
+    public void testMode12() {
+        DataFrame<Object> DF = new DataFrame<Object>();
+        DF.add("Name", "Age");
+        DF.append("row1", Arrays.asList("Cody", 22));
+        DF.append("row2", Arrays.asList("Elena", 23));
+        DF.append("row3", Arrays.asList("Emma", 22));
+        DF.append("row4", Arrays.asList("John", 14));
+        DF.append("row5", Arrays.asList("ELENA", 25));
+        DF.append("row6", Arrays.asList("Emily", 25));
+
+        assertArrayEquals(
+                new Object[] {null, 22},
+                DF.mode().toArray()
+        );
+    }
+
+
+    /**
+     * For issue #74
+     */
+    @Test
+    public final void test_get_entry_by_object() {
+        DataFrame<Object> DF = new DataFrame<>("Name", "DateOfBirth", "Age");
+        DF.append("one" ,Arrays.asList("Cody",1024,23));
+        DF.append("two" ,Arrays.asList("Cody",1024,19));
+        DF.append("three",Arrays.asList("Elena",827,29));
+
+        //normal cases
+        assertEquals(DF.getEntryByObject("one", "Name"), "Cody");
+        assertEquals(DF.getEntryByObject("one", "DateOfBirth"), 1024);
+        assertEquals(DF.getEntryByObject("one", "Age"), 23);
+
+        assertEquals(DF.getEntryByObject("two", "Name"), "Cody");
+        assertEquals(DF.getEntryByObject("two", "DateOfBirth"), 1024);
+        assertEquals(DF.getEntryByObject("two", "Age"), 19);
+
+        assertEquals(DF.getEntryByObject("three", "Name"), "Elena");
+        assertEquals(DF.getEntryByObject("three", "DateOfBirth"), 827);
+        assertEquals(DF.getEntryByObject("three", "Age"), 29);
+
+        //abnormal cases
+        assertEquals(DF.getEntryByObject("one", "Nam"), null);
+        assertEquals(DF.getEntryByObject("1", "Name"), null);
+        assertEquals(DF.getEntryByObject("on", "DateOfBith"), null);
+        assertEquals(DF.getEntryByObject("oneq", "Age"), null);
+        assertEquals(DF.getEntryByObject("two", "Nae"), null);
+        assertEquals(DF.getEntryByObject("2", "Name"), null);
+        assertEquals(DF.getEntryByObject("two", "DateOfBrth"), null);
+        assertEquals(DF.getEntryByObject("wo", "Age"), null);
+        assertEquals(DF.getEntryByObject("thee", "Nam"), null);
+        assertEquals(DF.getEntryByObject("te", "DateOfBirth"), null);
+        assertEquals(DF.getEntryByObject("three", "Ag"), null);
+        assertEquals(DF.getEntryByObject("3", "Age"), null);
+
+    }
+
+    @Test
+    public final void test_get_indx_by_object() {
+        DataFrame<Object> DF = new DataFrame<>("Name", "DateOfBirth", "Age");
+        DF.append("one" ,Arrays.asList("Cody",1024,23));
+        DF.append("two" ,Arrays.asList("Cody",1024,19));
+        DF.append("three",Arrays.asList("Elena",827,29));
+
+        //normal working cases
+        assertEquals(DF.getIndxByObject("Name", 1), 0);
+        assertEquals(DF.getIndxByObject("DateOfBirth", 1), 1);
+        assertEquals(DF.getIndxByObject("Age", 1), 2);
+
+        assertEquals(DF.getIndxByObject("one", 0), 0);
+        assertEquals(DF.getIndxByObject("two", 0), 1);
+        assertEquals(DF.getIndxByObject("three", 0), 2);
+
+        //abnormal cases
+        assertEquals(DF.getIndxByObject("Nae", 1), -1);
+        assertEquals(DF.getIndxByObject("DaeOfBirth", 1), -1);
+        assertEquals(DF.getIndxByObject("Age", 0), -1);
+        assertEquals(DF.getIndxByObject("On", 0), -1);
+        assertEquals(DF.getIndxByObject("to", 0), -1);
+        assertEquals(DF.getIndxByObject("three", 1), -1);
+
     }
 
     @Test
