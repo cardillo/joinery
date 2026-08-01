@@ -7,3 +7,30 @@ target/
 *.war
 *.ear
 hs_err_pid*
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 数据库运行产物（含本机路径等敏感信息，绝不可提交）
+derby.log
+derby.properties
+*.db
+*.h2.*
+*.trace.db
+*.lock.db
+*.mv.db
+testdb/
+testdb*
+
+# 临时测试产物
+*.tmp
+*.swp
+*~

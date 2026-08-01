@@ -1,6 +1,7 @@
 /*
  * Joinery -- Data frames for Java
  * Copyright (c) 2014, 2015 IBM Corp.
+ * Copyright (c) 2026 zc (1.11 line, GLM-5.2 AI-assisted refactor)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,8 +82,11 @@ public class DataFrameManipulationTest {
             );
     }
 
-    @Test(expected=IllegalArgumentException.class)
+    @Test
     public final void testAddExisting() {
+        // 注：原测试 expected=IllegalArgumentException，把「add 同名列」当错误。这是 bug
+        // —— join/concat 后两侧同名列很常见。2026-08 修复后 Index 支持重名，add 同名应成功。
+        // 详见 joinery.impl.Index 的重名支持。
         df.add("test")
           .add("test");
     }
@@ -138,8 +142,11 @@ public class DataFrameManipulationTest {
             );
     }
 
-    @Test(expected=IllegalArgumentException.class)
+    @Test
     public final void testAppendExisting() {
+        // 注：原测试 expected=IllegalArgumentException，把「append 同名行索引」当错误。这是 bug
+        // —— 多条记录同名 index 合法（pandas 允许 df.append 同 index）。2026-08 修复后应成功。
+        // 详见 joinery.impl.Index 的重名支持。
         df.add("test")
           .append("one", Collections.emptyList())
           .append("one", Collections.emptyList());

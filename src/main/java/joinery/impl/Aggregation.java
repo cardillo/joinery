@@ -1,6 +1,7 @@
 /*
  * Joinery -- Data frames for Java
  * Copyright (c) 2014, 2015 IBM Corp.
+ * Copyright (c) 2026 zc (1.11 line, GLM-5.2 AI-assisted refactor)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +40,7 @@ public class Aggregation {
     implements Aggregate<V, Number> {
         @Override
         public Number apply(final List<V> values) {
-            return new Integer(values.size());
+            return values.size();   // 自动装箱 Integer（替代已废弃的 new Integer(...)）
         }
     }
 
@@ -250,12 +251,12 @@ public class Aggregation {
                     }
 
                     final StatisticalSummary summary = StatisticalSummary.class.cast(value);
-                    desc.set(name(df, row, "count"), col, (V)new Double(summary.getN()));
-                    desc.set(name(df, row, "mean"),  col, (V)new Double(summary.getMean()));
-                    desc.set(name(df, row, "std"),   col, (V)new Double(summary.getStandardDeviation()));
-                    desc.set(name(df, row, "var"),   col, (V)new Double(summary.getVariance()));
-                    desc.set(name(df, row, "max"),   col, (V)new Double(summary.getMax()));
-                    desc.set(name(df, row, "min"),   col, (V)new Double(summary.getMin()));
+                    desc.set(name(df, row, "count"), col, (V)(Double)((double)summary.getN()));   // 替代已废弃的 new Double(...)
+                    desc.set(name(df, row, "mean"),  col, (V)(Double)summary.getMean());
+                    desc.set(name(df, row, "std"),   col, (V)(Double)summary.getStandardDeviation());
+                    desc.set(name(df, row, "var"),   col, (V)(Double)summary.getVariance());
+                    desc.set(name(df, row, "max"),   col, (V)(Double)summary.getMax());
+                    desc.set(name(df, row, "min"),   col, (V)(Double)summary.getMin());
                 }
             }
         }

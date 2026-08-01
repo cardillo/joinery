@@ -1,6 +1,7 @@
 /*
  * Joinery -- Data frames for Java
  * Copyright (c) 2014, 2015 IBM Corp.
+ * Copyright (c) 2026 zc (1.11 line, GLM-5.2 AI-assisted refactor)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +50,7 @@ import joinery.impl.BlockManager;
 import joinery.impl.Combining;
 import joinery.impl.Comparison;
 import joinery.impl.Conversion;
+import joinery.impl.Database;
 import joinery.impl.Display;
 import joinery.impl.Grouping;
 import joinery.impl.Index;
@@ -905,6 +907,42 @@ implements Iterable<List<V>> {
     }
 
     /**
+     * Return all column names as a list, preserving duplicates and order
+     * (对标 pandas DataFrame.columns 在重名列场景下的行为).
+     *
+     * <p>旧 {@link #columns()} 返回 {@code Set}（去重），无法表达重名列；
+     * 本方法返回含重复的 {@code List}，准确反映列数与列名顺序。
+     * 例：含两列同名为 "value" 时，{@code columnsList()} 返回 {@code [value, value]}，
+     * 而 {@code columns()} 返回 {@code [value]}。</p>
+     *
+     * @return all column names including duplicates, in positional order
+     */
+    public List<Object> columnsList() {
+        return columns.namesList();
+    }
+
+    /**
+     * Select all columns matching the given name
+     * (对标 pandas df['name'] 在重名列时的行为 —— 返回所有匹配列).
+     *
+     * <p>与 {@link #col(Object)} 不同：col 在重名时只返回首个匹配列（向后兼容），
+     * cols 返回所有匹配列（pandas 风格）。无重名时两者结果一致。</p>
+     *
+     * @param name the column name
+     * @return a new data frame containing all columns matching the name
+     */
+    public DataFrame<V> cols(final Object name) {
+        final List<Integer> positions = columns.getAll(name);
+        // 按位置 select 列（重命名避免再次重名冲突）
+        final DataFrame<V> result = new DataFrame<>();
+        for (int i = 0; i < positions.size(); i++) {
+            final int pos = positions.get(i);
+            result.add(name + "." + i, new ArrayList<>(col(pos)));
+        }
+        return result;
+    }
+
+    /**
      * Return the value located by the (row, column) names.
      *
      * <pre> {@code
@@ -980,7 +1018,7 @@ implements Iterable<List<V>> {
      * >        Arrays.asList("row1", "row2"),
      * >        Arrays.asList("col1", "col2")
      * >     );
-     * > df.set("row1", "col2", new Integer(7));
+     * > df.set("row1", "col2", 7);
      * > df.col(1);
      * [7, null] }</pre>
      *
@@ -1000,7 +1038,7 @@ implements Iterable<List<V>> {
      * >        Arrays.asList("row1", "row2"),
      * >        Arrays.asList("col1", "col2")
      * >     );
-     * > df.set(1, 0, new Integer(7));
+     * > df.set(1, 0, 7);
      * > df.col(0);
      * [null, 7] }</pre>
      *
@@ -2090,6 +2128,156 @@ implements Iterable<List<V>> {
         Display.show(this);
     }
 
+    // ───────────────────────── 图表加强（参考 Python pandas + matplotlib，2026-08 新增） ─────────────────────────
+    // 以下方法返回 XChart 图表对象（org.knowm.xchart），无 GUI 环境可用 saveChart 落盘为 PNG
+    // 中文标题/轴标签自动用 CJK 字体（微软雅黑/SansSerif 兜底），不会出现方框
+
+    /**
+     * Build a histogram chart for the specified numeric column
+     * (对标 Python pandas.DataFrame.hist).
+     *
+     * @param column the numeric column name
+     * @param bins number of bins
+     * @return the histogram chart (use {@link #saveChart} to save as PNG)
+     */
+    public final org.knowm.xchart.XYChart hist(final Object column, final int bins) {
+        return Display.hist(this, column, bins);
+    }
+
+    /** Convenience overload of {@link #hist(Object, int)} with default 20 bins. */
+    public final org.knowm.xchart.XYChart hist(final Object column) {
+        return Display.hist(this, column, 20);
+    }
+
+    /**
+     * Build a box plot for the specified numeric columns
+     * (对标 Python pandas.DataFrame.boxplot).
+     *
+     * @param columns the numeric column names (empty = all numeric columns)
+     * @return the box chart
+     */
+    public final org.knowm.xchart.BoxChart box(final Object... columns) {
+        return Display.box(this, columns);
+    }
+
+    /**
+     * Build a scatter plot of yCol versus xCol
+     * (对标 Python pandas.DataFrame.plot.scatter).
+     *
+     * @param xCol the x-axis column name
+     * @param yCol the y-axis column name
+     * @return the scatter chart
+     */
+    public final org.knowm.xchart.XYChart scatter(final Object xCol, final Object yCol) {
+        return Display.scatter(this, xCol, yCol);
+    }
+
+    /**
+     * Build a pie chart aggregating valueCol by categoryCol
+     * (对标 Python pandas.DataFrame.plot.pie).
+     *
+     * @param categoryCol the category column
+     * @param valueCol the value column
+     * @return the pie chart
+     */
+    public final org.knowm.xchart.PieChart pie(final Object categoryCol, final Object valueCol) {
+        return Display.pie(this, categoryCol, valueCol);
+    }
+
+    /**
+     * Save an XChart chart to a PNG file (对标 matplotlib.pyplot.savefig),
+     * works in headless environments without GUI.
+     *
+     * @param chart the chart to save (returned by hist/box/scatter/pie)
+     * @param path the output file path (without or with .png extension)
+     * @throws IOException if an error occurs writing the file
+     */
+    public static final void saveChart(final org.knowm.xchart.internal.chartpart.Chart<?, ?> chart, final String path)
+    throws IOException {
+        Display.saveChart(chart, path);
+    }
+
+    // ───────────── 图表导出·多格式（对标 matplotlib 多后端） ─────────────
+    /** Save chart as JPG. */
+    public static final void saveChartJpg(final org.knowm.xchart.internal.chartpart.Chart<?, ?> chart, final String path)
+    throws IOException { Display.saveChartJpg(chart, path); }
+
+    /** Save chart as BMP. */
+    public static final void saveChartBmp(final org.knowm.xchart.internal.chartpart.Chart<?, ?> chart, final String path)
+    throws IOException { Display.saveChartBmp(chart, path); }
+
+    /** Save chart as GIF. */
+    public static final void saveChartGif(final org.knowm.xchart.internal.chartpart.Chart<?, ?> chart, final String path)
+    throws IOException { Display.saveChartGif(chart, path); }
+
+    /** Save chart as SVG vector graphic (对标 matplotlib 矢量导出，可无损缩放). */
+    public static final void saveChartSvg(final org.knowm.xchart.internal.chartpart.Chart<?, ?> chart, final String path)
+    throws IOException { Display.saveChartSvg(chart, path); }
+
+    // ───────────── 图表·补齐 XChart 10 种（2026-08 新增 6 种） ─────────────
+
+    /**
+     * Build a bar chart for the specified numeric columns
+     * (对标 pandas df.plot.bar).
+     *
+     * @param columns the numeric column names (empty = all numeric)
+     */
+    public final org.knowm.xchart.CategoryChart bar(final Object... columns) {
+        return Display.bar(this, columns);
+    }
+
+    /**
+     * Build a horizontal bar chart (对标 pandas df.plot.barh).
+     */
+    public final org.knowm.xchart.HorizontalBarChart hbar(final Object... columns) {
+        return Display.hbar(this, columns);
+    }
+
+    /**
+     * Build a bubble chart from three columns: x, y, bubble-size
+     * (对标 pandas df.plot.scatter(s=...)).
+     */
+    public final org.knowm.xchart.BubbleChart bubble(final Object xCol, final Object yCol, final Object sizeCol) {
+        return Display.bubble(this, xCol, yCol, sizeCol);
+    }
+
+    /**
+     * Build a heat map aggregating valueCol over (xCol, yCol) pairs
+     * (对标 seaborn.heatmap).
+     */
+    public final org.knowm.xchart.HeatMapChart heatmap(final Object xCol, final Object yCol, final Object valueCol) {
+        return Display.heatmap(this, xCol, yCol, valueCol);
+    }
+
+    /**
+     * Build an OHLC (candlestick) chart for stock-like data
+     * (对标 mplfinance candlestick).
+     *
+     * @param openCol high low close 四列
+     */
+    public final org.knowm.xchart.OHLCChart ohlc(final Object openCol, final Object highCol, final Object lowCol, final Object closeCol) {
+        return Display.ohlc(this, openCol, highCol, lowCol, closeCol);
+    }
+
+    /**
+     * Build a radar chart for one row's multi-dimension comparison
+     * (对标 plotly radar).
+     *
+     * @param rowName the row index name to plot
+     * @param valueCols the dimension column names
+     */
+    public final org.knowm.xchart.RadarChart radar(final Object rowName, final Object... valueCols) {
+        return Display.radar(this, rowName, valueCols);
+    }
+
+    /**
+     * Build a dial chart showing the average of valueCol
+     * (对标仪表盘/percentage gauge).
+     */
+    public final org.knowm.xchart.DialChart dial(final Object valueCol) {
+        return Display.dial(this, valueCol);
+    }
+
     public static final <V> DataFrame<String> compare(final DataFrame<V> df1, final DataFrame<V> df2) {
         return Comparison.compare(df1, df2);
     }
@@ -2202,6 +2390,24 @@ implements Iterable<List<V>> {
         return Serialization.readXls(file);
     }
 
+    /** Read a specific sheet (by index) from an Excel file（对标 pandas sheet_name=int）. */
+    public static final DataFrame<Object> readXls(final String file, final int sheetIndex)
+    throws IOException {
+        return Serialization.readXls(file, sheetIndex);
+    }
+
+    /** Read a specific sheet (by name) from an Excel file（对标 pandas sheet_name=str）. */
+    public static final DataFrame<Object> readXls(final String file, final String sheetName)
+    throws IOException {
+        return Serialization.readXls(file, sheetName);
+    }
+
+    /** List all sheet names in an Excel file（对标 pandas ExcelFile.sheet_names）. */
+    public static final List<String> sheetNames(final String file)
+    throws IOException {
+        return Serialization.sheetNames(file);
+    }
+
     /**
      * Read data from the input stream as an
      * excel workbook into a new data frame.
@@ -2213,6 +2419,50 @@ implements Iterable<List<V>> {
     public static final DataFrame<Object> readXls(final InputStream input)
     throws IOException {
         return Serialization.readXls(input);
+    }
+
+    /**
+     * Read a specific sheet (by index) from an Excel workbook into a new data frame
+     * (对标 Python pandas.read_excel 的 sheet_name=int 参数).
+     *
+     * <p>修 Bug-B：原 readXls 硬编码只读 sheet 0，多 sheet 文件其他 sheet 数据全部丢失。
+     * 本重载允许指定任意 sheet index。</p>
+     *
+     * @param input the input stream
+     * @param sheetIndex 0-based sheet index
+     * @return a new data frame from the specified sheet
+     * @throws IOException if an error occurs reading the input stream
+     */
+    public static final DataFrame<Object> readXls(final InputStream input, final int sheetIndex)
+    throws IOException {
+        return Serialization.readXls(input, sheetIndex);
+    }
+
+    /**
+     * Read a specific sheet (by name) from an Excel workbook into a new data frame
+     * (对标 Python pandas.read_excel 的 sheet_name=str 参数).
+     *
+     * @param input the input stream
+     * @param sheetName sheet name
+     * @return a new data frame from the specified sheet
+     * @throws IOException if an error occurs reading the input stream
+     */
+    public static final DataFrame<Object> readXls(final InputStream input, final String sheetName)
+    throws IOException {
+        return Serialization.readXls(input, sheetName);
+    }
+
+    /**
+     * List all sheet names in an Excel workbook
+     * (对标 Python pandas.ExcelFile.sheet_names，帮助用户选 sheet).
+     *
+     * @param input the input stream
+     * @return list of sheet names
+     * @throws IOException if an error occurs reading the input stream
+     */
+    public static final List<String> sheetNames(final InputStream input)
+    throws IOException {
+        return Serialization.sheetNames(input);
     }
 
     /**
@@ -2237,6 +2487,86 @@ implements Iterable<List<V>> {
     public final void writeXls(final OutputStream output)
     throws IOException {
         Serialization.writeXls(this, output);
+    }
+
+    /**
+     * Read data from the specified excel workbook (.xlsx, OOXML 格式)
+     * into a new data frame.
+     *
+     * <p>本方法支持 Office Open XML (.xlsx) 格式，与 {@link #readXls} （.xls 旧二进制格式）互补。
+     * 大文件场景内部按需切换为 SXSSF 流式读取，避免 OOM。</p>
+     *
+     * @param file the excel .xlsx workbook
+     * @return a new data frame
+     * @throws IOException if an error occurs reading the workbook
+     */
+    public static final DataFrame<Object> readXlsx(final String file)
+    throws IOException {
+        return Serialization.readXlsx(file);
+    }
+
+    /** Read a specific sheet (by index) from an .xlsx file（对标 pandas sheet_name=int）. */
+    public static final DataFrame<Object> readXlsx(final String file, final int sheetIndex)
+    throws IOException {
+        return Serialization.readXlsx(file, sheetIndex);
+    }
+
+    /** Read a specific sheet (by name) from an .xlsx file（对标 pandas sheet_name=str）. */
+    public static final DataFrame<Object> readXlsx(final String file, final String sheetName)
+    throws IOException {
+        return Serialization.readXlsx(file, sheetName);
+    }
+
+    /**
+     * Read data from the input stream as an
+     * excel .xlsx workbook into a new data frame.
+     *
+     * @param input the input stream
+     * @return a new data frame
+     * @throws IOException if an error occurs reading the input stream
+     */
+    public static final DataFrame<Object> readXlsx(final InputStream input)
+    throws IOException {
+        return Serialization.readXlsx(input);
+    }
+
+    /** Read a specific sheet (by index) from an .xlsx workbook（对标 pandas sheet_name=int）. */
+    public static final DataFrame<Object> readXlsx(final InputStream input, final int sheetIndex)
+    throws IOException {
+        return Serialization.readXlsx(input, sheetIndex);
+    }
+
+    /** Read a specific sheet (by name) from an .xlsx workbook（对标 pandas sheet_name=str）. */
+    public static final DataFrame<Object> readXlsx(final InputStream input, final String sheetName)
+    throws IOException {
+        return Serialization.readXlsx(input, sheetName);
+    }
+
+    /**
+     * Write the data from the data frame
+     * to the specified file as an excel .xlsx workbook.
+     *
+     * <p>大文件（行数 &gt; 内部窗口阈值）自动走 SXSSF 流式写，避免 OOM。
+     * 单元格字体使用「微软雅黑」CJK 字体，保证中文表头不乱码。</p>
+     *
+     * @param file the file to write
+     * @throws IOException if an error occurs writing the file
+     */
+    public final void writeXlsx(final String file)
+    throws IOException {
+        Serialization.writeXlsx(this, file);
+    }
+
+    /**
+     * Write the data from the data frame
+     * to the provided output stream as an excel .xlsx workbook.
+     *
+     * @param output the output stream
+     * @throws IOException if an error occurs writing the stream
+     */
+    public final void writeXlsx(final OutputStream output)
+    throws IOException {
+        Serialization.writeXlsx(this, output);
     }
 
     /**
@@ -2296,6 +2626,124 @@ implements Iterable<List<V>> {
     public final void writeSql(final PreparedStatement stmt)
     throws SQLException {
         Serialization.writeSql(this, stmt);
+    }
+
+    // ───────────────────────── 数据库加强（参考 Python pandas + SQLAlchemy，2026-08 新增） ─────────────────────────
+
+    /**
+     * Read an entire database table into a new data frame
+     * (对标 Python pandas.read_sql_table).
+     *
+     * <p>无需手写 SQL，按表名直读全表。返回的 DataFrame 保留 SQL 列的原生类型
+     *（INTEGER → Long，DOUBLE → Double，TIMESTAMP → Date 等），中文 VARCHAR 值按 UTF-8 原样读取。</p>
+     *
+     * @param c the database connection
+     * @param tableName the table name
+     * @return a new data frame
+     * @throws SQLException if an error occurs reading the table
+     */
+    public static final DataFrame<Object> readSqlTable(final Connection c, final String tableName)
+    throws SQLException {
+        return Database.readSqlTable(c, tableName);
+    }
+
+    /**
+     * Execute a SQL query and return the result as a new data frame,
+     * preserving each column's native SQL type
+     * (对标 Python pandas.read_sql_query 的强类型版本).
+     *
+     * @param c the database connection
+     * @param sql the SQL query
+     * @return a new data frame
+     * @throws SQLException if an error occurs executing the query
+     */
+    public static final DataFrame<Object> readSqlQuery(final Connection c, final String sql)
+    throws SQLException {
+        return Database.readSqlQuery(c, sql);
+    }
+
+    /**
+     * Write the data frame to a database table
+     * (对标 Python pandas.DataFrame.to_sql).
+     *
+     * <p>自动按列类型建表/覆盖/追加，并批量插入数据。</p>
+     *
+     * @param c the database connection
+     * @param tableName the target table name
+     * @param ifExists {@code FAIL} / {@code REPLACE} / {@code APPEND}
+     * @param batchSize batch insert size (e.g. 1000)
+     * @throws SQLException if an error occurs writing the table
+     */
+    public final void writeSqlTable(final Connection c, final String tableName,
+            final joinery.sql.IfExists ifExists, final int batchSize)
+    throws SQLException {
+        Database.writeSqlTable(this, c, tableName, ifExists, batchSize);
+    }
+
+    /** Convenience overload of {@link #writeSqlTable(Connection, String, IfExists, int)} with batch size 1000. */
+    public final void writeSqlTable(final Connection c, final String tableName, final joinery.sql.IfExists ifExists)
+    throws SQLException {
+        Database.writeSqlTable(this, c, tableName, ifExists, 1000);
+    }
+
+    // ───────────────────────── Engine API（SQLAlchemy 风格，推荐用法） ─────────────────────────
+    //  调用方只需面向 Engine，不再手写驱动类名 / 方言转义 / SQL。
+    //    Engine engine = DataFrame.sqlEngine("jdbc:postgresql://host:5432/db");
+    //    DataFrame.readSqlTable(engine, "users");
+    //    df.writeSqlTable(engine, "users", IfExists.REPLACE);
+
+    /**
+     * Create a database Engine from a JDBC URL
+     * (对标 Python SQLAlchemy 的 create_engine).
+     *
+     * <p>自动按 URL 前缀选择方言（H2/MySQL/PostgreSQL/Oracle/SQLite/Doris），
+     * 驱动类需在 classpath（joinery 主工程不含具体驱动）。</p>
+     *
+     * @param jdbcUrl the JDBC URL, e.g. {@code jdbc:postgresql://host:5432/db}
+     * @return a new Engine bound to the URL
+     */
+    public static final joinery.sql.Engine sqlEngine(final String jdbcUrl) {
+        return joinery.sql.Engine.fromUrl(jdbcUrl);
+    }
+
+    /** Convenience overload with credentials. */
+    public static final joinery.sql.Engine sqlEngine(final String jdbcUrl, final String user, final String password) {
+        return joinery.sql.Engine.fromUrl(jdbcUrl, user, password);
+    }
+
+    /**
+     * Read an entire database table via the Engine
+     * (对标 Python pandas.read_sql_table 的 Engine 版).
+     */
+    public static final DataFrame<Object> readSqlTable(final joinery.sql.Engine engine, final String tableName)
+    throws SQLException {
+        return engine.readTable(tableName);
+    }
+
+    /**
+     * Execute a SQL query via the Engine
+     * (对标 Python pandas.read_sql_query 的 Engine 版).
+     */
+    public static final DataFrame<Object> readSqlQuery(final joinery.sql.Engine engine, final String sql)
+    throws SQLException {
+        return engine.readQuery(sql);
+    }
+
+    /**
+     * Write the data frame to a database table via the Engine
+     * (对标 Python pandas.DataFrame.to_sql 的 Engine 版).
+     */
+    public final void writeSqlTable(final joinery.sql.Engine engine, final String tableName,
+            final joinery.sql.IfExists ifExists, final int batchSize)
+    throws SQLException {
+        engine.writeTable(this, tableName, ifExists, batchSize);
+    }
+
+    /** Convenience overload of {@link #writeSqlTable(Engine, String, IfExists, int)} with batch size 1000. */
+    public final void writeSqlTable(final joinery.sql.Engine engine, final String tableName,
+            final joinery.sql.IfExists ifExists)
+    throws SQLException {
+        engine.writeTable(this, tableName, ifExists);
     }
 
     public final String toString(final int limit) {

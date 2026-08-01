@@ -1,6 +1,7 @@
 /*
  * Joinery -- Data frames for Java
  * Copyright (c) 2014, 2015 IBM Corp.
+ * Copyright (c) 2026 zc (1.11 line, GLM-5.2 AI-assisted refactor)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,6 +72,24 @@ public class Sorting {
         for (final Integer r : rows) {
             final Object label = r < labels.size() ? labels.get(r) : r;
             sorted.append(label, df.row(r));
+        }
+
+        // ┌─ What : 修复「sortBy 丢失 groupBy 状态」bug（2026-08）
+        // │  Why  : 原实现 sortBy 返回全新 DataFrame，groups 字段被重置为空 Grouping，
+        // │         导致 df.groupBy("x").sortBy("y").mean() 链式调用时 mean 退化成整列平均
+        // │         （聚合结果静默错算，是严重的数据正确性事故）。
+        // │         pandas 用户最自然的链式写法 `df.groupby('x').sort_values('y').mean()`
+        // │         必须在 joinery 里也工作。sortBy 只应改顺序，绝不能丢分组状态。
+        // │  Who  : 所有 sortBy 链式调用后还要聚合的场景
+        // │  When : sortBy 返回时
+        // │  Where: Sorting.sort
+        // │  How  : 若原 df 已 groupBy（groups 包含分组列），在 sorted 上用相同列重建 Grouping。
+        // │         因 sorted 的行是原 df 行的重排，新的分组行号变了，必须用列值重新 groupBy。
+        if (!df.groups().columns().isEmpty()) {
+            // 必须用 Integer[]（varargs Integer... 重载），int[] 会被当成 Object 当成单个 key
+            final Integer[] groupCols = df.groups().columns().toArray(new Integer[0]);
+            // 在已排序的 sorted 上按相同分组列重新分组（值相同即同组，与排序无关）
+            return sorted.groupBy(groupCols);
         }
 
         return sorted;

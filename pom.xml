@@ -22,6 +22,13 @@
       <name>Bryan Cardillo</name>
       <email>bryan.cardillo@gmail.com</email>
     </developer>
+    <!-- 1.11 line (2026-08)：本次修改完善的二次开发者署名（与源码版权头一致） -->
+    <developer>
+      <name>zc</name>
+      <roles>
+        <role>1.11 maintainer (GLM-5.2 AI-assisted refactor)</role>
+      </roles>
+    </developer>
   </developers>
 
   <scm>
@@ -32,19 +39,38 @@
   </scm>
 
   <properties>
-    <project.build.sourceEncoding>iso-8859-1</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>iso-8859-1</project.reporting.outputEncoding>
-    <java.version>1.8</java.version>
+    <!-- ┌─ What : 构建编码与 Java 版本基线 -->
+    <!-- │  Why  : iso-8859-1 会导致中文注释/日志乱码（违反 UTF-8 规范）； -->
+    <!-- │         Java 8 已 EOL，统一升 17（当前 LTS，Derby 10.17、POI 5.5 均要求 8+/11+/17+） -->
+    <!-- │  Who  : 由 maven-compiler-plugin / maven-resources-plugin 在编译/资源处理时读取 -->
+    <!-- │  When : 整个 build 生命周期 -->
+    <!-- │  Where: 本文件 properties 段，被全工程引用 -->
+    <!-- │  How  : 改为 UTF-8 + 17，所有源码/资源按 UTF-8 处理 -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <java.version>17</java.version>
+
+    <!-- ┌─ What : 全量升级依赖到最新稳定版（消除已知 CVE / 停止维护风险） -->
+    <!-- │  Why  : 关键修复： -->
+    <!-- │           - poi 5.0.0 → 5.5.1：修 CVE-2025-31672（poi-ooxml < 5.4.0 OOXML 信息泄露） -->
+    <!-- │           - derby 10.14.2.0 → 10.17.1.1：修多个反序列化 CVE，且 10.17 要求 JDK 17+ -->
+    <!-- │           - xchart groupId 由停止维护的 com.xeiam.xchart 迁至官方 org.knowm.xchart -->
+    <!-- │           - slf4j 1.7.7（1.x 已 EOL）→ 2.0.18；jline/rhino/metrics/aspectj 同步跟进 -->
+    <!-- │  Who  : 本工程所有模块（main + test） -->
+    <!-- │  When : 依赖解析时 -->
+    <!-- │  Where: 本文件 dependencies 段 -->
+    <!-- │  How  : 改 version 属性 + 改 xchart 坐标；新增 poi-ooxml 以支持 .xlsx -->
     <junit.version>4.13.2</junit.version>
     <supercsv.version>2.4.0</supercsv.version>
     <commons-math3.version>3.6.1</commons-math3.version>
-    <poi.version>5.0.0</poi.version>
-    <aspectj.version>1.8.2</aspectj.version>
-    <metrics.version>4.2.0</metrics.version>
-    <xchart.version>2.5.1</xchart.version>
-    <jline.version>3.20.0</jline.version>
-    <slf4j.version>1.7.7</slf4j.version>
-    <rhino.version>1.7.13</rhino.version>
+    <poi.version>5.5.1</poi.version>
+    <aspectj.version>1.9.24</aspectj.version>
+    <metrics.version>4.2.39</metrics.version>
+    <xchart.version>4.0.4</xchart.version>
+    <jline.version>3.29.0</jline.version>
+    <slf4j.version>2.0.18</slf4j.version>
+    <rhino.version>1.7.15.1</rhino.version>
+    <derby.version>10.17.1.0</derby.version>
 
     <!-- use property to allow redefining via profiles/command line -->
     <test.groups>!joinery.perf.PerformanceTests</test.groups>
@@ -76,6 +102,12 @@
     </dependency>
 
     <!-- optional deps for additional functionality -->
+    <!-- ┌─ What : Apache POI（Excel 读写，含 .xls 与 .xlsx） -->
+    <!-- │  Why  : poi-ooxml 5.5.1 含 XSSF/SXSSF，支持 .xlsx 与流式大文件写入； -->
+    <!-- │         同时修 CVE-2025-31672（5.0.0 受影响） -->
+    <!-- │  Who  : joinery.impl.Serialization 的 readXls/readXlsx/writeXls/writeXlsx -->
+    <!-- │  When : 调用 readXls/readXlsx/writeXls/writeXlsx 时 -->
+    <!-- │  Where: optional=true，运行时缺 POI 则走 CSV -->
     <dependency>
       <groupId>org.apache.poi</groupId>
       <artifactId>poi</artifactId>
@@ -83,16 +115,20 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-      <groupId>com.xeiam.xchart</groupId>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-ooxml</artifactId>
+      <version>${poi.version}</version>
+      <optional>true</optional>
+    </dependency>
+    <!-- ┌─ What : XChart 图表（plot/show） -->
+    <!-- │  Why  : 旧坐标 com.xeiam.xchart 已停止维护（2020），官方迁至 org.knowm.xchart； -->
+    <!-- │         升 4.0.4 与 Display.java 改写配套 -->
+    <!-- │  注：不再 exclude VectorGraphics2D —— SVG/EPS/PDF 矢量导出依赖它 -->
+    <dependency>
+      <groupId>org.knowm.xchart</groupId>
       <artifactId>xchart</artifactId>
       <version>${xchart.version}</version>
       <optional>true</optional>
-      <exclusions>
-        <exclusion>
-          <groupId>de.erichseifert.vectorgraphics2d</groupId>
-          <artifactId>VectorGraphics2D</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.mozilla</groupId>
@@ -117,7 +153,22 @@
     <dependency>
       <groupId>org.apache.derby</groupId>
       <artifactId>derby</artifactId>
-      <version>10.14.2.0</version>
+      <version>${derby.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- ┌─ What : Derby 10.16+ 拆分出的子模块（EmbeddedDriver 已迁至 derbytools） -->
+    <!-- │  Why  : 原 DataFrameSerializationTest.testToFromSql 用 org.apache.derby.jdbc.EmbeddedDriver； -->
+    <!-- │         Derby 10.17 拆模块后必须同时引 derbytools（含 EmbeddedDriver）+ derbyshared（共享代码） -->
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derbytools</artifactId>
+      <version>${derby.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derbyshared</artifactId>
+      <version>${derby.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -129,14 +180,14 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-enforcer-plugin</artifactId>
-          <version>3.0.0-M2</version>
+          <version>3.6.3</version>
         </plugin>
 
         <!-- configure compile phase -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.8.0</version>
+          <version>3.14.0</version>
           <configuration>
             <source>${java.version}</source>
             <target>${java.version}</target>
@@ -151,7 +202,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.22.0</version>
+          <version>3.5.4</version>
           <configuration>
             <!-- parallel tests -->
             <parallel>${parallel}</parallel>
@@ -164,7 +215,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-failsafe-plugin</artifactId>
-          <version>2.22.0</version>
+          <version>3.5.4</version>
           <configuration>
             <!-- parallel tests -->
             <parallel>all</parallel>
@@ -180,7 +231,7 @@
         <!-- configure release plugin -->
         <plugin>
           <artifactId>maven-release-plugin</artifactId>
-          <version>2.5.3</version>
+          <version>3.3.1</version>
           <configuration>
             <releaseProfiles>release</releaseProfiles>
             <tagNameFormat>v@{project.version}</tagNameFormat>
@@ -191,7 +242,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.0.1</version>
+          <version>3.12.0</version>
           <configuration>
             <docletArtifact>
               <groupId>com.google.doclava</groupId>
@@ -214,7 +265,7 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>buildnumber-maven-plugin</artifactId>
-          <version>1.4</version>
+          <version>3.3.0</version>
           <configuration>
             <shortRevisionLength>7</shortRevisionLength>
           </configuration>
@@ -224,7 +275,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
-          <version>3.1.0</version>
+          <version>3.4.0</version>
           <configuration>
             <archive>
               <manifest>
@@ -245,7 +296,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
-          <version>3.1.0</version>
+          <version>3.8.0</version>
           <configuration>
             <descriptorRefs>
               <descriptorRef>jar-with-dependencies</descriptorRef>
@@ -278,49 +329,49 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-gpg-plugin</artifactId>
-          <version>3.0.1</version>
+          <version>3.2.8</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
-          <version>3.0.1</version>
+          <version>3.3.1</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-clean-plugin</artifactId>
-          <version>3.1.0</version>
+          <version>3.5.0</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-deploy-plugin</artifactId>
-          <version>2.8.2</version>
+          <version>3.1.4</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-install-plugin</artifactId>
-          <version>2.5.2</version>
+          <version>3.1.4</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-resources-plugin</artifactId>
-          <version>3.1.0</version>
+          <version>3.3.1</version>
         </plugin>
 
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.7.1</version>
+          <version>3.21.0</version>
         </plugin>
 
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>aspectj-maven-plugin</artifactId>
-          <version>1.11</version>
+          <version>1.16.0</version>
           <configuration>
             <target>${java.version}</target>
             <complianceLevel>${java.version}</complianceLevel>
@@ -331,7 +382,7 @@
         <plugin>
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
-          <version>0.8.7</version>
+          <version>0.8.15</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -349,8 +400,12 @@
             <configuration>
               <rules>
                 <requireMavenVersion>
-                  <version>3.0.5</version>
+                  <version>3.6.3</version>
                 </requireMavenVersion>
+                <!-- ┌─ What : 强制 JDK 17+（java.version=17 与 Derby 10.17 共同要求） -->
+                <requireJavaVersion>
+                  <version>[17,)</version>
+                </requireJavaVersion>
               </rules>
             </configuration>
           </execution>

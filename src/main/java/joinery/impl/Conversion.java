@@ -1,6 +1,7 @@
 /*
  * Joinery -- Data frames for Java
  * Copyright (c) 2014, 2015 IBM Corp.
+ * Copyright (c) 2026 zc (1.11 line, GLM-5.2 AI-assisted refactor)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -230,7 +231,7 @@ public class Conversion {
             } else if (Date.class.isAssignableFrom(colTypes.get(column))) {
                 List<Number> dates = new ArrayList<>();
                 for (V date : col) {
-                    dates.add(new Double(((Date)date).getTime()));
+                    dates.add(((Date)date).getTime());   // 自动装箱 Double
                 }
                 newDf.add(columnName,dates);
             } else if (Boolean.class.isAssignableFrom(colTypes.get(column))) {
@@ -365,7 +366,7 @@ public class Conversion {
         @Override
         public Long apply(final V value) {
             try {
-                return new Long(String.valueOf(value));
+                return Long.valueOf(String.valueOf(value));   // 替代已废弃的 new Long(String)
             } catch (final NumberFormatException ignored) { }
             return null;
         }
@@ -376,7 +377,7 @@ public class Conversion {
         @Override
         public Double apply(final V value) {
             try {
-                return new Double(String.valueOf(value));
+                return Double.valueOf(String.valueOf(value));   // 替代已废弃的 new Double(String)
             } catch (final NumberFormatException ignored) { }
             return null;
         }
@@ -388,9 +389,9 @@ public class Conversion {
         public Boolean apply(final V value) {
             final String str = String.valueOf(value);
             if (str.matches("t(r(u(e)?)?)?|y(e(s)?)?")) {
-                return new Boolean(true);
+                return Boolean.TRUE;   // 替代已废弃的 new Boolean(true)
             } else if (str.matches("f(a(l(s(e)?)?)?)?|n(o)?")) {
-                return new Boolean(false);
+                return Boolean.FALSE;
             }
             return null;
         }

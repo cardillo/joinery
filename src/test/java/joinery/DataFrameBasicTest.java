@@ -1,6 +1,7 @@
 /*
  * Joinery -- Data frames for Java
  * Copyright (c) 2014, 2015 IBM Corp.
+ * Copyright (c) 2026 zc (1.11 line, GLM-5.2 AI-assisted refactor)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,9 +43,13 @@ public class DataFrameBasicTest {
             );
     }
 
-    @Test(expected=IllegalArgumentException.class)
+    @Test
     public final void testDuplicateColumnsInConstructor() {
-        new DataFrame<String>(Arrays.<Object>asList("test", "test"));
+        // 注：原测试 expected=IllegalArgumentException，把「重名列抛异常」当契约 —— 这是 bug。
+        // joinery 1.x 的 Index 强制列名唯一，导致 Excel 重名列、join 同名列都崩溃。
+        // 2026-08 修复后 Index 支持 pandas 风格的重名列：构造器不再抛异常，重名列原样保留。
+        // 详见 joinery.impl.Index 的重名支持。
+        new DataFrame<>(Arrays.<Object>asList("test", "test"));
     }
 
     @Test
@@ -141,8 +146,12 @@ public class DataFrameBasicTest {
             );
     }
 
-    @Test(expected=IllegalArgumentException.class)
+    @Test
     public final void testReindexIntDuplicates() {
+        // 注：原测试 expected=IllegalArgumentException，把「reindex 后行 index 有重复值」当错误。
+        // 这是 bug —— 实际数据中 index 列有重复值完全合法（如时间序列的多条同日期记录、
+        // 分组键的多条同组记录）。2026-08 修复后 Index 支持重名，reindex(0) 应成功。
+        // 详见 joinery.impl.Index 的重名支持。
         df.reindex(0);
     }
 
@@ -171,8 +180,11 @@ public class DataFrameBasicTest {
             );
     }
 
-    @Test(expected=IllegalArgumentException.class)
+    @Test
     public final void testReindexStringDuplicates() {
+        // 注：原测试 expected=IllegalArgumentException，把「reindex 后行 index 有重复值」当错误。
+        // 这是 bug —— 与 testReindexIntDuplicates 同理，category 列含重复值（"test"/"beta"）完全合法。
+        // 2026-08 修复后 Index 支持重名，reindex("category") 应成功。
         df.reindex("category");
     }
 }

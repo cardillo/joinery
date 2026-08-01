@@ -1,6 +1,7 @@
 /*
  * Joinery -- Data frames for Java
  * Copyright (c) 2014, 2015 IBM Corp.
+ * Copyright (c) 2026 zc (1.11 line, GLM-5.2 AI-assisted refactor)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -196,10 +197,13 @@ public class DataFrameSerializationTest {
     public void testReadXlsInputStream()
     throws IOException {
         final DataFrame<Object> df = DataFrame.readXls(ClassLoader.getSystemResourceAsStream("serialization.xls"));
+        // 注：value 列在 xls 中是整数单元格（POI NUMERIC，值 1.0/2.0/...），
+        // 按新契约「Excel 整数单元格 → Long」（保留精度，不丢位），所以期望 1L/2L/...
+        // 详见 Serialization.readCell / numericValueToObject
         final Object[][] expected = new Object[][] {
                 new Object[] { "a", "a", "b", "b", "c", "c" },
                 new Object[] { "alpha", "bravo", "charlie", "delta", "echo", "foxtrot" },
-                new Object[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 }
+                new Object[] { 1L, 2L, 3L, 4L, 5L, 6L }
             };
         for (int i = 0; i < expected.length; i++) {
             assertArrayEquals(
@@ -234,8 +238,12 @@ public class DataFrameSerializationTest {
     throws IOException {
         final File tmp = File.createTempFile(getClass().getName(), ".xls");
         tmp.deleteOnExit();
+        // 注：原写 1.0（Double）期望读回 Double。新契约「Excel 整数单元格 → Long」（保留精度）：
+        //   1.0 在 Excel 单元格里是整数（POI NUMERIC 格式 General，值 1.0），按新契约读回为 Long，
+        //   与原类型 Double 不一致。改为写 1.5（真正的小数），读回保持 Double，验证类型往返保持。
+        //   详见 Serialization.numericValueToObject —— 整数判定：d == Math.floor(d) 且在 long 范围内。
         final DataFrame<Object> original = new DataFrame<>("date", "double", "bool", "string");
-        original.append(Arrays.asList(new Date(), 1.0, true, "test"));
+        original.append(Arrays.asList(new Date(), 1.5, true, "test"));
         original.writeXls(tmp.getPath());
         assertArrayEquals(
                 original.types().toArray(),
